@@ -39,11 +39,15 @@
 |------|------|
 | [CLAUDE.md](CLAUDE.md) | Agent 角色、规则与约束（每次会话自动加载到系统提示词） |
 | [.claude/skills/](.claude/skills/) | 五阶段工作流的 Skill 定义 |
-| [references/](references/) | 知识库：国标、设备参数、工艺流程、文档模板 |
+| [references/](references/) | 知识库：国标、设备参数、工艺流程、卡片库（PLT/MOD/SOL）、模板、词表 |
+| [tools/](tools/) | 卡片库自动化脚本（validate / build_indexes / recompute） |
+| [scripts/](scripts/) | 钩子安装与一键体检脚本（install-hooks / check-all） |
+| [git-hooks/](git-hooks/) | 受版本控制的 pre-commit 钩子源（需通过 scripts 安装到 .git/hooks/） |
+| [.github/workflows/](.github/workflows/) | GitHub Actions 远程兜底：方案/索引/资源汇总三项 CI 校验 |
 | [projects/](projects/) | 每个客户/项目一个目录，存放六类工作产物 |
 | [samples/](samples/) | 历史项目参考样例（如北京海关农残检测前处理系统） |
 | [SetupTools/](SetupTools/) | 安装工具与演进路线说明 |
-| [设计资料/](设计资料/) | SmartLabOS 设计方法、知识卡片体系、自动化资料 |
+| [设计资料/](设计资料/) | SmartLabOS 设计方法、知识卡片体系、自动化资料（原始设计文档） |
 | [大连项目/](大连项目/) | 大连中药经典名方质量分析自动化项目原始资料 |
 | [食检院项目/](食检院项目/) | 成都食检院项目国标 PDF 与设计稿 |
 | [FromUbuntu/](FromUbuntu/) | 原 Ubuntu OpenClaw 环境导出归档（迁移完成后可删除） |
@@ -75,6 +79,18 @@
 | [_sources/](references/_sources/) | 国标 PDF 原文与历史方案 PDF 资料 |
 | [_gaps.md](references/_gaps.md) / [_gaps_01.md](references/_gaps_01.md) | 知识库缺口清单 |
 
+### 已落地的卡片库（seed 状态）
+
+| 路径 | 内容 | 卡片数 |
+|------|------|--------|
+| [references/_templates/](references/_templates/) | 三类卡片的空白模板（建卡时复制） | 3 |
+| [references/_vocabulary/](references/_vocabulary/) | 受控词表：functions / module-categories / sample-types / industries | 4 |
+| [references/platforms/](references/platforms/) | 平台卡片库（含 `_index.md`） | 1 (PLT-1400) |
+| [references/modules/](references/modules/) | 模块卡片库（含 `_index.md` 与 `_categories.md`） | 6 (称量/加液振荡/移液/SPE/浓缩/离心 各 1) |
+| [references/solutions/](references/solutions/) | 工艺方案卡片库（含 `_index.md`） | 1 (SOL-QUECHERS-MID) |
+
+> **种子数据来源**：`references/platforms|modules|solutions/` 下的卡片复制自 [设计资料/03-SmartLabOS-Automation/sample_kb/](设计资料/03-SmartLabOS-Automation/sample_kb/)，是工具脚本配套的迷你示例库。可直接基于这些卡片改写为公司真实数据，或先跑一次 `python tools/validate_solution.py references/solutions/SOL-QUECHERS-MID.md` 确认环境就绪。
+
 ### 知识卡片体系（Knowledge Card System）
 
 > 完整设计与样板：[设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/](设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/) · 工具脚本：[设计资料/02-SmartLabOS-Card-Tools/](设计资料/02-SmartLabOS-Card-Tools/) · 自动化与 CI：[设计资料/03-SmartLabOS-Automation/](设计资料/03-SmartLabOS-Automation/)
@@ -85,9 +101,9 @@
 
 | 卡片类型 | ID 前缀 | 回答的问题 | 类比 | 模板 |
 |---------|--------|-----------|------|------|
-| 平台卡片（Platform） | `PLT-` | 我有什么硬件底盘？ | 汽车的"车型平台" | [02-platform-card-template-平台卡片.md](设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/templates/02-platform-card-template-平台卡片.md) |
-| 模块卡片（Module） | `MOD-` | 我能做什么动作？ | 汽车的"零部件" | [01-module-card-template-模块卡片.md](设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/templates/01-module-card-template-模块卡片.md) |
-| 工艺方案卡片（Solution） | `SOL-` | 针对某类需求推荐什么组合？ | 汽车的"配置版本" | [03-solution-card-template-方案卡片.md](设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/templates/03-solution-card-template-方案卡片.md) |
+| 平台卡片（Platform） | `PLT-` | 我有什么硬件底盘？ | 汽车的"车型平台" | [platform-card-template.md](references/_templates/platform-card-template.md) |
+| 模块卡片（Module） | `MOD-` | 我能做什么动作？ | 汽车的"零部件" | [module-card-template.md](references/_templates/module-card-template.md) |
+| 工艺方案卡片（Solution） | `SOL-` | 针对某类需求推荐什么组合？ | 汽车的"配置版本" | [solution-card-template.md](references/_templates/solution-card-template.md) |
 
 平台/模块为**物理资产**，方案为**组合资产**。客户来了，先在 SOL 库找最接近的方案微调，找不到再从 PLT + MOD 重新组合，并把结果沉淀回 SOL 库——库越用越值钱。
 
@@ -167,7 +183,7 @@ references/
 └── _sources/                 # 原始 PDF 资料（已就位）
 ```
 
-> **当前状态**：`platforms/` `modules/` `solutions/` 三个卡片目录及 `_templates/` `_vocabulary/` 尚未在 [references/](references/) 下建立，目前只有传统工艺/模板 Markdown。模板与样板卡片暂存于 [设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/](设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/)，可参考其中的 `examples/` 直接复制改写。详细 7 天上手计划见该目录下《SmartLabOS-卡片体系使用说明.md》第五节。
+> **当前状态**：上述目录骨架与 seed 卡片已落地（详见上节"已落地的卡片库"）。`tools/` `scripts/` `git-hooks/` `.github/workflows/` 也已部署完毕。详细 7 天上手计划见 [设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/SmartLabOS-卡片体系使用说明.md](设计资料/01-SmartLabOS-Card-Templates(知识卡片体系)/SmartLabOS-卡片体系使用说明.md) 第五节。
 
 #### 4. 如何生成卡片
 
@@ -180,9 +196,9 @@ references/
 ##### 单卡片填写流程
 
 ```bash
-# 1. 复制对应模板（路径在第 1 节表格中）
-copy "设计资料\01-SmartLabOS-Card-Templates(知识卡片体系)\templates\03-solution-card-template-方案卡片.md" ^
-     "references\solutions\SOL-NEW-CASE.md"
+# 1. 从模板目录复制
+copy references\_templates\solution-card-template.md ^
+     references\solutions\SOL-NEW-CASE.md
 
 # 2. 填写 frontmatter（重点：platform.id, modules[], workflow），正文按需扩展
 # 3. resource_summary 字段可留空，由脚本自动算
@@ -199,7 +215,7 @@ python tools\build_indexes.py
 
 #### 5. 如何校验卡片
 
-校验由三层防线组成（脚本源码暂在 [设计资料/03-SmartLabOS-Automation/tools/](设计资料/03-SmartLabOS-Automation/tools/)，部署到项目根 `tools/` 后启用）：
+校验由三层防线组成（脚本已部署在项目根 [tools/](tools/)，启用前请先安装 Python 3.9+ 与 `pyyaml`，详见下方"环境与一次性部署"）：
 
 ##### 第 1 层：脚本即时校验
 
@@ -266,6 +282,87 @@ python tools\build_indexes.py
 ##### 未来演进
 
 这套"卡片 + 校验脚本"将来可无缝迁移到平台化阶段——`validate_solution.py` → 后端 API 校验中间件，`build_indexes.py` → 数据库物化视图，frontmatter 字段 → ORM 表字段。现在花在写规则的时间不会浪费。
+
+## 环境与一次性部署（启用卡片自动化）
+
+仓库已经包含全部脚本、钩子、CI 工作流与 seed 卡片，但首次使用时仍需做两件事：**装 Python 依赖** + **装 git pre-commit 钩子**。
+
+### 1. Python 环境
+
+脚本（[validate_solution.py](tools/validate_solution.py) / [build_indexes.py](tools/build_indexes.py) / [recompute_resource_summary.py](tools/recompute_resource_summary.py)）需要：
+
+- Python ≥ 3.9
+- 第三方库 `pyyaml`
+
+Windows 安装步骤：
+
+```powershell
+# 方式 A：从 python.org 下载安装包（推荐，避免 Microsoft Store 别名）
+# 下载 https://www.python.org/downloads/windows/ → 安装时勾选 "Add python.exe to PATH"
+
+# 安装后验证
+python --version
+
+# 安装依赖
+python -m pip install pyyaml
+```
+
+> ⚠️ Windows 自带的 `python` / `python3` 命令默认指向 Microsoft Store 别名，运行后会跳到 Store 安装页。务必从 python.org 安装真实解释器并加入 PATH。
+
+### 2. 一键体检（确认环境就绪）
+
+装好 Python 后，从项目根跑一次：
+
+```bash
+# 校验示例方案（应输出 7 通过 / 0 失败 / 若干警告）
+python tools/validate_solution.py references/solutions/SOL-QUECHERS-MID.md
+
+# 重建三类卡片索引（覆盖 references/{platforms,modules,solutions}/_index.md）
+python tools/build_indexes.py
+
+# 资源占用 dry-run（不写入，只看差异）
+python tools/recompute_resource_summary.py references/solutions/
+```
+
+或在 Windows 上直接双击 [scripts/check-all.bat](scripts/check-all.bat) 一键跑全套。
+
+### 3. 安装 pre-commit 钩子（每个新克隆都要装一次）
+
+钩子源在 [git-hooks/pre-commit](git-hooks/pre-commit)（受版本控制），需安装到 `.git/hooks/pre-commit`（本地路径，不进 git）：
+
+```bash
+# Linux / Mac / Windows Git Bash
+bash scripts/install-hooks.sh
+
+# Windows PowerShell
+PowerShell -ExecutionPolicy Bypass -File scripts/install-hooks.ps1
+```
+
+安装后，每次 `git commit` 涉及 `references/{platforms,modules,solutions}/` 改动时会自动跑 [validate_solution.py](tools/validate_solution.py)，FAIL 则拒绝提交。应急绕过（不推荐）：`git commit --no-verify`。
+
+### 4. GitHub Actions 远程兜底
+
+[.github/workflows/validate-cards.yml](.github/workflows/validate-cards.yml) 在 push / PR 触及 `references/**` 或 `tools/**` 时自动并行跑：
+
+1. `validate-solutions` — 全库方案校验
+2. `check-indexes` — 重建索引并 diff，捕获"忘记跑 build_indexes"
+3. `recompute-check` — Dry-run 跑 recompute，捕获 `resource_summary` 与实际不一致
+
+无需额外配置，推送后即生效。
+
+### 5. 队友首次克隆仓库后
+
+每位新成员都要跑一次：
+
+```bash
+git clone git@github.com:AIer2025/SmartLabOS-AI-Assistant.git
+cd SmartLabOS-AI-Assistant
+python -m pip install pyyaml          # 装依赖
+bash scripts/install-hooks.sh         # 装钩子（或 PowerShell 版）
+python tools/build_indexes.py         # 验证脚本可跑
+```
+
+---
 
 ## 项目工作产物（projects/{name}/）
 

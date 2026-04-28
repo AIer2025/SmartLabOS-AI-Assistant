@@ -1,0 +1,116 @@
+name: Validate Cards
+
+# 在 push 到主分支或 PR 时触发
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'references/**'
+      - 'tools/**'
+  pull_request:
+    paths:
+      - 'references/**'
+      - 'tools/**'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  validate-solutions:
+    name: 校验所有工艺方案卡片
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: 校验全部方案
+        id: validate
+        run: |
+          set +e  # 不要因单条命令失败就退出,统一汇总
+          fail_count=0
+          for f in references/solutions/SOL-*.md; do
+            [ -f "$f" ] || continue
+            echo ""
+            echo "::group::校验 $f"
+            python tools/validate_solution.py "$f"
+            ec=$?
+            echo "::endgroup::"
+            if [ $ec -ne 0 ]; then
+              fail_count=$((fail_count + 1))
+              echo "::error file=$f::方案校验失败"
+            fi
+          done
+          echo ""
+          echo "==============================="
+          if [ $fail_count -gt 0 ]; then
+            echo "❌ 共 $fail_count 份方案校验失败"
+            exit 1
+          fi
+          echo "✅ 全部方案校验通过"
+
+  check-indexes:
+    name: 检查索引是否同步
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: 重新生成索引
+        run: python tools/build_indexes.py --kb-root references
+
+      - name: 检查是否有变化
+        run: |
+          if ! git diff --exit-code references/*/_index.md; then
+            echo ""
+            echo "❌ 索引文件已过期! 请在本地运行:"
+            echo "    python tools/build_indexes.py"
+            echo "并提交更新后的 _index.md 文件"
+            exit 1
+          fi
+          echo "✅ 索引已同步"
+
+  recompute-check:
+    name: 检查 resource_summary 是否准确
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Dry-run 重算所有方案的 resource_summary
+        run: |
+          set +e
+          out=$(python tools/recompute_resource_summary.py references/solutions/ --kb-root references)
+          echo "$out"
+          # 如果输出里包含"X 份需修改"且 X > 0,说明有方案没及时同步
+          if echo "$out" | grep -E '[1-9][0-9]* 份需修改' >/dev/null; then
+            echo ""
+            echo "❌ 有方案的 resource_summary 字段与实际汇总不一致! 请在本地运行:"
+            echo "    python tools/recompute_resource_summary.py references/solutions/ --write"
+            echo "并提交更新后的方案文件"
+            exit 1
+          fi
+          echo "✅ resource_summary 字段全部准确"
