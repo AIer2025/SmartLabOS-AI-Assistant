@@ -13,6 +13,9 @@
 
 set -e
 
+# 强制 UTF-8 stdout/stderr,避免 Windows GBK 终端无法输出 ✓ ✗ 等字符
+export PYTHONIOENCODING=utf-8
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 

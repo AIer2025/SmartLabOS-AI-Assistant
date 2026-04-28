@@ -1,7 +1,7 @@
 # 模块卡片索引
 
 > SmartLabOS 模块清单(按类别分组)
-> 由 build_indexes.py 自动生成于 2026-04-25 08:37:23
+> 由 build_indexes.py 自动生成
 > 共收录 **6** 份卡片
 
 ⚠️ 本文件由脚本自动生成,**请勿手工编辑**;改动卡片后重新运行 build_indexes.py。

@@ -7,6 +7,10 @@ REM 双击运行,或在命令行 cd 到项目根目录后执行
 
 cd /d %~dp0\..
 
+REM 强制 UTF-8 输出，避免 GBK 终端无法显示 ✓ ✗ 等 Unicode 字符
+set PYTHONIOENCODING=utf-8
+chcp 65001 >nul
+
 echo ========================================
 echo SmartLabOS 卡片库一键体检
 echo ========================================
@@ -34,7 +38,7 @@ if %errorlevel% neq 0 (
 
 echo [步骤 1/2] 重建索引...
 echo ----------------------------------------
-python tools\build_indexes.py
+python tools\build_indexes.py --kb-root references
 if %errorlevel% neq 0 (
     echo [警告] 索引生成出错,但继续后续步骤
 )

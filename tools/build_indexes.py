@@ -31,7 +31,6 @@ from __future__ import annotations
 import argparse
 import sys
 from collections import defaultdict
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -140,12 +139,11 @@ def md_link(text: str, href: str) -> str:
 
 
 def render_header(title: str, subtitle: str, count: int) -> str:
-    """通用索引头"""
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    """通用索引头(不写时间戳,保证输出可复现以便 CI 用 git diff 检测漂移)"""
     return (
         f"# {title}\n\n"
         f"> {subtitle}\n"
-        f"> 由 build_indexes.py 自动生成于 {now}\n"
+        f"> 由 build_indexes.py 自动生成\n"
         f"> 共收录 **{count}** 份卡片\n\n"
         f"⚠️ 本文件由脚本自动生成,**请勿手工编辑**;改动卡片后重新运行 build_indexes.py。\n\n"
     )
