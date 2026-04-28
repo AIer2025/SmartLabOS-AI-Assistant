@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# SmartLabOS pre-commit 钩子
+# 在 git commit 前自动校验改动到的方案卡片,FAIL 则拒绝提交。
+#
+# 安装: 把这个文件复制到 .git/hooks/pre-commit 并赋予可执行权限
+#   bash scripts/install-hooks.sh
+# 或手动:
+#   cp git-hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# 跳过钩子(应急):
+#   git commit --no-verify
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# 1. 检查 Python 和 pyyaml
+if ! command -v python >/dev/null 2>&1 && ! command -v python3 >/dev/null 2>&1; then
+    echo "❌ pre-commit: 找不到 python,跳过校验" >&2
+    exit 0
+fi
+
+PYTHON=$(command -v python3 2>/dev/null || command -v python)
+
+if ! "$PYTHON" -c "import yaml" 2>/dev/null; then
+    echo "⚠️  pre-commit: 缺少 pyyaml,请运行 'pip install pyyaml',本次跳过校验" >&2
+    exit 0
+fi
+
+# 2. 找出本次提交涉及到的卡片文件
+CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^references/(platforms|modules|solutions)/.*\.md$' || true)
+
+if [ -z "$CHANGED" ]; then
+    # 没有卡片改动,直接放行
+    exit 0
+fi
+
+echo "🔍 pre-commit: 发现卡片改动,开始校验..."
+
+# 3. 判断是否需要全库校验
+# 如果改了平台或模块,可能影响多个方案,跑全部 SOL- 文件
+# 如果只改了方案,只校验改动的方案
+NEEDS_FULL=$(echo "$CHANGED" | grep -E '^references/(platforms|modules)/' || true)
+
+VALIDATE="$REPO_ROOT/tools/validate_solution.py"
+if [ ! -f "$VALIDATE" ]; then
+    echo "⚠️  pre-commit: 找不到 $VALIDATE,跳过校验" >&2
+    exit 0
+fi
+
+FAIL_COUNT=0
+
+if [ -n "$NEEDS_FULL" ]; then
+    echo "  · 平台/模块有改动,执行全库方案校验"
+    SOL_FILES=$(find references/solutions -name 'SOL-*.md' -not -name '_*.md' 2>/dev/null || true)
+else
+    echo "  · 仅方案有改动,校验改动的方案"
+    SOL_FILES=$(echo "$CHANGED" | grep -E '^references/solutions/SOL-.*\.md$' || true)
+fi
+
+if [ -z "$SOL_FILES" ]; then
+    echo "  · 没有方案需要校验"
+    exit 0
+fi
+
+for f in $SOL_FILES; do
+    [ -f "$f" ] || continue
+    echo ""
+    echo "▶ 校验 $f"
+    if ! "$PYTHON" "$VALIDATE" "$f"; then
+        FAIL_COUNT=$((FAIL_COUNT + 1))
+    fi
+done
+
+echo ""
+if [ $FAIL_COUNT -gt 0 ]; then
+    echo "❌ pre-commit: $FAIL_COUNT 份方案校验失败,提交被拒绝"
+    echo "   修复后重新提交,或用 'git commit --no-verify' 强制提交(不推荐)"
+    exit 1
+fi
+
+echo "✅ pre-commit: 全部方案校验通过"
+exit 0

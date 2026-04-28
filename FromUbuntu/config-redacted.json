@@ -1,0 +1,170 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": "/home/stone/.openclaw/workspace",
+      "models": {
+        "deepseek/deepseek-chat": {
+          "alias": "DeepSeek"
+        },
+        "deepseek/deepseek-reasoner": {}
+      },
+      "model": {
+        "primary": "deepseek/deepseek-reasoner"
+      }
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "<REDACTED_GATEWAY_TOKEN>",
+      "rateLimit": {
+        "maxAttempts": 10,
+        "windowMs": 60000,
+        "lockoutMs": 300000
+      }
+    },
+    "port": 18789,
+    "bind": "lan",
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "controlUi": {
+      "allowInsecureAuth": true,
+      "allowedOrigins": [
+        "http://192.168.199.130:18789"
+      ],
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send",
+        "sms.search"
+      ]
+    }
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "tools": {
+    "profile": "coding"
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek": {
+        "baseUrl": "https://api.deepseek.com",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-chat",
+            "name": "DeepSeek Chat",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "cost": {
+              "input": 0.28,
+              "output": 0.42,
+              "cacheRead": 0.028,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsUsageInStreaming": true
+            },
+            "api": "openai-completions"
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "DeepSeek Reasoner",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 131072,
+            "maxTokens": 65536,
+            "cost": {
+              "input": 0.28,
+              "output": 0.42,
+              "cacheRead": 0.028,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsUsageInStreaming": true
+            },
+            "api": "openai-completions"
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "profiles": {
+      "deepseek:default": {
+        "provider": "deepseek",
+        "mode": "api_key"
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "groups": {
+        "*": {
+          "requireMention": true
+        }
+      },
+      "botToken": "<REDACTED_TELEGRAM_BOT_TOKEN>",
+      "dmPolicy": "allowlist",
+      "allowFrom": [
+        "8195663806"
+      ]
+    }
+  },
+  "skills": {
+    "load": {
+      "extraDirs": [
+        "/home/stone/.openclaw/AddOnSkills"
+      ]
+    }
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "boot-md": {
+          "enabled": true
+        },
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-04-09T02:12:33.613Z",
+    "lastRunVersion": "2026.4.8",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.4.9",
+    "lastTouchedAt": "2026-04-09T04:59:11.997Z"
+  },
+  "plugins": {
+    "entries": {
+      "deepseek": {
+        "enabled": true
+      }
+    }
+  }
+}

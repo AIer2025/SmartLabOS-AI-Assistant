@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>SmartLabOS Proposal AI-Assistant 实现方法</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'neutral',
+    fontFamily: '"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif',
+    flowchart: { useMaxWidth: true, htmlLabels: true, nodeSpacing: 50, rankSpacing: 60, padding: 12 },
+    gantt: { useMaxWidth: true, leftPadding: 90, rightPadding: 30, barHeight: 22, fontSize: 13 }
+  });
+</script>
+<style>
+  :root{
+    --primary:#1e3a8a; --accent:#0ea5e9; --accent-2:#f59e0b;
+    --ok:#10b981; --warn:#f59e0b; --err:#ef4444;
+    --bg:#f8fafc; --surface:#ffffff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
+    --typeA:#2563eb; --typeB:#9333ea;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:0;font-family:"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .cover{background:linear-gradient(135deg,#1e3a8a 0%,#0ea5e9 60%,#06b6d4 100%);color:#fff;padding:60px 48px;position:relative;overflow:hidden}
+  .cover::after{content:"";position:absolute;inset:0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='20' cy='20' r='1' fill='%23ffffff22'/><circle cx='60' cy='40' r='1.2' fill='%23ffffff22'/><circle cx='80' cy='80' r='1' fill='%23ffffff22'/></svg>");opacity:.6}
+  .cover h1{margin:0;font-size:38px;letter-spacing:1px;position:relative;z-index:2}
+  .cover p.subtitle{margin:12px 0 0;font-size:18px;opacity:.92;position:relative;z-index:2}
+  .cover .meta{margin-top:28px;display:flex;gap:24px;flex-wrap:wrap;font-size:14px;opacity:.9;position:relative;z-index:2}
+  .cover .meta span{background:#ffffff22;padding:6px 14px;border-radius:999px;border:1px solid #ffffff33}
+  .container{max-width:1180px;margin:0 auto;padding:32px 40px 80px}
+  nav.toc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 28px;margin:32px 0 44px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+  nav.toc h3{margin:0 0 12px;color:var(--primary);font-size:16px}
+  nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:32px}
+  nav.toc a{color:var(--text);text-decoration:none}
+  nav.toc a:hover{color:var(--accent);text-decoration:underline}
+  section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 36px;margin-bottom:28px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+  section h2{margin:0 0 18px;color:var(--primary);padding-bottom:12px;border-bottom:3px solid var(--accent);font-size:26px}
+  section h3{color:var(--primary);margin-top:28px;font-size:19px;border-left:4px solid var(--accent);padding-left:12px}
+  section h4{color:var(--text);margin-top:22px;font-size:16px}
+  p,li{font-size:15px}
+  code{background:#eef2ff;color:#3730a3;padding:2px 6px;border-radius:4px;font-size:13.5px;font-family:"Cascadia Code",Consolas,monospace}
+  pre{background:#0f172a;color:#e2e8f0;padding:16px 20px;border-radius:8px;overflow-x:auto;font-size:13.5px;line-height:1.6}
+  pre code{background:transparent;color:inherit;padding:0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:#f1f5f9;color:var(--primary);font-weight:600}
+  tr:nth-child(even) td{background:#fafbfc}
+  .callout{border-left:5px solid var(--accent);background:#f0f9ff;padding:14px 18px;margin:16px 0;border-radius:0 8px 8px 0}
+  .callout.warn{border-color:var(--warn);background:#fffbeb}
+  .callout.ok{border-color:var(--ok);background:#ecfdf5}
+  .callout.err{border-color:var(--err);background:#fef2f2}
+  .callout strong{color:var(--primary)}
+  .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;margin-right:6px}
+  .tag-A{background:#dbeafe;color:var(--typeA)}
+  .tag-B{background:#f3e8ff;color:var(--typeB)}
+  .tag-P0{background:#fee2e2;color:#b91c1c}
+  .tag-P1{background:#fef3c7;color:#92400e}
+  .tag-P2{background:#e0f2fe;color:#075985}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+  .card{border:1px solid var(--border);border-radius:10px;padding:16px 18px;background:#fbfcfd}
+  .card h4{margin:0 0 8px;color:var(--primary)}
+  .mermaid{background:#fff;padding:18px;border-radius:10px;border:1px dashed var(--border);text-align:center;margin:18px 0}
+  .stage-row{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap}
+  .stage{flex:1;min-width:140px;background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;text-align:center;font-size:13px;position:relative}
+  .stage strong{display:block;color:var(--primary);font-size:15px;margin-bottom:4px}
+  .arrow{color:var(--accent);font-weight:bold;align-self:center;font-size:22px}
+  .foot{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:20px;border-top:1px solid var(--border)}
+  .legend{display:flex;gap:16px;margin:10px 0 20px;font-size:13px;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:6px}
+  .legend-dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+  details{border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:10px 0;background:#fbfcfd}
+  details summary{cursor:pointer;font-weight:600;color:var(--primary)}
+  details[open] summary{margin-bottom:10px}
+  @media(max-width:820px){
+    .grid-2,.grid-3{grid-template-columns:1fr}
+    nav.toc ol{columns:1}
+    .cover{padding:40px 24px}
+    .cover h1{font-size:28px}
+    .container{padding:20px}
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>SmartLabOS Proposal AI-Assistant</h1>
+  <p class="subtitle">面向智慧实验室样品前处理系统的售前提案智能生成 — 实现方法与演进路线</p>
+  <div class="meta">
+    <span>编制日期：2026-04-24</span>
+    <span>编制单位：百泉聚兴（北京）科技有限公司</span>
+    <span>工具栈：Claude Max + Claude Code（当前阶段）</span>
+    <span>目标形态：Claude API + Python/C# GUI（演进目标）</span>
+  </div>
+</div>
+
+<div class="container">
+
+<nav class="toc">
+<h3>📑 目录</h3>
+<ol>
+  <li><a href="#s1">一、总体架构与双提案分型</a></li>
+  <li><a href="#s2">二、共用基座：知识库建设</a></li>
+  <li><a href="#s3">三、提案类型 A（国标驱动型）</a></li>
+  <li><a href="#s4">四、提案类型 B（讨论驱动型）</a></li>
+  <li><a href="#s5">五、Claude Max 阶段最佳实践</a></li>
+  <li><a href="#s6">六、演进路线：向 API + GUI 平台化</a></li>
+  <li><a href="#s7">七、行动清单与交付物</a></li>
+</ol>
+</nav>
+
+<!-- =========================== 第一章 =========================== -->
+<section id="s1">
+<h2>一、总体架构与双提案分型</h2>
+
+<p>公司当前阶段主营 <strong>SmartLabOS</strong> — 样品前处理阶段的软硬件一体化系统。售前提案的本质是把 <em>"客户需求 + 行业标准"</em> 转化为 <em>"平台 + 模块 + 工艺流程 + 通量 + 现场条件"</em> 的可交付配置方案。根据输入信息的确定性，提案天然分为两类：</p>
+
+<div class="grid-2">
+  <div class="card" style="border-left:5px solid var(--typeA)">
+    <h4><span class="tag tag-A">类型 A</span>国标/行标驱动型</h4>
+    <p><strong>特征</strong>：客户明确给出国标/行标编号，工艺流程和参数在标准文档中强制规定。</p>
+    <p><strong>案例</strong>：成都食检院 — 硝基呋喃 + 127 种药物残留，依据 GB 31656.13、GBT 21311、GB 31658.26。</p>
+    <p><strong>AI 的职责</strong>：精准解析标准 → 套工艺 → 选平台/模块 → 算通量 → 出文档。</p>
+    <p><strong>难点</strong>：标准细节、参数一致性、合规性审核。</p>
+  </div>
+  <div class="card" style="border-left:5px solid var(--typeB)">
+    <h4><span class="tag tag-B">类型 B</span>讨论驱动型</h4>
+    <p><strong>特征</strong>：无现成标准，工艺路线需要与客户来回讨论、迭代确认。</p>
+    <p><strong>案例</strong>：中药经典名方质量分析 — 工艺由客户科研团队定义，时序图、并行优化由双方共创。</p>
+    <p><strong>AI 的职责</strong>：结构化采集客户需求 → 拆解实验时序 → 推荐模块组合 → 画全流程图 → 迭代优化。</p>
+    <p><strong>难点</strong>：需求钓稳、时序拆解、并行度优化、可视化表达。</p>
+  </div>
+</div>
+
+<h3>两类提案共享的基础层</h3>
+<p>虽然表层流程不同，但两类提案在底层依赖同一组知识库与同一套系统抽象，仅在上层的"采集/分析/生成"环节分叉：</p>
+
+<div class="mermaid">
+flowchart TB
+  subgraph IN["输入层"]
+    I1["客户需求<br/>(效率/尺寸/电力/水电)"]
+    I2["行业标准<br/>(GB/GBT/SN/T)"]
+    I3["客户讨论<br/>(会议纪要/时序图)"]
+  end
+  subgraph KB["共用知识库（Knowledge Base）"]
+    K1["模块卡片库<br/>(150+ 模块)"]
+    K2["平台卡片库<br/>(800/1200/1400)"]
+    K3["工艺模板库<br/>(QuEChERS/酸消解/SPE)"]
+    K4["国标库<br/>(标准摘要 + 参数)"]
+    K5["历史提案样本库"]
+    K6["后端仪器兼容库<br/>(HPLC-MS/GC-MS/ICP)"]
+  end
+  subgraph AI["Claude AI 处理层"]
+    A1["类型 A 流水线<br/>标准解析→套工艺"]
+    A2["类型 B 流水线<br/>需求钓稳→时序建模"]
+  end
+  subgraph OUT["输出层"]
+    O1["技术方案 MD/HTML"]
+    O2["全流程示意图"]
+    O3["设备清单 + 通量报告"]
+    O4["现场要求清单"]
+  end
+  I1 --> A1
+  I2 --> A1
+  I1 --> A2
+  I3 --> A2
+  K1 --> A1 & A2
+  K2 --> A1 & A2
+  K3 --> A1
+  K4 --> A1
+  K5 --> A1 & A2
+  K6 --> A1 & A2
+  A1 --> O1 & O2 & O3 & O4
+  A2 --> O1 & O2 & O3 & O4
+</div>
+
+<div class="callout">
+<strong>核心判断：</strong>知识库是底座，两类提案的可用性都取决于<strong>模块卡片库 + 平台卡片库</strong>的完整度。因此第一优先级是把第二章所述的知识库建起来。
+</div>
+</section>
+
+<!-- =========================== 第二章 =========================== -->
+<section id="s2">
+<h2>二、共用基座：知识库建设</h2>
+
+<p>知识库决定了 AI 能否做到"不编造、可追溯、可复用"。结构化程度越高，AI 输出质量越可控。</p>
+
+<h3>2.1 知识库总览</h3>
+
+<table>
+<thead><tr><th>类别</th><th>文件</th><th>格式</th><th>优先级</th><th>当前状态</th></tr></thead>
+<tbody>
+<tr><td>平台卡片库</td><td><code>references/platforms/</code></td><td>YAML/JSON + MD</td><td><span class="tag tag-P0">P0</span></td><td>❌ 未建立</td></tr>
+<tr><td>模块卡片库</td><td><code>references/modules/</code></td><td>YAML/JSON + MD</td><td><span class="tag tag-P0">P0</span></td><td>❌ 未建立（150+ 模块）</td></tr>
+<tr><td>工艺流程库</td><td><code>references/process-*.md</code></td><td>Markdown</td><td><span class="tag tag-P0">P0</span></td><td>⚠️ 仅覆盖植物源 QuEChERS</td></tr>
+<tr><td>国标库</td><td><code>references/standards-library.md</code></td><td>Markdown</td><td><span class="tag tag-P0">P0</span></td><td>⚠️ 多条目 TODO</td></tr>
+<tr><td>后端仪器兼容库</td><td><code>references/instruments.md</code></td><td>Markdown</td><td><span class="tag tag-P1">P1</span></td><td>❌ 未建立</td></tr>
+<tr><td>历史样本库</td><td><code>samples/</code></td><td>PDF/DOCX/HTML + 摘要 MD</td><td><span class="tag tag-P1">P1</span></td><td>⚠️ 有原件，无结构化摘要</td></tr>
+<tr><td>文档模板库</td><td><code>references/proposal-template.md</code></td><td>Markdown</td><td><span class="tag tag-P1">P1</span></td><td>✅ 已就位</td></tr>
+<tr><td>提案标准参数表</td><td><code>references/ops-constants.md</code></td><td>Markdown</td><td><span class="tag tag-P2">P2</span></td><td>❌ 未建立</td></tr>
+</tbody>
+</table>
+
+<h3>2.2 平台卡片（Platform Card）</h3>
+
+<p>每个平台用一份 Markdown + 结构化 frontmatter 描述。建议使用 YAML frontmatter 让 Claude 可精准抽取字段：</p>
+
+<pre><code>---
+id: PLT-1400
+name: 标准型 1400 平台
+dimensions_mm: { length: 1400, width: 850, height: 1200 }
+max_modules: 6
+max_trays: 8
+tray_size_mm: { length: 300, width: 200 }
+supported_functions: [称量, 提取, 浓缩, 净化, 浓缩定容, 过滤, 萃取, 定容, 消解]
+pipette_options_ml: [10, 5, 2, 1]
+gripper_options: [试管-15ml, 试管-50ml, 离心管-2ml]   # 待落实
+power_kva_nominal: 3.0
+power_kva_peak: 4.5
+---
+
+# 标准型 1400 平台
+
+## 用途说明
+最常用的主力平台，可承载 6 个模块 + 8 个托盘，兼顾通量和灵活性。
+
+## 典型配置示例
+- 提取平台：3× 加液振荡 + 1× 离心 + 1× 移液 + 1× 加内标
+- 净化平台：3× SPE + 2× 浓缩 + 1× 定容
+
+## 限制
+- 单平台最大功耗 4.5 kVA，配 SPE + 浓缩时需确认电力余量
+- 超过 4 个加热类模块时需强制通风
+</code></pre>
+
+<p>对三种平台（800、1200、1400）各建一份，共 3 份；未来新平台按相同模板追加。</p>
+
+<h3>2.3 模块卡片（Module Card）</h3>
+
+<p>公司 150+ 模块是提案的"原子零件"，必须结构化。建议字段：</p>
+
+<div class="grid-2">
+<div class="card">
+<h4>基础信息</h4>
+<ul>
+<li><code>id</code>：唯一 ID（如 MOD-CF-5K）</li>
+<li><code>name</code>：模块名称</li>
+<li><code>category</code>：离心/振荡/SPE/浓缩/加液/过滤/…</li>
+<li><code>version</code>：硬件版本</li>
+</ul>
+</div>
+<div class="card">
+<h4>功能参数</h4>
+<ul>
+<li><code>function_params</code>：结构化键值对（转速范围、温度、时间、管位数等）</li>
+<li><code>capacity</code>：单次处理量（如 24 管）</li>
+<li><code>throughput_per_hour</code>：单模块每小时产量</li>
+</ul>
+</div>
+<div class="card">
+<h4>物理约束</h4>
+<ul>
+<li><code>footprint_mm</code>：占用空间 L×W×H</li>
+<li><code>weight_kg</code>：重量</li>
+<li><code>mount_platform_types</code>：可部署到哪些平台</li>
+</ul>
+</div>
+<div class="card">
+<h4>电力与特殊需求</h4>
+<ul>
+<li><code>power_w</code>：额定功率</li>
+<li><code>voltage</code>：电压（220V/380V）</li>
+<li><code>special_requirements</code>：如通风/低振动/排废</li>
+<li><code>compatible_modules</code>：需要与哪些模块搭配</li>
+<li><code>conflicts_with</code>：与哪些模块互斥</li>
+</ul>
+</div>
+</div>
+
+<div class="callout warn">
+<strong>实施建议：</strong>先从<strong>高频使用的 20~30 个核心模块</strong>入手建卡，一周内建完；剩余 120+ 模块用模板批量补。同时建一个 <code>modules-index.md</code>，列出所有模块 ID + 名称 + 分类，便于 Claude 快速检索。
+</div>
+
+<h3>2.4 工艺流程库（Process Template）</h3>
+<p>每个主流程一份 Markdown，包含：适用范围、依据标准、分步骤流程（含关键参数）、推荐模块组合、典型时序、基质差异化参数表。当前已建 <code>process-quechers.md</code>（植物源）、<code>process-inorganic.md</code>；需补动物源、茶叶、香辛料、中药等。</p>
+
+<h3>2.5 国标库（Standards Library）</h3>
+<p>每个国标/行标一节，至少包含：</p>
+<ul>
+<li>标准编号、标题、发布日期、代替关系</li>
+<li>适用范围（基质/分析物）</li>
+<li>关键前处理步骤（称样量、试剂、盐包、离心、净化、浓缩、定容）</li>
+<li>关键参数表（可被 AI 直接引用）</li>
+<li>后端检测仪器要求</li>
+</ul>
+
+<h3>2.6 后端仪器兼容库</h3>
+<p>列出常见 HPLC-MS/MS、GC-MS/MS、ICP-OES、ICP-MS、UPLC、LC-QTOF 的品牌/型号/进样规格/兼容性。前处理的定容体积、进样管规格由此反推。</p>
+
+<h3>2.7 历史样本库（samples/）</h3>
+<p>每个历史项目保留：原方案文件 + 一份 <code>summary.md</code>（摘要客户场景、选用配置、通量、成交价区间 <em>[可选]</em>、客户反馈）。样本摘要让 AI 做 few-shot 参考。</p>
+</section>
+
+<!-- =========================== 第三章 =========================== -->
+<section id="s3">
+<h2>三、提案类型 A（国标驱动型）</h2>
+<p><span class="tag tag-A">类型 A</span>典型案例：<code>食检院项目/</code> 目录下，基于 GB 31656.13、GBT 21311、GB 31658.26 生成的成都食检院方案。</p>
+
+<h3>3.1 输入 → 输出的全景</h3>
+
+<div class="mermaid">
+flowchart LR
+  subgraph IN["输入"]
+    direction TB
+    N1["国标 PDF<br/>(1~N 份)"]
+    N2["客户需求表<br/>(效率/场地/电力)"]
+    N3["客户后端仪器清单"]
+  end
+  subgraph PIPE["AI 五阶段流水线"]
+    direction TB
+    P1["① 标准解析"]
+    P2["② 需求采集"]
+    P3["③ 工艺-平台-模块匹配"]
+    P4["④ 通量测算 + 现场校验"]
+    P5["⑤ 文档生成 + 审核"]
+    P1 --> P2 --> P3 --> P4 --> P5
+  end
+  subgraph OUT["输出"]
+    direction TB
+    Q1["technical-proposal.html/pdf"]
+    Q2["全流程图 (SVG)"]
+    Q3["模块清单 (Excel)"]
+    Q4["现场要求清单"]
+  end
+  IN --> PIPE --> OUT
+</div>
+
+<h3>3.2 需要准备的知识库（在第二章基础上的增量）</h3>
+<table>
+<thead><tr><th>知识点</th><th>形式</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>国标 PDF 原文</td><td><code>references/_sources/standards/*.pdf</code></td><td>客户提供什么就存什么，作为权威源</td></tr>
+<tr><td>国标结构化摘要</td><td><code>references/standards-library.md</code></td><td>把 PDF 关键参数手工抽成表格（<strong>Claude 读表格比读 PDF 稳定得多</strong>）</td></tr>
+<tr><td>工艺流程对照表</td><td><code>references/process-*.md</code></td><td>同一类标准（如硝基呋喃、氯霉素类）共用一个工艺模板</td></tr>
+<tr><td>历史标准型提案样本</td><td><code>samples/std-*/summary.md</code></td><td>吴妹丽那份成都食检院提案作为金标准 few-shot</td></tr>
+</tbody>
+</table>
+
+<h3>3.3 推荐的对话式工作流（五阶段）</h3>
+
+<div class="stage-row">
+<div class="stage"><strong>① 新建项目</strong>"新建提案 成都食检院"</div>
+<div class="arrow">→</div>
+<div class="stage"><strong>② 上传标准</strong>PDF 扔进目录</div>
+<div class="arrow">→</div>
+<div class="stage"><strong>③ 信息采集</strong>6 类客户条件</div>
+<div class="arrow">→</div>
+<div class="stage"><strong>④ 自动匹配</strong>平台+模块+通量</div>
+<div class="arrow">→</div>
+<div class="stage"><strong>⑤ 生成+审核</strong>HTML/PDF</div>
+</div>
+
+<h3>3.4 各阶段实现要点</h3>
+
+<details open>
+<summary>阶段 ① — 新建项目</summary>
+<p>触发口令 <code>新建提案 {客户名}</code>，在 <code>projects/{客户名}/</code> 下建目录，初始化 <code>workflow-status.md</code>。由 <a href=".claude/skills/proposal-workflow/SKILL.md">proposal-workflow Skill</a> 完成，当前已落地。</p>
+</details>
+
+<details open>
+<summary>阶段 ② — 标准解析</summary>
+<p>用户把客户给的 PDF 拷贝到 <code>projects/{客户名}/_inputs/</code>，然后说"解析标准"。Claude 会：</p>
+<ol>
+<li>读每份 PDF，抽取标准编号、适用范围、关键参数</li>
+<li>在 <code>references/standards-library.md</code> 中查找是否已有对应条目；有则复用，无则提示用户"我先按 PDF 生成草稿条目，请你人工校核后入库"</li>
+<li>输出 <code>projects/{客户名}/standards-extracted.md</code>，列出每个标准的核心参数表</li>
+</ol>
+<div class="callout warn"><strong>关键：</strong>PDF 抽参数不稳定。让 Claude 读，生成草稿条目；人工校对后才入库 — 这是保证"不编造"的最后一道护栏。</div>
+</details>
+
+<details open>
+<summary>阶段 ③ — 信息采集</summary>
+<p>沿用 <a href=".claude/skills/proposal-collector/SKILL.md">proposal-collector Skill</a>，六大类问题：业务需求 / 技术规范 / 行业规范 / 效率要求 / 布局 / 基础设施。</p>
+<p>类型 A 场景下，<strong>技术规范类的问题可以被"已解析的标准"自动填充</strong>：比如检测方法、国标编号、分析物清单，直接从阶段 ② 继承，不必再问。</p>
+</details>
+
+<details open>
+<summary>阶段 ④ — 自动匹配（核心智能）</summary>
+<p>这一步是整个 Pipeline 的"脑"，由 <a href=".claude/skills/proposal-analyzer/SKILL.md">proposal-analyzer Skill</a> 扩展后完成。决策算法如下：</p>
+
+<div class="mermaid">
+flowchart TB
+  S1["读 standards-extracted.md<br/>获取前处理步骤清单"] --> S2["每步骤 → 查 process-*.md<br/>→ 得到所需功能单元"]
+  S2 --> S3["功能单元 → 查 modules-index.md<br/>→ 候选模块集"]
+  S3 --> S4{"模块集 合并<br/>去重"}
+  S4 --> S5["按 功能 × 通量 分组<br/>→ 推荐每组的部署数量"]
+  S5 --> S6["部署映射到平台卡片<br/>(800/1200/1400)"]
+  S6 --> S7{"平台 总数 + 尺寸<br/>是否适配客户场地?"}
+  S7 -->|是| S8["生成 platform-module-map.md"]
+  S7 -->|否| S9["降级: 减通道或多班次"]
+  S9 --> S5
+  S8 --> S10["通量测算:<br/>批次数=日量/批量<br/>单批次耗时累加"]
+  S10 --> S11{"通量 ≥ 客户要求?"}
+  S11 -->|否| S12["提升: 加通道/加平台"]
+  S12 --> S5
+  S11 -->|是| S13["电力/水电/承重校验"]
+  S13 --> S14["输出 analysis-report.md"]
+</div>
+</details>
+
+<details open>
+<summary>阶段 ⑤ — 生成 + 审核</summary>
+<p>由 <a href=".claude/skills/proposal-generator/SKILL.md">proposal-generator</a> + <a href=".claude/skills/proposal-reviewer/SKILL.md">proposal-reviewer</a> 完成：</p>
+<ul>
+<li><strong>生成</strong>：按 <code>proposal-template.md</code> 的 7 章结构，逐章生成 Markdown，再转 HTML（建议走 Pandoc 或直接让 Claude 一次出 HTML）</li>
+<li><strong>全流程图</strong>：用 Mermaid 或 SVG 内嵌 HTML，避免额外依赖</li>
+<li><strong>审核</strong>：对照国标库、模块库、客户需求逐项打勾；有 ❌ 自动改 v2；有 ⚠️ 列人工确认清单</li>
+</ul>
+</details>
+
+<h3>3.5 类型 A 的最佳实践清单</h3>
+<div class="callout ok">
+<strong>✅ DO</strong>
+<ul>
+<li>先把国标用<strong>表格形式</strong>手工摘到 <code>standards-library.md</code>，再让 Claude 读表格而不是 PDF</li>
+<li>把吴妹丽的成都食检院提案作为 <strong>gold sample</strong>，在 <code>samples/</code> 放一份并附结构化 summary</li>
+<li>每个新标准增量回填知识库，不要一次性想把全部国标补完</li>
+<li>平台/模块卡片使用 <strong>YAML frontmatter</strong>，便于 Claude 提取字段做计算</li>
+<li>通量计算公式固化在 <code>proposal-template.md</code> 的"系统效率分析"章节，让 AI 套公式而不是自创</li>
+</ul>
+</div>
+
+<div class="callout err">
+<strong>❌ DON'T</strong>
+<ul>
+<li>不要让 Claude 直接读原始国标 PDF 生成最终参数（PDF 解析不稳）</li>
+<li>不要让 Claude 凭印象推测模块/标准参数 — 遇到知识库缺项必须停并提示补料</li>
+<li>不要把报价/价格写入方案（统一"请联系销售团队"）</li>
+<li>不要在一次对话里生成完整方案 — 分阶段确认，每阶段人工签收</li>
+</ul>
+</div>
+</section>
+
+<!-- =========================== 第四章 =========================== -->
+<section id="s4">
+<h2>四、提案类型 B（讨论驱动型）</h2>
+<p><span class="tag tag-B">类型 B</span>典型案例：<code>大连项目/</code> 中药经典名方质量分析，最终输出 <code>06-中药经典名方自动化全流程示意图-胡总结-V1.2.html</code>。</p>
+
+<h3>4.1 与类型 A 的本质差别</h3>
+
+<table>
+<thead><tr><th>维度</th><th>类型 A（国标驱动）</th><th>类型 B（讨论驱动）</th></tr></thead>
+<tbody>
+<tr><td>工艺依据</td><td>国标/行标硬性规定</td><td>客户科研团队 + 企业联合定义</td></tr>
+<tr><td>参数来源</td><td>标准文档</td><td>需求规格说明书 + 时序图 + 会议纪要</td></tr>
+<tr><td>迭代次数</td><td>1~2 轮</td><td>3~N 轮</td></tr>
+<tr><td>AI 擅长</td><td>精确匹配、合规校对</td><td>需求结构化、时序建模、并行度优化、可视化</td></tr>
+<tr><td>输出重点</td><td>设备清单 + 通量表</td><td>全流程示意图 + 时序图 + 工位协同</td></tr>
+</tbody>
+</table>
+
+<h3>4.2 类型 B 的"客户需求"标准化模板</h3>
+<p>把已经成功的大连项目反向拆解，可以归纳出一份<strong>"讨论驱动型客户需求采集模板"</strong>，让下一个类似项目只需要填表即可进入 AI 生成：</p>
+
+<pre><code># 讨论驱动型提案 — 客户需求规格表
+
+## G1. 项目背景
+- 项目名称：
+- 客户单位：
+- 业务目标：（例：经典名方的质量一致性检测自动化）
+- 研究阶段：（研发 / 中试 / 生产）
+- 项目紧迫程度与关键里程碑：
+
+## G2. 样品与基质
+- 样品类型：（中药饮片 / 水提液 / 醇提液 / 超临界提取物 / ...）
+- 基质复杂度：（色素/油脂/糖类/蛋白 等干扰情况）
+- 单样量：（mg / mL）
+- 样品总数 / 批次：
+
+## G3. 目标分析物
+- 指标成分名称与 CAS 号：
+- 定量/定性要求：
+- 限量值（如有）：
+- 参考文献 / 药典编号：
+
+## G4. 实验步骤（SOP 初稿）
+- 步骤 1：{名称} — {试剂/用量/时间/温度/转速}
+- 步骤 2：...
+- 步骤 N：...
+- 关键控制点：（QC 抽检/平行样比例/空白样策略）
+
+## G5. 后端检测仪器
+- 仪器类型与型号：（UPLC / UPLC-MS/MS / HPLC-DAD / ...）
+- 进样量与色谱条件：
+- 每样品检测耗时：
+
+## G6. 效率与产能
+- 日样品数：
+- 单批次期望：
+- 工作时长：
+- 是否允许夜间无人值守运行：
+
+## G7. 现场与基础设施
+- 场地面积 / 层高 / 承重：
+- 可用电力（总 kVA / 单相三相）：
+- 供水（纯水型号 / 流量 / 废水）：
+- 温湿度控制：
+- 通道 / 电梯尺寸：
+
+## G8. 集成与数据
+- LIMS/MES/ERP 对接要求：
+- 数据合规：（FDA 21 CFR Part 11 / GLP / 药典 GMP）
+- 电子签名 / 审计追踪 / 批记录要求：
+
+## G9. 与客户共创的约束
+- 关键工艺参数由谁拍板：（客户/企业/联合）
+- 允许的灵活度：（可调流程 / 固定流程）
+- 客户希望保留的人工环节：
+- 客户现有设备复用清单：
+
+## G10. 期望交付
+- 方案语言：中文 / 双语
+- 方案形式：HTML / PDF / PPT
+- 是否需要时序图：
+- 是否需要并行优化分析：
+- 是否需要风险矩阵：
+</code></pre>
+
+<div class="callout">
+<strong>关键洞察：</strong>大连项目之所以出的好，是因为客户<strong>提前把"需求规格说明书 + 时序图 + UPLC 作用说明"写好了</strong>。这三份文件恰好覆盖了 G3+G4+G5+G6。把它们抽象成上面的 G1~G10 模板，下一个项目就能复现这个质量。
+</div>
+
+<h3>4.3 类型 B 的 AI 流水线</h3>
+
+<div class="mermaid">
+flowchart TB
+  subgraph COL["阶段 ① 需求钓稳"]
+    C1["按 G1~G10 模板<br/>引导客户逐项填写"]
+    C2{"关键项是否齐全?"}
+    C3["生成疑问清单<br/>回客户二次确认"]
+    C1 --> C2 -->|否| C3 --> C1
+  end
+  subgraph SEQ["阶段 ② 时序建模"]
+    T1["把 G4 步骤转为<br/>时序图 (Mermaid Gantt)"]
+    T2["识别可并行的步骤<br/>(离心 + 前准备 / SPE + 浓缩等)"]
+    T3["输出 sequence-diagram.md"]
+    T1 --> T2 --> T3
+  end
+  subgraph MAP["阶段 ③ 模块-工位映射"]
+    M1["每步骤 → 候选模块集"]
+    M2["按时序对模块做<br/>时间占用分析"]
+    M3["确定工位数 + 平台配置"]
+    M1 --> M2 --> M3
+  end
+  subgraph OPT["阶段 ④ 并行优化"]
+    O1["计算原始节拍"]
+    O2["尝试批次错峰"]
+    O3["输出 V1→V2 优化对比"]
+    O1 --> O2 --> O3
+  end
+  subgraph DOC["阶段 ⑤ 可视化与发布"]
+    D1["全流程 HTML 示意图<br/>(SVG + 交互)"]
+    D2["技术方案 MD"]
+    D3["交付清单 Excel"]
+  end
+  COL --> SEQ --> MAP --> OPT --> DOC
+</div>
+
+<h3>4.4 每阶段实现要点</h3>
+
+<details open>
+<summary>① 需求钓稳 — 迭代式填表</summary>
+<p>新建 Skill <code>proposal-rnd-collector</code>（研发型采集），与现有 <code>proposal-collector</code> 区分。Claude 按 G1~G10 逐项引导：<strong>每轮最多 2~3 个问题</strong>，客户每轮答一批，Claude 更新 <code>collected-info.md</code> 并显示完成度，遇到模糊项给出<strong>候选答案让客户选</strong>而不是开放性提问。</p>
+</details>
+
+<details open>
+<summary>② 时序建模 — 从 SOP 到 Gantt</summary>
+<p>新建 Skill <code>proposal-sequence-builder</code>，读 G4 步骤，生成如下 Gantt 时序图：</p>
+<div class="mermaid">
+gantt
+    title 中药经典名方前处理时序
+    dateFormat HH:mm
+    axisFormat %H:%M
+    section 工位A
+    称量       :a1, 00:00, 5m
+    加提取液   :a2, after a1, 3m
+    超声提取   :a3, after a2, 30m
+    section 工位B
+    离心       :b1, after a3, 10m
+    过滤       :b2, after b1, 5m
+    section 工位C
+    浓缩       :c1, after b2, 40m
+    定容       :c2, after c1, 5m
+</div>
+<p>然后把 Gantt 再转成 <strong>Swimlane SVG</strong>，在 HTML 中交互展示 — 这正是 06-中药方案.html 的实现路径。</p>
+</details>
+
+<details open>
+<summary>③ 模块-工位映射</summary>
+<p>每个步骤查询模块库候选模块 → 按时间占用找可并行的工位 → 合并成平台。关键计算：<strong>节拍 = max(各工位链路耗时)</strong>。</p>
+</details>
+
+<details open>
+<summary>④ 并行优化</summary>
+<p>这是大连项目 V1→V2 的核心增量："离心时段并行准备西林瓶和过滤平台"。抽象为三种优化手法：</p>
+<ul>
+<li><strong>批次错峰</strong>：在 A 批次进入离心时，B 批次开始称量</li>
+<li><strong>工位预热</strong>：长耗时模块（如浓缩）前置准备</li>
+<li><strong>夹爪复用</strong>：同夹爪类型的物料合并工位</li>
+</ul>
+<p>输出 <code>optimization-report.md</code>，对比 V1 / V2 节拍提升率。</p>
+</details>
+
+<details open>
+<summary>⑤ 可视化发布</summary>
+<p>大连项目 HTML 是质量标杆。把它做成<strong>模板</strong> — 抽出 CSS / SVG 结构 / 交互脚本，放到 <code>references/viz-templates/</code>，下次 AI 只需要把内容填进模板即可。</p>
+</details>
+
+<h3>4.5 类型 B 的最佳实践</h3>
+<div class="callout ok">
+<strong>✅ DO</strong>
+<ul>
+<li>让客户先填 G1~G10 表格再开始生成 — 信息不够<strong>宁可暂停</strong></li>
+<li>把 06-V1.2 那份 HTML 当作 <strong>视觉模板</strong>，保留其 CSS 和 SVG 结构</li>
+<li>时序图先 Mermaid Gantt 快速出，再升级为交互 SVG</li>
+<li>每轮迭代保留版本号：V1.0 / V1.1 / V1.2，客户可追溯</li>
+<li>在关键工位放"客户确认锚点"，避免 AI 推演过头</li>
+</ul>
+</div>
+<div class="callout err">
+<strong>❌ DON'T</strong>
+<ul>
+<li>不要让 AI 自行发明关键工艺参数（必须来自客户 SOP）</li>
+<li>不要一次性出最终 HTML — 至少拆 3 步：采集→时序→可视化</li>
+<li>不要用自由格式对话采集，一定要按 G1~G10 结构</li>
+</ul>
+</div>
+</section>
+
+<!-- =========================== 第五章 =========================== -->
+<section id="s5">
+<h2>五、Claude Max 阶段最佳实践</h2>
+
+<h3>5.1 当前栈的能力边界</h3>
+<table>
+<thead><tr><th>维度</th><th>Claude Max + Claude Code 能做到</th><th>做不到（需走 API）</th></tr></thead>
+<tbody>
+<tr><td>本地文件读写</td><td>✅ Skill 直接操作 <code>projects/</code> <code>references/</code></td><td>—</td></tr>
+<tr><td>PDF/Word 解析</td><td>✅ 可读 PDF 文本（需人工校验）</td><td>⚠️ 复杂版式 / 扫描件 → 需 OCR 服务</td></tr>
+<tr><td>Markdown → HTML</td><td>✅ Claude 可直接生成 HTML</td><td>—</td></tr>
+<tr><td>Markdown → Word/PDF</td><td>⚠️ 手动走 Pandoc</td><td>✅ API 管道 + python-docx / OpenXML 自动</td></tr>
+<tr><td>多人协作</td><td>❌ 单机</td><td>✅ Web GUI 多租户</td></tr>
+<tr><td>批量生成 / 定时任务</td><td>❌</td><td>✅</td></tr>
+<tr><td>额度</td><td>✅ Max 订阅已付费，无 token 计算焦虑</td><td>💰 按 token 付费</td></tr>
+</tbody>
+</table>
+
+<h3>5.2 当前阶段的八条落地规矩</h3>
+<div class="grid-2">
+<div class="card"><h4>① CLAUDE.md 是宪法</h4><p>身份、纪律、价格红线、语言全部写进 <a href="CLAUDE.md">CLAUDE.md</a>，会话启动自动注入，优先级高于任何默认行为。</p></div>
+<div class="card"><h4>② 一个 Skill 一件事</h4><p>workflow / collector / analyzer / generator / reviewer 职责单一，可独立测试与替换。</p></div>
+<div class="card"><h4>③ 用 Markdown 作为中间态</h4><p>HTML/Word 是最终发布格式；中间所有状态、分析、审核都是 Markdown，diff 友好、AI 可继续处理。</p></div>
+<div class="card"><h4>④ YAML frontmatter 结构化</h4><p>平台卡/模块卡/国标条目都用 frontmatter，Claude 检索与计算更稳。</p></div>
+<div class="card"><h4>⑤ 分阶段人工签收</h4><p>每阶段结束输出摘要，用户说"继续"再走下一步，杜绝"一口气跑到终点"。</p></div>
+<div class="card"><h4>⑥ 知识库缺项立即停</h4><p>Claude 读不到的参数 → 返回"需要补料 X"，不允许脑补。</p></div>
+<div class="card"><h4>⑦ 样本库驱动风格</h4><p>吴妹丽成都方案（类型 A 金标准）+ 06-中药方案 V1.2（类型 B 金标准）放到 <code>samples/</code>，做 few-shot。</p></div>
+<div class="card"><h4>⑧ 版本化管理</h4><p>项目目录 git 化，每次阶段结束自动 commit；方案版本 V1.0/V1.1 放入文件名。</p></div>
+</div>
+</section>
+
+<!-- =========================== 第六章 =========================== -->
+<section id="s6">
+<h2>六、演进路线：向 API + GUI 平台化</h2>
+
+<p>当 Claude Max + Claude Code 跑通 <strong>3~5 个真实提案</strong>、知识库稳定、Skill 行为固化后，可以启动平台化。</p>
+
+<h3>6.1 三阶段演进</h3>
+
+<div class="mermaid">
+flowchart TB
+  subgraph P1["阶段 1 (已启动) · Claude Max + Claude Code"]
+    direction LR
+    p1a["5 个 Skill"]
+    p1b["references/ 知识库"]
+    p1c["projects/ 文件产出"]
+  end
+  subgraph P2["阶段 2 (3~6 个月后) · Claude API + Python/C# 本地 GUI"]
+    direction LR
+    p2a["FastAPI / ASP.NET Core"]
+    p2b["SQLite / PostgreSQL<br/>模块卡、平台卡结构化"]
+    p2c["Electron / WPF GUI"]
+    p2d["Word/PDF 导出引擎"]
+  end
+  subgraph P3["阶段 3 (12 个月以上) · 企业级 Web 平台"]
+    direction LR
+    p3a["多租户 + 审批流"]
+    p3b["向量库 RAG"]
+    p3c["SmartLabOS 业务系统对接"]
+    p3d["CRM / ERP 集成"]
+  end
+  P1 ==> P2 ==> P3
+</div>
+
+<h3>6.2 阶段 2 架构设想</h3>
+
+<div class="mermaid">
+flowchart TB
+  subgraph FE["前端 (Electron + React 或 WPF + Blazor)"]
+    F1["客户需求表单<br/>G1~G10"]
+    F2["方案编辑器<br/>(实时预览)"]
+    F3["模块库管理界面"]
+    F4["项目看板"]
+  end
+  subgraph BE["后端 (Python FastAPI 或 C# ASP.NET Core)"]
+    B1["/api/proposal<br/>提案编排"]
+    B2["/api/kb<br/>知识库 CRUD"]
+    B3["/api/export<br/>Word/PDF 生成"]
+    B4["Claude API Client<br/>(prompt 管理 + 重试)"]
+  end
+  subgraph DB["数据层"]
+    D1["SQLite / PostgreSQL<br/>(模块/平台/国标/项目)"]
+    D2["MinIO / 文件系统<br/>(PDF/Word/HTML)"]
+    D3["Qdrant 向量库<br/>(历史方案检索)"]
+  end
+  subgraph AI["AI 层"]
+    A1["Claude API<br/>claude-opus-4-7"]
+    A2["Prompt 模板库"]
+    A3["Agent SDK 编排"]
+  end
+  FE --> BE --> DB
+  BE --> AI
+  AI --> BE
+</div>
+
+<h3>6.3 阶段 2 关键技术选型建议</h3>
+
+<table>
+<thead><tr><th>层</th><th>优选</th><th>次选</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td>后端语言</td><td>Python (FastAPI)</td><td>C# (ASP.NET Core)</td><td>Python 对 Claude Agent SDK 生态最友好；SmartLabOS 团队若 .NET 栈更熟，可选 C#</td></tr>
+<tr><td>前端</td><td>Electron + React</td><td>WPF + Blazor Hybrid</td><td>Electron 跨平台；WPF 若限定 Windows 客户端则更轻</td></tr>
+<tr><td>数据库</td><td>PostgreSQL</td><td>SQLite (单机) / 达梦 (信创)</td><td>未来信创合规优先达梦</td></tr>
+<tr><td>Word 导出</td><td>python-docx (Py) / OpenXML (C#)</td><td>Pandoc</td><td>需保留公司页眉页脚、封面、样式</td></tr>
+<tr><td>PDF 导出</td><td>WeasyPrint (HTML→PDF)</td><td>wkhtmltopdf</td><td>WeasyPrint 对中文支持好</td></tr>
+<tr><td>向量库</td><td>Qdrant</td><td>PGVector</td><td>Qdrant 独立部署，PGVector 省一个组件</td></tr>
+<tr><td>Claude 调用</td><td>Anthropic Python SDK + Claude Agent SDK</td><td>Anthropic TS SDK</td><td>与后端语言对齐</td></tr>
+</tbody>
+</table>
+
+<h3>6.4 从 Claude Code 迁到 API 的平滑路径</h3>
+<ul>
+<li>当前 Skill 的 <code>SKILL.md</code> <strong>直接转为 Prompt 模板</strong>，几乎零修改</li>
+<li>当前 <code>references/</code> 知识库 <strong>直接作为向量库的原始材料</strong>，YAML frontmatter 作为 metadata</li>
+<li>当前 <code>projects/{客户名}/</code> 目录结构 <strong>直接映射为数据库表</strong>（project → 1:N → artifacts）</li>
+<li>当前五阶段工作流 <strong>直接映射为 REST API 的 5 个端点</strong></li>
+</ul>
+
+<div class="callout ok">
+<strong>这意味着当前 Claude Max 阶段的每一份投入都不会浪费。</strong>Skill → Prompt、MD → 数据库、文件产出 → API 响应，一一对应。
+</div>
+</section>
+
+<!-- =========================== 第七章 =========================== -->
+<section id="s7">
+<h2>七、行动清单与交付物</h2>
+
+<h3>7.1 本周（一周内）建议完成</h3>
+<ol>
+<li><span class="tag tag-P0">P0</span>建立 <code>references/platforms/</code> — 3 份平台卡（800/1200/1400），YAML + MD</li>
+<li><span class="tag tag-P0">P0</span>建立 <code>references/modules/</code> — 先挑<strong>高频 20 个核心模块</strong>建卡，剩余后续</li>
+<li><span class="tag tag-P0">P0</span>把吴妹丽成都食检院方案、06-中药方案 V1.2 拷入 <code>samples/</code>，各写一份 <code>summary.md</code></li>
+<li><span class="tag tag-P0">P0</span>按本文 §4.2 的 G1~G10 模板，新增 Skill <code>proposal-rnd-collector</code></li>
+</ol>
+
+<h3>7.2 两周内完成</h3>
+<ol start="5">
+<li><span class="tag tag-P1">P1</span>用"成都食检院"做类型 A 的端到端演练，记录所有卡点</li>
+<li><span class="tag tag-P1">P1</span>用一个新中药项目做类型 B 的端到端演练（重跑大连流程但不看原答案）</li>
+<li><span class="tag tag-P1">P1</span>把 06-V1.2.html 抽象为 <code>references/viz-templates/flowchart-html.tmpl</code></li>
+<li><span class="tag tag-P1">P1</span>扩写 <code>references/standards-library.md</code> 至少 5 个新国标</li>
+</ol>
+
+<h3>7.3 一个月内完成</h3>
+<ol start="9">
+<li><span class="tag tag-P2">P2</span>150+ 模块卡全部补齐（可用 Python 脚本批量生成草稿模板）</li>
+<li><span class="tag tag-P2">P2</span>新增 <code>proposal-sequence-builder</code> Skill，自动输出 Gantt</li>
+<li><span class="tag tag-P2">P2</span>新增 <code>proposal-precheck</code> Skill — 阶段 2→3 过渡前做知识库可用性扫描</li>
+<li><span class="tag tag-P2">P2</span>项目目录 git 化，每阶段 auto commit</li>
+</ol>
+
+<h3>7.4 需要你（业务方）提供的资料</h3>
+<div class="grid-2">
+<div class="card">
+<h4>立即需要</h4>
+<ul>
+<li>3 种平台的实际尺寸 / 模块承载数 / 托盘规格确认</li>
+<li>150+ 模块的名称与 ID 列表（哪怕没参数也先要 ID/名称清单）</li>
+<li>20 个高频模块的完整参数卡（可分批）</li>
+<li>"试管种类/夹爪规格"落实后的清单</li>
+</ul>
+</div>
+<div class="card">
+<h4>近期需要</h4>
+<ul>
+<li>更多金标准历史提案（>=5 份，覆盖农残/兽残/无机/中药等多个领域）</li>
+<li>常见后端检测仪器品牌/型号清单</li>
+<li>公司方案模板的页眉页脚、封面样式（供 Word/PDF 导出阶段用）</li>
+<li>常用客户类型（食检院/海关/高校/环保局）的典型场景描述</li>
+</ul>
+</div>
+</div>
+
+<h3>7.5 交付物矩阵</h3>
+<table>
+<thead><tr><th>阶段</th><th>交付物</th><th>形式</th><th>负责</th></tr></thead>
+<tbody>
+<tr><td>类型 A 单次提案</td><td>技术方案 + 模块清单 + 全流程图 + 审核报告</td><td>HTML/MD (+ PDF)</td><td>AI 生成 + 人工审核</td></tr>
+<tr><td>类型 B 单次提案</td><td>需求规格回执 + 时序图 + 全流程 HTML + 并行优化报告</td><td>HTML/MD</td><td>AI 生成 + 客户迭代</td></tr>
+<tr><td>知识库持续维护</td><td>平台卡 / 模块卡 / 国标库 / 样本库</td><td>YAML + MD</td><td>业务方 + AI 辅助</td></tr>
+<tr><td>阶段 2 平台</td><td>GUI + 后端 API + Word/PDF 导出</td><td>Electron + FastAPI/ASP.NET</td><td>工程开发</td></tr>
+</tbody>
+</table>
+</section>
+
+<div class="foot">
+📄 Proposal AI-Assistant 实现方法 · v1.0 · 2026-04-24<br/>
+百泉聚兴（北京）科技有限公司 · SmartLabOS 智慧实验室
+</div>
+
+</div>
+</body>
+</html>
