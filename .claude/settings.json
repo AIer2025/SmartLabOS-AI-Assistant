@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip -p \"03-项目集成和交付清单-中药经典明方质量分析\\(20260428-刘锫-V3.0\\).xlsx\" xl/sharedStrings.xml)",
+      "Read(//tmp/**)",
+      "Read(//c/Users/littl/AppData/Local/Temp/**)",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-create-pages",
+      "mcp__claude_ai_Notion__notion-update-page",
+      "Read(//c/Program Files/Microsoft Office/root//**)",
+      "Read(//c/Program Files \\(x86\\)/Microsoft Office/**)"
+    ]
+  }
+}
