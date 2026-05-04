@@ -1,6 +1,7 @@
 ---
 # ========== 标识与版本 ==========
 id: MOD-XXXX                          # 模块唯一编号,建议 MOD- 前缀
+Module_Part_No: PRD-MOD-202604001     # 模块发货号，建议 PRD- 前缀
 name: 模块显示名称
 category: 加液振荡                     # 大类:加液振荡 | SPE | 浓缩 | 离心 | 移液 | 称量 | 加热 | 其他
 version: 1.0

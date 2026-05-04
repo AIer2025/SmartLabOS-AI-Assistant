@@ -1,6 +1,7 @@
 ---
 # ========== 标识与版本 ==========
-id: PLT-XXXX                          # 平台唯一编号，建议 PLT- 前缀
+id: PLT-XXXX                           # 平台唯一编号，建议 PLT- 前缀
+Platform_Part_No: PRD-PLT-202604001    # 平台发货号，建议 PRD- 前缀
 name: 平台显示名称
 version: 1.0                          # 卡片版本号，便于追踪修订
 status: draft                         # draft | active | deprecated

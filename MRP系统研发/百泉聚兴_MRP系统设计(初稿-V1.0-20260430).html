@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SmartLabOS 项目产线物料 MRP 系统设计 v0.1（讨论稿） — 20260430</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --c-bg:#f6f7fb; --c-panel:#ffffff; --c-border:#e3e6ee;
+    --c-ink:#1f2433; --c-ink-2:#4a5170; --c-muted:#7a8295;
+    --c-brand:#1f6feb; --c-brand-2:#0e4cb1;
+    --c-accent:#13a17a; --c-warn:#c9750e; --c-danger:#c2362c;
+    --c-soft:#eef3ff;
+    --radius:10px; --shadow:0 2px 8px rgba(40,55,90,.06);
+    --mono:'JetBrains Mono','Cascadia Code',Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--c-bg);color:var(--c-ink);
+    font-family:"Microsoft YaHei","PingFang SC","Segoe UI",Arial,sans-serif;
+    line-height:1.65;font-size:15px}
+  a{color:var(--c-brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  /* sidebar */
+  aside{position:sticky;top:0;height:100vh;overflow:auto;background:#11233f;color:#cfd9ec;padding:18px 14px}
+  aside h1{font-size:15px;color:#fff;margin:6px 6px 14px;letter-spacing:.5px}
+  aside .meta{font-size:12px;color:#8aa0c4;margin:0 6px 14px}
+  aside ol{list-style:none;margin:0;padding:0;counter-reset:s}
+  aside ol>li{counter-increment:s;margin:2px 0}
+  aside ol>li>a{display:block;padding:6px 10px;border-radius:6px;color:#cfd9ec;font-size:13.5px}
+  aside ol>li>a::before{content:counter(s) ". ";color:#6b88b5}
+  aside ol>li>a:hover{background:#1a2f55;color:#fff;text-decoration:none}
+  aside ol ol{counter-reset:t;padding-left:14px;margin:2px 0 6px}
+  aside ol ol>li{counter-increment:t}
+  aside ol ol>li>a{display:block;padding:3px 10px;border-radius:6px;color:#9eb3d4;font-size:12.5px}
+  aside ol ol>li>a::before{content:counter(s) "." counter(t) " ";color:#5b7aaa}
+  aside ol ol>li>a:hover{background:#1a2f55;color:#fff;text-decoration:none}
+  /* main */
+  main{padding:24px 36px 80px;max-width:1180px}
+  h1.title{font-size:26px;margin:0 0 4px;color:var(--c-ink)}
+  .subtitle{color:var(--c-muted);margin-bottom:18px}
+  h2{margin:36px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--c-border);font-size:22px}
+  h3{margin:24px 0 8px;font-size:17px;color:var(--c-ink-2)}
+  h4{margin:16px 0 6px;font-size:15px;color:var(--c-ink-2)}
+  p{margin:8px 0}
+  ul,ol{padding-left:22px}
+  li{margin:3px 0}
+  code{font-family:var(--mono);background:#f0f2f8;padding:1px 5px;border-radius:4px;font-size:13px;color:#324}
+  pre{background:#0f1b2d;color:#e6edf7;padding:14px 16px;border-radius:8px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.55}
+  pre .kw{color:#ff9b6b}
+  pre .str{color:#9bd28d}
+  pre .com{color:#7e96b4;font-style:italic}
+  table{width:100%;border-collapse:collapse;margin:10px 0;background:#fff;font-size:13.5px}
+  th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f3f6fc;font-weight:600;color:var(--c-ink-2)}
+  tr:nth-child(even) td{background:#fafbfe}
+  .panel{background:var(--c-panel);border:1px solid var(--c-border);border-radius:var(--radius);
+    padding:16px 18px;box-shadow:var(--shadow);margin:14px 0}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .kpi{background:#fff;border:1px solid var(--c-border);border-left:4px solid var(--c-brand);
+    border-radius:6px;padding:10px 12px}
+  .kpi b{display:block;font-size:20px;color:var(--c-brand-2)}
+  .kpi span{color:var(--c-muted);font-size:12px}
+  .badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;margin-right:4px;border:1px solid transparent}
+  .b-blue{background:#e7efff;color:#1247a8;border-color:#cfdcfa}
+  .b-green{background:#e6f7ee;color:#10744a;border-color:#bfe9ce}
+  .b-amber{background:#fff1d9;color:#8a5707;border-color:#f5d8a3}
+  .b-red{background:#fde6e3;color:#9b2c23;border-color:#f4c1ba}
+  .b-grey{background:#eef0f5;color:#3e4555;border-color:#dadfe9}
+  .callout{background:#f3f8ff;border-left:4px solid var(--c-brand);padding:10px 14px;border-radius:6px;margin:10px 0;color:#243a5e}
+  .callout.warn{background:#fff7ec;border-left-color:#d99020;color:#6c4408}
+  .callout.danger{background:#fdecea;border-left-color:var(--c-danger);color:#7a201a}
+  .mermaid{background:#fff;border:1px solid var(--c-border);border-radius:8px;padding:12px;overflow:auto}
+  /* SVG mockup wrapper */
+  figure{margin:14px 0;background:#fff;border:1px solid var(--c-border);border-radius:8px;padding:10px}
+  figcaption{color:var(--c-muted);font-size:12.5px;margin-top:6px;text-align:center}
+  /* tag chips for sidebar legend */
+  .legend{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+  .legend span{font-size:12px;padding:1px 7px;border-radius:8px;background:#1a2f55;color:#cfdaef}
+  hr.soft{border:none;border-top:1px dashed var(--c-border);margin:18px 0}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside>
+  <h1>SmartLabOS · MRP 设计</h1>
+  <div class="meta">v0.1 讨论稿 · 2026-04-30<br/>百泉聚兴（北京）科技</div>
+  <div class="legend">
+    <span>HTML/JS/CSS</span><span>.NET 8</span><span>MySQL 8.0</span>
+  </div>
+  <ol>
+    <li><a href="#sec-1">系统概述与目标</a></li>
+    <li><a href="#sec-2">业务对象与领域模型</a>
+      <ol>
+        <li><a href="#sec-2-1">五层结构</a></li>
+        <li><a href="#sec-2-2">核心实体术语表</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-3">业务流程设计</a>
+      <ol>
+        <li><a href="#sec-3-1">总体流程</a></li>
+        <li><a href="#sec-3-2">成品模组—领料/采购</a></li>
+        <li><a href="#sec-3-3">研发模组—URD→转产</a></li>
+        <li><a href="#sec-3-4">MRP 运算时序</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-4">数据库设计 (MySQL 8)</a>
+      <ol>
+        <li><a href="#sec-4-1">ER 图</a></li>
+        <li><a href="#sec-4-2">表结构清单</a></li>
+        <li><a href="#sec-4-3">关键 DDL 草案</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-5">后端架构 (.NET 8)</a>
+      <ol>
+        <li><a href="#sec-5-1">分层架构</a></li>
+        <li><a href="#sec-5-2">RESTful API</a></li>
+        <li><a href="#sec-5-3">MRP 计算引擎</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-6">前端架构</a>
+      <ol>
+        <li><a href="#sec-6-1">页面地图</a></li>
+        <li><a href="#sec-6-2">主要界面线框</a></li>
+        <li><a href="#sec-6-3">技术栈与组件</a></li>
+      </ol>
+    </li>
+    <li><a href="#sec-7">非功能性需求</a></li>
+    <li><a href="#sec-8">实施路线与里程碑</a></li>
+    <li><a href="#sec-9">待讨论清单</a></li>
+  </ol>
+</aside>
+
+<main>
+
+<h1 class="title">SmartLabOS 项目产线物料 MRP 系统</h1>
+<div class="subtitle">设计说明书（讨论稿 v0.1） · 文档日期：2026-04-30 · 编写：方案 Agent</div>
+
+<div class="grid-3">
+  <div class="kpi"><b>5 层</b><span>客户 → 产线 → 平台 → 模组 → BOM 物料</span></div>
+  <div class="kpi"><b>2 类模组</b><span>成品模组 / 研发模组（双轨齐套）</span></div>
+  <div class="kpi"><b>3 端</b><span>HTML+JS 前端 · .NET 8 API · MySQL 8</span></div>
+</div>
+
+<div class="callout">
+  <b>本文档定位：</b> 提供一套可作为研发起点的总体设计，围绕 <em>客户产线 BOM 齐套</em> 这条主线，覆盖业务流程、数据模型、后端 API、前端界面、关键算法。
+  待经过与负责人评审/修订后，进入开发阶段。<br/>
+  <b>引用基线：</b> 大连项目《03-项目集成和交付清单 V3.0》Excel 中的<em>阶段 / 平台 / 模块号 / 模块名称 / 数量 / 采购状态 / 库存 / 制造与组装节点</em>列。
+</div>
+
+<!-- ================== 1. 概述 ================== -->
+<h2 id="sec-1">1. 系统概述与目标</h2>
+
+<h3>1.1 业务背景</h3>
+<p>百泉聚兴交付给客户的智慧实验室是<strong>软硬件一体化</strong>的整体方案，以"产线"为最小交付单元，每条产线由 1～N 个平台（PLT-1200 / 1400 / 1800 等）拼装而成，每个平台搭载若干 SmartLabOS 模组（已规划 ~150 余种），模组又由若干层 BOM 物料组成。客户的项目落地节奏，强依赖于"<em>每个模组在装配日期前能否齐套到位</em>"。</p>
+
+<h3>1.2 目标</h3>
+<ul>
+  <li><strong>项目级齐套可视化</strong>：以"客户—产线—平台—模组—BOM 物料"五层结构展示并跟踪交付进度。</li>
+  <li><strong>自动化 MRP 运算</strong>：依据装配日期反推，计算各模组/物料的<em>毛需求 → 净需求 → 建议采购日</em>。</li>
+  <li><strong>双轨齐套策略</strong>：
+    <ul>
+      <li>成品模组：库存优先、不足部分按 BOM 反向爆炸下达采购；</li>
+      <li>研发模组：URD → 研发计划 → 验证收敛 → 升级为成品模组并入库。</li>
+    </ul>
+  </li>
+  <li><strong>数据可追溯</strong>：每一个 BOM 物料的状态、批次、领用记录、缺料预警，可追溯到具体客户产线。</li>
+</ul>
+
+<h3>1.3 范围（v1.0 MVP）</h3>
+<table>
+  <tr><th style="width:8em">维度</th><th>纳入</th><th>暂不纳入（后续版本）</th></tr>
+  <tr><td>项目结构</td><td>客户 / 产线 / 平台 / 模组 / BOM</td><td>多版本变更管理（仅保留单版本变更记录）</td></tr>
+  <tr><td>采购</td><td>采购单、到货检验、入库</td><td>供应商对账、应付/付款</td></tr>
+  <tr><td>库存</td><td>多仓库、批次、出入库</td><td>序列号级追踪、条码扫描枪硬件集成</td></tr>
+  <tr><td>研发</td><td>URD 文档、研发计划状态、转成品</td><td>设计图档版本系统对接（PDM/PLM）</td></tr>
+  <tr><td>MRP</td><td>BOM 反向爆炸、净需求、缺料/迟料告警</td><td>多工厂协同、跨项目共用调拨</td></tr>
+  <tr><td>权限</td><td>角色（项目经理/采购/仓管/研发/管理员）</td><td>SSO、按列字段级权限</td></tr>
+</table>
+
+<h3>1.4 技术栈选型</h3>
+<table>
+  <tr><th>层</th><th>选型</th><th>说明</th></tr>
+  <tr><td>前端</td><td>HTML5 + 原生 JavaScript (ES2022) + CSS3<br/>+ ECharts 5（图表）+ Mermaid（流程图渲染）</td><td>单页应用结构，模块化加载；不引入完整框架以保持轻量，可在后续按需替换为 Vue/React。</td></tr>
+  <tr><td>后端</td><td>.NET 8.0 + ASP.NET Core Web API + EF Core 8<br/>+ FluentValidation + Serilog</td><td>分层（API/Application/Domain/Infrastructure）；REST + JSON。</td></tr>
+  <tr><td>数据库</td><td>MySQL 8.0 (utf8mb4_0900_ai_ci) + Redis（缓存/锁，可选）</td><td>InnoDB；强一致写、读多用索引覆盖。</td></tr>
+  <tr><td>部署</td><td>Docker Compose（3 服务：api、mysql、web-static）</td><td>开发/测试一致；生产可平移到 K8s。</td></tr>
+</table>
+
+<!-- ================== 2. 领域模型 ================== -->
+<h2 id="sec-2">2. 业务对象与领域模型</h2>
+
+<h3 id="sec-2-1">2.1 五层结构</h3>
+
+<figure>
+<svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#1f6feb"/><stop offset="1" stop-color="#0e4cb1"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#13a17a"/><stop offset="1" stop-color="#0c7657"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#c9750e"/><stop offset="1" stop-color="#9a560a"/>
+    </linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6a85"/>
+    </marker>
+  </defs>
+  <!-- columns -->
+  <g font-family="Microsoft YaHei" font-size="13" fill="#fff">
+    <rect x="20" y="40" width="170" height="280" rx="10" fill="url(#g1)"/>
+    <text x="105" y="68" text-anchor="middle" font-size="15" font-weight="700">① Customer 客户</text>
+    <text x="105" y="92" text-anchor="middle" font-size="11.5">CustomerID</text>
+    <text x="105" y="110" text-anchor="middle" font-size="11.5">公司名称 / 联系人</text>
+    <text x="105" y="128" text-anchor="middle" font-size="11.5">合同/项目编号</text>
+    <text x="105" y="160" text-anchor="middle" font-size="11.5" fill="#cfdcff">示例</text>
+    <text x="105" y="180" text-anchor="middle" font-size="11.5" fill="#cfdcff">中科院大连物化所</text>
+    <text x="105" y="200" text-anchor="middle" font-size="11.5" fill="#cfdcff">ZKYDL_ZYMF_001</text>
+
+    <rect x="210" y="40" width="170" height="280" rx="10" fill="url(#g1)" opacity=".88"/>
+    <text x="295" y="68" text-anchor="middle" font-size="15" font-weight="700">② Production Line 产线</text>
+    <text x="295" y="92" text-anchor="middle" font-size="11.5">PRD_LINE_ID</text>
+    <text x="295" y="110" text-anchor="middle" font-size="11.5">名称 / 用途</text>
+    <text x="295" y="128" text-anchor="middle" font-size="11.5">装配开始/交付日期</text>
+    <text x="295" y="160" text-anchor="middle" font-size="11.5" fill="#cfdcff">示例</text>
+    <text x="295" y="180" text-anchor="middle" font-size="11.5" fill="#cfdcff">中药经典名方质量分析</text>
+    <text x="295" y="200" text-anchor="middle" font-size="11.5" fill="#cfdcff">PL-ZKYDL-ZYMF-01</text>
+
+    <rect x="400" y="40" width="170" height="280" rx="10" fill="url(#g2)"/>
+    <text x="485" y="68" text-anchor="middle" font-size="15" font-weight="700">③ Platform 平台</text>
+    <text x="485" y="92" text-anchor="middle" font-size="11.5">PLT-1200/1400/1800</text>
+    <text x="485" y="110" text-anchor="middle" font-size="11.5">大连项目 4 个平台</text>
+    <text x="485" y="160" text-anchor="middle" font-size="11.5" fill="#dff5ea">#1 全自动称量</text>
+    <text x="485" y="178" text-anchor="middle" font-size="11.5" fill="#dff5ea">#2 全自动提取</text>
+    <text x="485" y="196" text-anchor="middle" font-size="11.5" fill="#dff5ea">#3 全自动净化</text>
+    <text x="485" y="214" text-anchor="middle" font-size="11.5" fill="#dff5ea">#4 六轴机械臂</text>
+
+    <rect x="590" y="40" width="170" height="280" rx="10" fill="url(#g2)" opacity=".88"/>
+    <text x="675" y="68" text-anchor="middle" font-size="15" font-weight="700">④ Module 模组</text>
+    <text x="675" y="92" text-anchor="middle" font-size="11.5">~150 种</text>
+    <text x="675" y="110" text-anchor="middle" font-size="11.5">成品模组 | 研发模组</text>
+    <text x="675" y="160" text-anchor="middle" font-size="11.5" fill="#dff5ea">HHM02A-050 萃取</text>
+    <text x="675" y="178" text-anchor="middle" font-size="11.5" fill="#dff5ea">HHM06B-050 净化</text>
+    <text x="675" y="196" text-anchor="middle" font-size="11.5" fill="#dff5ea">HHM10B-025-UD ★</text>
+    <text x="675" y="214" text-anchor="middle" font-size="11.5" fill="#dff5ea">★ = 研发模组</text>
+
+    <rect x="780" y="40" width="170" height="280" rx="10" fill="url(#g3)"/>
+    <text x="865" y="68" text-anchor="middle" font-size="15" font-weight="700">⑤ BOM Item 物料</text>
+    <text x="865" y="92" text-anchor="middle" font-size="11.5">物料/零件层</text>
+    <text x="865" y="110" text-anchor="middle" font-size="11.5">采购周期 / 单价 / 供应商</text>
+    <text x="865" y="160" text-anchor="middle" font-size="11.5" fill="#fde6c4">机加件 / 标准件</text>
+    <text x="865" y="178" text-anchor="middle" font-size="11.5" fill="#fde6c4">电子元器件</text>
+    <text x="865" y="196" text-anchor="middle" font-size="11.5" fill="#fde6c4">耗材 / 包装</text>
+  </g>
+  <!-- arrows -->
+  <g stroke="#5b6a85" stroke-width="1.6" fill="none">
+    <line x1="190" y1="180" x2="210" y2="180" marker-end="url(#arr)"/>
+    <line x1="380" y1="180" x2="400" y2="180" marker-end="url(#arr)"/>
+    <line x1="570" y1="180" x2="590" y2="180" marker-end="url(#arr)"/>
+    <line x1="760" y1="180" x2="780" y2="180" marker-end="url(#arr)"/>
+  </g>
+  <text x="490" y="345" text-anchor="middle" font-size="12" fill="#5b6a85">1 ── n 关系；模组在不同产线间可被复用，BOM 行可被多个模组复用（共用件）</text>
+</svg>
+<figcaption>图 2-1 业务对象五层结构示意（左→右展开）</figcaption>
+</figure>
+
+<h3 id="sec-2-2">2.2 核心实体术语表</h3>
+<table>
+  <tr><th>实体</th><th>关键标识</th><th>说明</th></tr>
+  <tr><td>Customer 客户</td><td>CustomerID</td><td>外部签约客户。每客户可有多个项目（项目=合同）。</td></tr>
+  <tr><td>Project 项目</td><td>ProjectCode</td><td>合同/订单粒度，对应一个交付包，可含 1～N 条产线。</td></tr>
+  <tr><td>ProductionLine 产线</td><td>PRD_LINE_ID</td><td>最小交付单元，独立排产、独立装配。</td></tr>
+  <tr><td>Platform 平台</td><td>PlatformCode (PLT-1200/1400/1800/...)</td><td>固定型号的物理平板/机柜骨架。</td></tr>
+  <tr><td>Module 模组目录项</td><td>ModuleCode (HHMxxA-yyy)</td><td>SmartLabOS 模组目录的"产品定义"，类型 = <span class="badge b-blue">FINISHED 成品</span> / <span class="badge b-amber">RND 研发</span>。</td></tr>
+  <tr><td>LineModule 产线-模组实例</td><td>(PRD_LINE_ID, PlatformSlot, ModuleCode)</td><td>实际装在某产线某平台某槽位上的一台模组实物，关联具体批次。</td></tr>
+  <tr><td>BomItem BOM 物料</td><td>ItemCode</td><td>原子物料/零件，含采购周期、单价、默认供应商。</td></tr>
+  <tr><td>BomLine 模组-BOM 行</td><td>(ModuleCode, ItemCode)</td><td>"一个模组要用 N 件 X"，是 BOM 爆炸的边。</td></tr>
+  <tr><td>UrdDocument 研发需求</td><td>UrdNo</td><td>仅当模组类型 = RND 时填写；含目标参数、验收标准。</td></tr>
+  <tr><td>RndPlan 研发计划</td><td>PlanNo</td><td>研发部填写：里程碑、负责人、预计稳定交付日。</td></tr>
+  <tr><td>PurchaseOrder 采购单</td><td>PoNo</td><td>对单个供应商的一批采购，含若干 BOM 物料行。</td></tr>
+  <tr><td>InventoryLot 库存批次</td><td>LotNo</td><td>入库后形成的可领用单位，按批次先进先出。</td></tr>
+  <tr><td>MrpRun MRP 运算批次</td><td>RunId</td><td>每次重算 MRP 都是一次快照，可回看历史版本。</td></tr>
+</table>
+
+<!-- ================== 3. 业务流程 ================== -->
+<h2 id="sec-3">3. 业务流程设计</h2>
+
+<h3 id="sec-3-1">3.1 总体业务流程</h3>
+<div class="mermaid">
+flowchart LR
+  A([项目立项<br/>客户/合同]) --> B[创建 Project + 产线骨架]
+  B --> C[配置每条产线的<br/>平台 & 槽位]
+  C --> D[挂载模组目录项<br/>区分: 成品 / 研发]
+  D --> E{模组类型?}
+  E -- 成品 --> F[加载该模组 BOM]
+  E -- 研发 --> G[创建 URD 文档]
+  G --> H[研发部填写研发计划]
+  H --> I{研发完成<br/>验收通过?}
+  I -- 否 --> H
+  I -- 是 --> J[升级为成品模组<br/>新增成品编码 → 走 F]
+  F --> K[MRP 运算<br/>反推毛需求/净需求]
+  K --> L{有缺料?}
+  L -- 否 --> N([齐套就绪 ✅<br/>触发装配])
+  L -- 是 --> M[生成采购建议<br/>并下达采购单]
+  M --> O[供应商发货]
+  O --> P[到货检验入库]
+  P --> K
+  classDef ok fill:#e6f7ee,stroke:#13a17a,color:#0c7657
+  classDef rnd fill:#fff1d9,stroke:#c9750e,color:#8a5707
+  classDef act fill:#eef3ff,stroke:#1f6feb,color:#0e4cb1
+  class N ok
+  class G,H,I,J rnd
+  class B,C,D,F,K,M,O,P act
+</div>
+
+<h3 id="sec-3-2">3.2 成品模组：库存领用 / 采购到货 双路径</h3>
+<div class="mermaid">
+flowchart TD
+  S[模组净需求 = N 台<br/>来自 MRP] --> Q1{该成品模组<br/>有可用库存?}
+  Q1 -- 库存 ≥ N --> R1[直接领料出库<br/>分配批次 LotNo] --> Z1([模组实物到位 ✅])
+  Q1 -- 库存 < N --> R2[缺口数量 = N - 可用]
+  R2 --> R3[展开模组 BOM<br/>计算各零件毛需求]
+  R3 --> R4{零件库存能否覆盖?}
+  R4 -- 能 --> R5[领料 → 自制装配] --> R6[自制完工入库<br/>形成新成品库存] --> Z1
+  R4 -- 不能 --> R7[生成采购建议<br/>按供应商 LeadTime 反推下单日]
+  R7 --> R8[采购单 PO 下达]
+  R8 --> R9[供应商交货 → 入库检验]
+  R9 --> R5
+  classDef hot fill:#fde6e3,stroke:#c2362c,color:#7a201a
+  classDef warm fill:#fff1d9,stroke:#c9750e,color:#8a5707
+  classDef cool fill:#e6f7ee,stroke:#13a17a,color:#0c7657
+  class R7,R8 warm
+  class R9 hot
+  class Z1 cool
+</div>
+
+<h3 id="sec-3-3">3.3 研发模组：URD → 研发计划 → 转产</h3>
+<div class="mermaid">
+flowchart LR
+  U1[项目经理识别需求<br/>模组在目录中不存在] --> U2[创建 URD 文档<br/>UrdNo]
+  U2 --> U3[研发评审会议<br/>判定可行性]
+  U3 --> U4[研发部填写 RndPlan<br/>里程碑/负责人/预计交付]
+  U4 --> U5[设计-打样-验证]
+  U5 --> U6{首件验收<br/>合格?}
+  U6 -- 否 --> U5
+  U6 -- 是 --> U7[发布到模组目录<br/>分配 ModuleCode<br/>类型 RND→FINISHED]
+  U7 --> U8[补充该模组 BOM<br/>录入采购周期]
+  U8 --> U9[纳入项目排产<br/>走 3.2 成品模组流程]
+  classDef rnd fill:#fff1d9,stroke:#c9750e,color:#8a5707
+  classDef ok fill:#e6f7ee,stroke:#13a17a,color:#0c7657
+  class U2,U3,U4,U5,U6 rnd
+  class U7,U8,U9 ok
+</div>
+
+<h3 id="sec-3-4">3.4 MRP 运算时序</h3>
+<div class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as 项目经理(前端)
+  participant API as MRP API (.NET 8)
+  participant ENG as MRP 引擎
+  participant DB as MySQL
+  participant N as 通知中心
+  U->>API: POST /api/mrp/runs {projectId, snapshotDate}
+  API->>DB: SELECT 项目结构(产线/平台/模组)
+  API->>ENG: BuildDemand(structure, deliveryDate)
+  ENG->>DB: SELECT BOM(ModuleCode list)
+  ENG->>DB: SELECT 库存(可用量, 在途采购)
+  ENG->>ENG: 净需求 = 毛需求 - 库存 - 在途
+  ENG->>ENG: 反推下单日 = 装配日 - LeadTime - 安全余量
+  ENG->>DB: INSERT mrp_run + mrp_run_item (快照)
+  ENG-->>API: 缺料/迟料清单
+  API-->>U: 200 OK + 缺料看板数据
+  API->>N: 异步推送预警(企业微信/邮件)
+</div>
+
+<!-- ================== 4. 数据库 ================== -->
+<h2 id="sec-4">4. 数据库设计 (MySQL 8.0)</h2>
+
+<h3 id="sec-4-1">4.1 实体关系图</h3>
+<div class="mermaid">
+erDiagram
+  CUSTOMER ||--o{ PROJECT : owns
+  PROJECT ||--o{ PRODUCTION_LINE : has
+  PRODUCTION_LINE ||--o{ LINE_PLATFORM : composed_of
+  LINE_PLATFORM ||--o{ LINE_MODULE : carries
+  MODULE_CATALOG ||--o{ LINE_MODULE : referenced_by
+  MODULE_CATALOG ||--o{ MODULE_BOM : has
+  ITEM_CATALOG ||--o{ MODULE_BOM : used_in
+  MODULE_CATALOG ||--o| URD_DOC : may_have
+  URD_DOC ||--o{ RND_PLAN : drives
+  ITEM_CATALOG ||--o{ INVENTORY_LOT : stocked_as
+  PURCHASE_ORDER ||--o{ PO_LINE : contains
+  ITEM_CATALOG ||--o{ PO_LINE : ordered_as
+  SUPPLIER ||--o{ PURCHASE_ORDER : receives
+  PROJECT ||--o{ MRP_RUN : evaluated_by
+  MRP_RUN ||--o{ MRP_REQUIREMENT : produces
+
+  CUSTOMER {
+    string customer_id PK
+    string name
+    string contact
+    datetime created_at
+  }
+  PROJECT {
+    string project_code PK
+    string customer_id FK
+    string name
+    date contract_date
+    date target_delivery
+    string status
+  }
+  PRODUCTION_LINE {
+    string prd_line_id PK
+    string project_code FK
+    string name
+    date assemble_start
+    date deliver_date
+  }
+  LINE_PLATFORM {
+    string id PK
+    string prd_line_id FK
+    string platform_code
+    int slot_no
+    string remark
+  }
+  LINE_MODULE {
+    string id PK
+    string line_platform_id FK
+    string module_code FK
+    int qty
+    string status
+  }
+  MODULE_CATALOG {
+    string module_code PK
+    string name
+    string type
+    string category
+    string current_version
+    string lifecycle
+  }
+  MODULE_BOM {
+    string id PK
+    string module_code FK
+    string item_code FK
+    decimal qty_per
+    string optional
+  }
+  ITEM_CATALOG {
+    string item_code PK
+    string name
+    string spec
+    string default_supplier_id
+    int lead_time_days
+    decimal safety_stock
+    decimal unit_price
+  }
+  SUPPLIER {
+    string supplier_id PK
+    string name
+    string contact
+  }
+  INVENTORY_LOT {
+    string lot_no PK
+    string item_code FK
+    decimal qty_on_hand
+    decimal qty_reserved
+    string warehouse
+    date receive_date
+  }
+  PURCHASE_ORDER {
+    string po_no PK
+    string supplier_id FK
+    date order_date
+    date expected_date
+    string status
+  }
+  PO_LINE {
+    string id PK
+    string po_no FK
+    string item_code FK
+    decimal qty
+    decimal qty_received
+  }
+  URD_DOC {
+    string urd_no PK
+    string module_code FK
+    string author
+    date created_at
+    string status
+  }
+  RND_PLAN {
+    string plan_no PK
+    string urd_no FK
+    date plan_finish
+    date actual_finish
+    string status
+  }
+  MRP_RUN {
+    string run_id PK
+    string project_code FK
+    datetime run_at
+    string created_by
+  }
+  MRP_REQUIREMENT {
+    string id PK
+    string run_id FK
+    string item_code FK
+    decimal gross_qty
+    decimal net_qty
+    date suggested_order_date
+    string shortage_flag
+  }
+</div>
+
+<h3 id="sec-4-2">4.2 表结构清单（v1.0 共 16 张主表）</h3>
+<table>
+  <tr><th>分组</th><th>表名</th><th>用途</th></tr>
+  <tr><td rowspan="4">项目结构</td><td><code>customer</code></td><td>客户主数据</td></tr>
+  <tr><td><code>project</code></td><td>客户下的一个项目（合同/订单）</td></tr>
+  <tr><td><code>production_line</code></td><td>项目下的产线</td></tr>
+  <tr><td><code>line_platform</code> / <code>line_module</code></td><td>产线-平台-模组实例（项目级 BOM 顶层）</td></tr>
+  <tr><td rowspan="3">主数据</td><td><code>module_catalog</code></td><td>SmartLabOS 模组目录（~150+，类型=FINISHED/RND）</td></tr>
+  <tr><td><code>item_catalog</code></td><td>BOM 原子物料目录（含采购周期/安全库存/单价）</td></tr>
+  <tr><td><code>module_bom</code></td><td>模组↔物料的"用量边"</td></tr>
+  <tr><td rowspan="3">采购库存</td><td><code>supplier</code></td><td>供应商</td></tr>
+  <tr><td><code>purchase_order</code> / <code>po_line</code></td><td>采购单及行</td></tr>
+  <tr><td><code>inventory_lot</code> / <code>inventory_txn</code></td><td>批次库存、出入库流水</td></tr>
+  <tr><td rowspan="2">研发</td><td><code>urd_doc</code></td><td>研发需求说明书</td></tr>
+  <tr><td><code>rnd_plan</code></td><td>研发计划与里程碑</td></tr>
+  <tr><td rowspan="2">MRP</td><td><code>mrp_run</code></td><td>每次 MRP 运算的快照头</td></tr>
+  <tr><td><code>mrp_requirement</code></td><td>每个物料的毛/净需求、缺料标记</td></tr>
+  <tr><td>系统</td><td><code>sys_user</code> / <code>sys_role</code> / <code>audit_log</code></td><td>用户、角色、操作审计</td></tr>
+</table>
+
+<h3 id="sec-4-3">4.3 关键 DDL 草案（节选）</h3>
+<pre><span class="com">-- 字符集统一 utf8mb4_0900_ai_ci；所有主键采用业务编码或 ULID。</span>
+<span class="kw">CREATE TABLE</span> customer (
+  customer_id   <span class="kw">VARCHAR</span>(32)  <span class="kw">NOT NULL</span>,
+  name          <span class="kw">VARCHAR</span>(128) <span class="kw">NOT NULL</span>,
+  contact       <span class="kw">VARCHAR</span>(64),
+  remark        <span class="kw">VARCHAR</span>(512),
+  created_at    <span class="kw">DATETIME DEFAULT CURRENT_TIMESTAMP</span>,
+  <span class="kw">PRIMARY KEY</span> (customer_id)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="kw">CREATE TABLE</span> project (
+  project_code   <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  customer_id    <span class="kw">VARCHAR</span>(32) <span class="kw">NOT NULL</span>,
+  name           <span class="kw">VARCHAR</span>(128),
+  contract_date  <span class="kw">DATE</span>,
+  target_delivery <span class="kw">DATE</span>,
+  status         <span class="kw">VARCHAR</span>(16)  <span class="kw">DEFAULT</span> <span class="str">'INIT'</span>,
+  <span class="kw">PRIMARY KEY</span> (project_code),
+  <span class="kw">KEY</span> idx_project_customer (customer_id),
+  <span class="kw">CONSTRAINT</span> fk_project_customer <span class="kw">FOREIGN KEY</span>(customer_id) <span class="kw">REFERENCES</span> customer(customer_id)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="kw">CREATE TABLE</span> production_line (
+  prd_line_id    <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  project_code   <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  name           <span class="kw">VARCHAR</span>(128),
+  assemble_start <span class="kw">DATE</span>,
+  deliver_date   <span class="kw">DATE</span>,
+  <span class="kw">PRIMARY KEY</span> (prd_line_id),
+  <span class="kw">KEY</span> idx_pl_project (project_code)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="kw">CREATE TABLE</span> module_catalog (
+  module_code     <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  name            <span class="kw">VARCHAR</span>(128) <span class="kw">NOT NULL</span>,
+  category        <span class="kw">VARCHAR</span>(32),
+  type            <span class="kw">ENUM</span>(<span class="str">'FINISHED'</span>,<span class="str">'RND'</span>) <span class="kw">NOT NULL</span>,
+  current_version <span class="kw">VARCHAR</span>(16),
+  lifecycle       <span class="kw">VARCHAR</span>(16) <span class="kw">DEFAULT</span> <span class="str">'active'</span>,
+  spec_doc        <span class="kw">VARCHAR</span>(255),
+  <span class="kw">PRIMARY KEY</span> (module_code),
+  <span class="kw">KEY</span> idx_mod_type (type)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="kw">CREATE TABLE</span> item_catalog (
+  item_code           <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  name                <span class="kw">VARCHAR</span>(128) <span class="kw">NOT NULL</span>,
+  spec                <span class="kw">VARCHAR</span>(255),
+  default_supplier_id <span class="kw">VARCHAR</span>(32),
+  lead_time_days      <span class="kw">INT</span>      <span class="kw">DEFAULT</span> 30,
+  safety_stock        <span class="kw">DECIMAL</span>(14,3) <span class="kw">DEFAULT</span> 0,
+  unit_price          <span class="kw">DECIMAL</span>(14,2),
+  uom                 <span class="kw">VARCHAR</span>(16) <span class="kw">DEFAULT</span> <span class="str">'EA'</span>,
+  <span class="kw">PRIMARY KEY</span> (item_code)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="kw">CREATE TABLE</span> module_bom (
+  id          <span class="kw">BIGINT</span> <span class="kw">AUTO_INCREMENT</span>,
+  module_code <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  item_code   <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  qty_per     <span class="kw">DECIMAL</span>(14,3) <span class="kw">NOT NULL</span>,
+  optional    <span class="kw">TINYINT</span>(1) <span class="kw">DEFAULT</span> 0,
+  remark      <span class="kw">VARCHAR</span>(255),
+  <span class="kw">PRIMARY KEY</span> (id),
+  <span class="kw">UNIQUE KEY</span> uk_mod_item (module_code, item_code),
+  <span class="kw">KEY</span> idx_bom_item (item_code)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="kw">CREATE TABLE</span> mrp_run (
+  run_id       <span class="kw">CHAR</span>(26) <span class="kw">NOT NULL</span>,         <span class="com">-- ULID</span>
+  project_code <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  run_at       <span class="kw">DATETIME</span> <span class="kw">DEFAULT CURRENT_TIMESTAMP</span>,
+  created_by   <span class="kw">VARCHAR</span>(32),
+  remark       <span class="kw">VARCHAR</span>(255),
+  <span class="kw">PRIMARY KEY</span> (run_id),
+  <span class="kw">KEY</span> idx_run_project (project_code, run_at)
+) <span class="kw">ENGINE</span>=InnoDB;
+
+<span class="kw">CREATE TABLE</span> mrp_requirement (
+  id                   <span class="kw">BIGINT</span> <span class="kw">AUTO_INCREMENT</span>,
+  run_id               <span class="kw">CHAR</span>(26) <span class="kw">NOT NULL</span>,
+  item_code            <span class="kw">VARCHAR</span>(40) <span class="kw">NOT NULL</span>,
+  required_by_date     <span class="kw">DATE</span>,
+  gross_qty            <span class="kw">DECIMAL</span>(14,3),
+  on_hand_qty          <span class="kw">DECIMAL</span>(14,3),
+  on_order_qty         <span class="kw">DECIMAL</span>(14,3),
+  net_qty              <span class="kw">DECIMAL</span>(14,3),
+  suggested_order_date <span class="kw">DATE</span>,
+  shortage_flag        <span class="kw">TINYINT</span>(1) <span class="kw">DEFAULT</span> 0,
+  late_flag            <span class="kw">TINYINT</span>(1) <span class="kw">DEFAULT</span> 0,
+  <span class="kw">PRIMARY KEY</span> (id),
+  <span class="kw">KEY</span> idx_req_run (run_id, shortage_flag)
+) <span class="kw">ENGINE</span>=InnoDB;
+</pre>
+
+<div class="callout warn">
+  <b>建模权衡：</b> 当前先按"模组直接挂物料行"的<em>单层 BOM</em> 落地，可覆盖大连项目 Excel 的现有粒度。后续若出现"模组中包含子组件，子组件再含 BOM"的多层情况，可在 <code>module_bom</code> 中增加 <code>child_module_code</code> 字段并启用递归 CTE 展开，无需重写表结构。
+</div>
+
+<!-- ================== 5. 后端 ================== -->
+<h2 id="sec-5">5. 后端架构 (.NET 8)</h2>
+
+<h3 id="sec-5-1">5.1 分层架构</h3>
+<figure>
+<svg viewBox="0 0 920 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+  <defs>
+    <linearGradient id="lg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#eef3ff"/><stop offset="1" stop-color="#dde7fc"/>
+    </linearGradient>
+  </defs>
+  <g font-family="Microsoft YaHei" font-size="13" fill="#1f2433">
+    <rect x="20" y="20"  width="880" height="50" rx="8" fill="url(#lg)" stroke="#1f6feb"/>
+    <text x="460" y="50" text-anchor="middle" font-weight="700">Presentation · ASP.NET Core Web API（Controllers / Filters / OpenAPI / 鉴权）</text>
+
+    <rect x="20" y="80"  width="880" height="50" rx="8" fill="url(#lg)" stroke="#1f6feb"/>
+    <text x="460" y="110" text-anchor="middle" font-weight="700">Application · 用例编排 (Commands/Queries · MediatR · FluentValidation)</text>
+
+    <rect x="20" y="140" width="430" height="100" rx="8" fill="#fff" stroke="#13a17a"/>
+    <text x="235" y="170" text-anchor="middle" font-weight="700" fill="#0c7657">Domain · 业务核心</text>
+    <text x="235" y="192" text-anchor="middle">实体: Project / Line / Module / Bom / MrpRun</text>
+    <text x="235" y="212" text-anchor="middle">领域服务: BomExploder · MrpEngine</text>
+    <text x="235" y="232" text-anchor="middle">规则: 模组类型切换、库存预留</text>
+
+    <rect x="470" y="140" width="430" height="100" rx="8" fill="#fff" stroke="#c9750e"/>
+    <text x="685" y="170" text-anchor="middle" font-weight="700" fill="#8a5707">Infrastructure</text>
+    <text x="685" y="192" text-anchor="middle">EF Core 8 (MySql.EntityFrameworkCore)</text>
+    <text x="685" y="212" text-anchor="middle">Repository · UnitOfWork · Outbox</text>
+    <text x="685" y="232" text-anchor="middle">Serilog · Redis · 邮件/企业微信适配器</text>
+
+    <rect x="20" y="250" width="880" height="50" rx="8" fill="#fff" stroke="#5b6a85"/>
+    <text x="460" y="280" text-anchor="middle">外部: MySQL 8 · Redis · SMTP · WeCom Webhook · 文件存储 (本地/S3)</text>
+
+    <rect x="20" y="310" width="880" height="40" rx="8" fill="#0f1b2d"/>
+    <text x="460" y="335" text-anchor="middle" fill="#cfdaef">横切: AuthN/Z (JWT) · Audit · Caching · 异常处理 · 健康检查 · OpenTelemetry</text>
+  </g>
+</svg>
+<figcaption>图 5-1 后端分层（依赖方向：Presentation → Application → Domain ← Infrastructure）</figcaption>
+</figure>
+
+<h3 id="sec-5-2">5.2 RESTful API 概要</h3>
+<p>命名遵循资源化风格：复数名词、kebab-case；统一前缀 <code>/api</code>；版本 <code>/api/v1/...</code>；返回 <code>application/json</code>，错误体遵循 RFC 7807（problem+json）。</p>
+
+<table>
+  <tr><th>分组</th><th>方法 / 路径</th><th>说明</th></tr>
+  <tr><td rowspan="3">客户/项目</td><td><code>GET /api/v1/customers</code> · <code>POST /api/v1/customers</code></td><td>客户列表/新增</td></tr>
+  <tr><td><code>GET/PUT /api/v1/customers/{customerId}</code></td><td>客户详情/修改</td></tr>
+  <tr><td><code>GET/POST /api/v1/projects</code> · <code>GET /api/v1/projects/{code}</code></td><td>项目 CRUD</td></tr>
+  <tr><td rowspan="2">产线结构</td><td><code>GET /api/v1/projects/{code}/lines</code> · <code>POST .../lines</code></td><td>产线列表/新增</td></tr>
+  <tr><td><code>POST /api/v1/lines/{lineId}/platforms</code> · <code>POST .../modules</code></td><td>挂载平台/模组实例</td></tr>
+  <tr><td rowspan="3">主数据</td><td><code>GET/POST /api/v1/modules</code> · <code>GET .../{moduleCode}</code></td><td>模组目录</td></tr>
+  <tr><td><code>GET/POST /api/v1/modules/{moduleCode}/bom</code></td><td>模组 BOM 维护</td></tr>
+  <tr><td><code>GET/POST /api/v1/items</code> · <code>GET .../{itemCode}</code></td><td>物料目录（采购周期/安全库存）</td></tr>
+  <tr><td rowspan="2">采购库存</td><td><code>GET/POST /api/v1/purchase-orders</code> · <code>POST .../{poNo}/receive</code></td><td>采购单/到货收货</td></tr>
+  <tr><td><code>GET /api/v1/inventory/lots</code> · <code>POST /api/v1/inventory/issues</code></td><td>批次库存查询/领料出库</td></tr>
+  <tr><td rowspan="2">研发</td><td><code>POST /api/v1/urd-docs</code> · <code>PUT .../{urdNo}/status</code></td><td>URD 文档</td></tr>
+  <tr><td><code>POST /api/v1/rnd-plans</code> · <code>POST .../{planNo}/promote</code></td><td>研发计划，<code>promote</code> 将研发模组升级为成品</td></tr>
+  <tr><td rowspan="3">MRP</td><td><code>POST /api/v1/mrp/runs</code></td><td>触发一次 MRP 运算（按项目）</td></tr>
+  <tr><td><code>GET /api/v1/mrp/runs/{runId}</code></td><td>查看运算快照</td></tr>
+  <tr><td><code>GET /api/v1/mrp/runs/{runId}/shortages</code></td><td>缺料清单（看板数据源）</td></tr>
+  <tr><td>仪表盘</td><td><code>GET /api/v1/dashboard/projects/{code}</code></td><td>聚合：齐套率/缺料数/采购在途/研发未结</td></tr>
+  <tr><td>系统</td><td><code>POST /api/v1/auth/login</code> · <code>GET /api/v1/me</code></td><td>登录/当前用户</td></tr>
+</table>
+
+<h4>5.2.1 请求/响应示例</h4>
+<pre><span class="com">// POST /api/v1/mrp/runs</span>
+{
+  <span class="str">"projectCode"</span>: <span class="str">"PRJ-ZKYDL-ZYMF-001"</span>,
+  <span class="str">"snapshotDate"</span>: <span class="str">"2026-04-30"</span>,
+  <span class="str">"considerOnOrder"</span>: <span class="kw">true</span>,
+  <span class="str">"safetyBufferDays"</span>: 7
+}
+
+<span class="com">// 200 OK</span>
+{
+  <span class="str">"runId"</span>: <span class="str">"01HW9...K9"</span>,
+  <span class="str">"projectCode"</span>: <span class="str">"PRJ-ZKYDL-ZYMF-001"</span>,
+  <span class="str">"summary"</span>: { <span class="str">"totalItems"</span>: 312, <span class="str">"shortageItems"</span>: 14, <span class="str">"lateItems"</span>: 3 },
+  <span class="str">"shortages"</span>: [
+    {
+      <span class="str">"itemCode"</span>: <span class="str">"HHM-PT-50ML-CAR-A"</span>,
+      <span class="str">"name"</span>: <span class="str">"50ml 离心管载具"</span>,
+      <span class="str">"requiredByDate"</span>: <span class="str">"2026-05-12"</span>,
+      <span class="str">"netQty"</span>: 6,
+      <span class="str">"suggestedOrderDate"</span>: <span class="str">"2026-04-15"</span>,
+      <span class="str">"lateFlag"</span>: <span class="kw">true</span>
+    }
+  ]
+}
+</pre>
+
+<h3 id="sec-5-3">5.3 MRP 计算引擎（核心算法）</h3>
+<p>引擎入口：<code>IMrpEngine.RunAsync(MrpInput)</code>。计算分四步：</p>
+
+<ol>
+  <li><strong>展开顶层需求</strong>：按 <em>(产线 → 平台 → 模组实例)</em> 汇总每个 ModuleCode 的需求台数 <code>D_module[m]</code>。</li>
+  <li><strong>BOM 反向爆炸</strong>：对每个模组，递归（一阶 / 多阶）展开 <code>module_bom</code>，得到每个 <code>item_code</code> 的<strong>毛需求</strong> <code>G[i] = Σ qty_per × D_module[m]</code>。</li>
+  <li><strong>抵扣库存与在途</strong>：净需求 <code>N[i] = max(0, G[i] - 可用库存 - 在途采购) + 安全库存</code>。</li>
+  <li><strong>反推下单日</strong>：<code>order_date = required_by_date − lead_time_days − safety_buffer</code>；若 <code>order_date &lt; today</code>，置 <code>late_flag</code>。</li>
+</ol>
+
+<pre><span class="com">// C# 伪代码</span>
+<span class="kw">public class</span> MrpEngine : IMrpEngine
+{
+    <span class="kw">public async</span> Task&lt;MrpResult&gt; RunAsync(MrpInput inp, CancellationToken ct)
+    {
+        <span class="kw">var</span> moduleDemand = <span class="kw">await</span> _projectRepo.AggregateModuleDemandAsync(inp.ProjectCode);
+        <span class="kw">var</span> bomMap       = <span class="kw">await</span> _bomRepo.LoadBomAsync(moduleDemand.Keys);
+        <span class="kw">var</span> grossByItem  = BomExploder.Explode(moduleDemand, bomMap);
+
+        <span class="kw">var</span> stock     = <span class="kw">await</span> _invRepo.GetOnHandAsync(grossByItem.Keys);
+        <span class="kw">var</span> onOrder   = <span class="kw">await</span> _poRepo.GetOnOrderAsync(grossByItem.Keys);
+        <span class="kw">var</span> itemMaster = <span class="kw">await</span> _itemRepo.LoadAsync(grossByItem.Keys);
+
+        <span class="kw">var</span> reqs = <span class="kw">new</span> List&lt;MrpRequirement&gt;();
+        <span class="kw">foreach</span> (<span class="kw">var</span> (item, gross) <span class="kw">in</span> grossByItem)
+        {
+            <span class="kw">var</span> meta = itemMaster[item];
+            <span class="kw">var</span> need = Math.Max(0, gross - stock[item] - onOrder[item]) + meta.SafetyStock;
+            <span class="kw">var</span> orderDate = inp.RequiredByDate.AddDays(-(meta.LeadTimeDays + inp.SafetyBufferDays));
+            reqs.Add(<span class="kw">new</span> MrpRequirement {
+                ItemCode = item, GrossQty = gross, NetQty = need,
+                SuggestedOrderDate = orderDate,
+                ShortageFlag = need &gt; 0,
+                LateFlag = orderDate &lt; DateTime.Today
+            });
+        }
+        <span class="kw">await</span> _runRepo.SaveSnapshotAsync(inp, reqs, ct);
+        <span class="kw">return new</span> MrpResult(reqs);
+    }
+}
+</pre>
+
+<div class="callout">
+  <b>关键设计点：</b> MRP 运算<strong>始终生成快照</strong>而不直接修改业务数据；采购、领料的真实变更走独立用例（保持"建议 vs 决策"分离）。这让用户敢于频繁重算 MRP，且历史可追溯。
+</div>
+
+<!-- ================== 6. 前端 ================== -->
+<h2 id="sec-6">6. 前端架构</h2>
+
+<h3 id="sec-6-1">6.1 页面地图</h3>
+<div class="mermaid">
+flowchart LR
+  Login[登录页] --> Home[仪表盘<br/>项目齐套总览]
+  Home --> M1[客户/项目管理]
+  Home --> M2[产线结构编辑器]
+  Home --> M3[模组目录]
+  Home --> M4[BOM 维护]
+  Home --> M5[库存中心]
+  Home --> M6[采购管理]
+  Home --> M7[研发中心<br/>URD/计划]
+  Home --> M8[MRP 控制台]
+  Home --> M9[报表中心]
+  Home --> M10[系统设置]
+  M2 -. 跳转 .-> M3
+  M3 -. 跳转 .-> M4
+  M8 -. 缺料导出 .-> M6
+</div>
+
+<h3 id="sec-6-2">6.2 主要界面线框</h3>
+
+<h4>6.2.1 项目齐套仪表盘</h4>
+<figure>
+<svg viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+  <rect x="0" y="0" width="980" height="460" fill="#f6f7fb"/>
+  <!-- top bar -->
+  <rect x="0" y="0" width="980" height="44" fill="#11233f"/>
+  <text x="20" y="28" font-size="14" fill="#fff" font-family="Microsoft YaHei">SmartLabOS · MRP 控制中心</text>
+  <text x="800" y="28" font-size="12" fill="#cfdaef" font-family="Microsoft YaHei">项目: 中药经典名方 · ZKYDL_ZYMF_001 ▾</text>
+  <!-- side -->
+  <rect x="0" y="44" width="160" height="416" fill="#1a2f55"/>
+  <g font-family="Microsoft YaHei" font-size="12" fill="#cfdaef">
+    <text x="20" y="76">📊 仪表盘</text>
+    <text x="20" y="104">🏗️ 产线结构</text>
+    <text x="20" y="132">📦 模组目录</text>
+    <text x="20" y="160">🧩 BOM 维护</text>
+    <text x="20" y="188">🏷️ 库存中心</text>
+    <text x="20" y="216">🛒 采购管理</text>
+    <text x="20" y="244">🔬 研发中心</text>
+    <text x="20" y="272">⚙️ MRP 控制台</text>
+    <text x="20" y="300">📑 报表中心</text>
+  </g>
+  <!-- KPI -->
+  <g font-family="Microsoft YaHei">
+    <rect x="180" y="60" width="180" height="80" rx="8" fill="#fff" stroke="#e3e6ee"/>
+    <text x="200" y="84" font-size="12" fill="#7a8295">齐套率</text>
+    <text x="200" y="118" font-size="24" font-weight="700" fill="#13a17a">87.2%</text>
+
+    <rect x="370" y="60" width="180" height="80" rx="8" fill="#fff" stroke="#e3e6ee"/>
+    <text x="390" y="84" font-size="12" fill="#7a8295">缺料物料数</text>
+    <text x="390" y="118" font-size="24" font-weight="700" fill="#c2362c">14</text>
+
+    <rect x="560" y="60" width="180" height="80" rx="8" fill="#fff" stroke="#e3e6ee"/>
+    <text x="580" y="84" font-size="12" fill="#7a8295">在途采购</text>
+    <text x="580" y="118" font-size="24" font-weight="700" fill="#1f6feb">¥ 327k</text>
+
+    <rect x="750" y="60" width="210" height="80" rx="8" fill="#fff" stroke="#e3e6ee"/>
+    <text x="770" y="84" font-size="12" fill="#7a8295">研发未结模组</text>
+    <text x="770" y="118" font-size="24" font-weight="700" fill="#c9750e">2</text>
+  </g>
+  <!-- chart placeholder -->
+  <rect x="180" y="160" width="500" height="280" rx="8" fill="#fff" stroke="#e3e6ee"/>
+  <text x="200" y="184" font-size="13" font-weight="700" fill="#1f2433" font-family="Microsoft YaHei">每日缺料/到货 趋势 (近 30 天)</text>
+  <polyline fill="none" stroke="#1f6feb" stroke-width="2"
+    points="200,400 240,380 280,360 320,340 360,355 400,300 440,280 480,260 520,250 560,220 600,200 640,210 680,180"/>
+  <polyline fill="none" stroke="#c2362c" stroke-width="2" stroke-dasharray="4,3"
+    points="200,420 240,415 280,410 320,395 360,400 400,385 440,375 480,360 520,355 560,340 600,330 640,335 680,320"/>
+  <!-- side panel: shortage list -->
+  <rect x="700" y="160" width="260" height="280" rx="8" fill="#fff" stroke="#e3e6ee"/>
+  <text x="720" y="184" font-size="13" font-weight="700" fill="#1f2433" font-family="Microsoft YaHei">紧急缺料 Top 5</text>
+  <g font-family="Microsoft YaHei" font-size="11.5" fill="#1f2433">
+    <text x="720" y="216">⚠ HHM02A-050 萃取</text>
+    <text x="720" y="234" fill="#c2362c">下单日 -3d · 净需求 1</text>
+    <text x="720" y="262">⚠ 50ml 载具 (Car-A)</text>
+    <text x="720" y="280" fill="#c2362c">下单日 -1d · 净需求 6</text>
+    <text x="720" y="308">⚠ 5CC 套筒</text>
+    <text x="720" y="326" fill="#c9750e">下单日 +2d · 净需求 4</text>
+    <text x="720" y="354">⚠ APS 控制板</text>
+    <text x="720" y="372" fill="#c9750e">下单日 +5d · 净需求 1</text>
+    <text x="720" y="400">⚠ 2ml 进样瓶</text>
+    <text x="720" y="418" fill="#c9750e">下单日 +7d · 净需求 200</text>
+  </g>
+</svg>
+<figcaption>图 6-1 项目齐套仪表盘（线框示意）</figcaption>
+</figure>
+
+<h4>6.2.2 产线结构编辑器（树形 + BOM 展开）</h4>
+<figure>
+<svg viewBox="0 0 980 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+  <rect x="0" y="0" width="980" height="360" fill="#f6f7fb"/>
+  <!-- left tree -->
+  <rect x="20" y="20" width="320" height="320" rx="8" fill="#fff" stroke="#e3e6ee"/>
+  <g font-family="Microsoft YaHei" font-size="12.5" fill="#1f2433">
+    <text x="40" y="48" font-weight="700">📁 PRJ-ZKYDL-ZYMF-001</text>
+    <text x="56" y="72">└ 🏭 PL-ZKYDL-ZYMF-01</text>
+    <text x="76" y="96">├ #1 全自动称量工站 (PLT-1400)</text>
+    <text x="96" y="118">│  ├ 🟢 HHM03E-050 50ml 离心管注液</text>
+    <text x="96" y="138">│  ├ 🟢 HHM39A-001 扫描枪</text>
+    <text x="96" y="158">│  └ 🟡 HHM10B-025-UD 高精度注液 ★</text>
+    <text x="76" y="182">├ #2 全自动提取工站 (PLT-1400)</text>
+    <text x="96" y="204">│  ├ 🔴 HHM02A-050 萃取模块</text>
+    <text x="96" y="224">│  └ 🟢 HHM06B-050 净化模块</text>
+    <text x="76" y="248">├ #3 全自动净化工站 (PLT-1400)</text>
+    <text x="76" y="272">└ #4 六轴机械臂 + 2ml 中转</text>
+    <text x="40" y="312" fill="#7a8295" font-size="11">🟢 齐套 · 🟡 研发中 · 🔴 缺料</text>
+  </g>
+  <!-- right detail -->
+  <rect x="360" y="20" width="600" height="320" rx="8" fill="#fff" stroke="#e3e6ee"/>
+  <g font-family="Microsoft YaHei" font-size="13" fill="#1f2433">
+    <text x="380" y="48" font-weight="700">🔴 HHM02A-050 萃取模块 · 数量 1</text>
+    <text x="380" y="68" font-size="12" fill="#7a8295">类型: 成品模组 · 类目: 提取 · 兼容平台: PLT-1200/1400/1800</text>
+  </g>
+  <line x1="380" y1="80" x2="940" y2="80" stroke="#e3e6ee"/>
+  <g font-family="Microsoft YaHei" font-size="12" fill="#1f2433">
+    <text x="380" y="104" font-weight="700">BOM 展开 (一阶)</text>
+    <rect x="380" y="116" width="560" height="200" fill="#fafbfe" stroke="#e3e6ee"/>
+    <text x="392" y="138" font-weight="700" fill="#4a5170">物料编码</text>
+    <text x="540" y="138" font-weight="700" fill="#4a5170">名称</text>
+    <text x="700" y="138" font-weight="700" fill="#4a5170">用量</text>
+    <text x="760" y="138" font-weight="700" fill="#4a5170">库存</text>
+    <text x="820" y="138" font-weight="700" fill="#4a5170">在途</text>
+    <text x="880" y="138" font-weight="700" fill="#4a5170">状态</text>
+
+    <text x="392" y="164">EX-PUMP-50</text><text x="540" y="164">50ml 萃取泵头</text>
+    <text x="700" y="164">1</text><text x="760" y="164">0</text><text x="820" y="164">1</text>
+    <text x="880" y="164" fill="#c9750e">在途</text>
+
+    <text x="392" y="186">EX-FRAME-A</text><text x="540" y="186">铝型材框架</text>
+    <text x="700" y="186">1</text><text x="760" y="186">2</text><text x="820" y="186">0</text>
+    <text x="880" y="186" fill="#13a17a">齐套</text>
+
+    <text x="392" y="208">EX-CTRL-V2</text><text x="540" y="208">控制板 V2</text>
+    <text x="700" y="208">1</text><text x="760" y="208">0</text><text x="820" y="208">0</text>
+    <text x="880" y="208" fill="#c2362c">缺料</text>
+
+    <text x="392" y="230">EX-VALVE-3</text><text x="540" y="230">三通电磁阀</text>
+    <text x="700" y="230">3</text><text x="760" y="230">5</text><text x="820" y="230">0</text>
+    <text x="880" y="230" fill="#13a17a">齐套</text>
+
+    <text x="392" y="252">EX-TUBE-PT</text><text x="540" y="252">PTFE 管件 (m)</text>
+    <text x="700" y="252">1.5</text><text x="760" y="252">10</text><text x="820" y="252">0</text>
+    <text x="880" y="252" fill="#13a17a">齐套</text>
+  </g>
+  <g font-family="Microsoft YaHei" font-size="12" fill="#fff">
+    <rect x="380" y="320" width="100" height="24" rx="4" fill="#1f6feb"/>
+    <text x="430" y="337" text-anchor="middle">▶ 触发 MRP</text>
+    <rect x="490" y="320" width="100" height="24" rx="4" fill="#13a17a"/>
+    <text x="540" y="337" text-anchor="middle">📤 生成采购</text>
+    <rect x="600" y="320" width="100" height="24" rx="4" fill="#5b6a85"/>
+    <text x="650" y="337" text-anchor="middle">✏ 编辑 BOM</text>
+  </g>
+</svg>
+<figcaption>图 6-2 产线结构 + BOM 展开（左树 / 右详情）</figcaption>
+</figure>
+
+<h4>6.2.3 MRP 控制台（运算 → 缺料看板）</h4>
+<figure>
+<svg viewBox="0 0 980 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+  <rect x="0" y="0" width="980" height="320" fill="#f6f7fb"/>
+  <rect x="20" y="20" width="940" height="60" rx="8" fill="#fff" stroke="#e3e6ee"/>
+  <g font-family="Microsoft YaHei" font-size="12" fill="#1f2433">
+    <text x="40" y="44" font-weight="700">MRP 运算参数</text>
+    <text x="40" y="66">项目: ZKYDL_ZYMF_001 ▾   交付日: 2026-06-30   安全余量: 7d   ☑ 含在途</text>
+  </g>
+  <rect x="800" y="34" width="140" height="32" rx="6" fill="#1f6feb"/>
+  <text x="870" y="55" text-anchor="middle" fill="#fff" font-family="Microsoft YaHei" font-size="13">▶ 立即运算</text>
+
+  <rect x="20" y="100" width="940" height="200" rx="8" fill="#fff" stroke="#e3e6ee"/>
+  <g font-family="Microsoft YaHei" font-size="12" fill="#1f2433">
+    <text x="40" y="124" font-weight="700">缺料看板 (Run-01HW9...K9 · 14 项)</text>
+    <text x="40" y="148" fill="#7a8295">物料</text>
+    <text x="280" y="148" fill="#7a8295">所需日期</text>
+    <text x="400" y="148" fill="#7a8295">净需求</text>
+    <text x="490" y="148" fill="#7a8295">建议下单日</text>
+    <text x="610" y="148" fill="#7a8295">迟料</text>
+    <text x="680" y="148" fill="#7a8295">影响产线</text>
+    <text x="860" y="148" fill="#7a8295">操作</text>
+
+    <line x1="40" y1="156" x2="940" y2="156" stroke="#e3e6ee"/>
+    <text x="40" y="178">EX-CTRL-V2 · 控制板 V2</text>
+    <text x="280" y="178">2026-05-12</text>
+    <text x="400" y="178">1</text>
+    <text x="490" y="178" fill="#c2362c">2026-04-15 (-15d)</text>
+    <text x="610" y="178" fill="#c2362c">是</text>
+    <text x="680" y="178">PL-ZKYDL-ZYMF-01 / #2</text>
+    <text x="860" y="178" fill="#1f6feb">→ 生成 PO</text>
+
+    <text x="40" y="206">PT-50ML-CAR-A · 50ml 载具</text>
+    <text x="280" y="206">2026-05-12</text>
+    <text x="400" y="206">6</text>
+    <text x="490" y="206" fill="#c2362c">2026-04-29 (-1d)</text>
+    <text x="610" y="206" fill="#c2362c">是</text>
+    <text x="680" y="206">PL-ZKYDL-ZYMF-01 / #1, #2</text>
+    <text x="860" y="206" fill="#1f6feb">→ 生成 PO</text>
+
+    <text x="40" y="234">VIAL-2ML · 2ml 进样瓶</text>
+    <text x="280" y="234">2026-06-10</text>
+    <text x="400" y="234">200</text>
+    <text x="490" y="234" fill="#c9750e">2026-05-07 (+7d)</text>
+    <text x="610" y="234">否</text>
+    <text x="680" y="234">PL-ZKYDL-ZYMF-01 / #4</text>
+    <text x="860" y="234" fill="#1f6feb">→ 生成 PO</text>
+
+    <text x="40" y="262">APS-BOARD · APS 控制板</text>
+    <text x="280" y="262">2026-06-15</text>
+    <text x="400" y="262">1</text>
+    <text x="490" y="262" fill="#c9750e">2026-05-05 (+5d)</text>
+    <text x="610" y="262">否</text>
+    <text x="680" y="262">PL-ZKYDL-ZYMF-01 / 公共</text>
+    <text x="860" y="262" fill="#1f6feb">→ 生成 PO</text>
+  </g>
+</svg>
+<figcaption>图 6-3 MRP 控制台 — 缺料看板</figcaption>
+</figure>
+
+<h3 id="sec-6-3">6.3 技术栈与组件</h3>
+<table>
+  <tr><th>能力</th><th>选型</th><th>备注</th></tr>
+  <tr><td>页面骨架</td><td>原生 HTML + 模块化 ES Module</td><td>每个业务模块对应 1 个页面 + 1 个 .js 文件</td></tr>
+  <tr><td>样式</td><td>CSS 变量 + BEM 命名</td><td>无 UI 框架；保留更换为 Element Plus / AntD 的可能性</td></tr>
+  <tr><td>状态管理</td><td>轻量 Store（基于 <code>EventTarget</code> + Proxy）</td><td>主要状态：当前项目、当前产线、登录用户</td></tr>
+  <tr><td>路由</td><td>Hash 路由（<code>#/projects/{code}/dashboard</code>）</td><td>避免后端转发；静态站点即可托管</td></tr>
+  <tr><td>请求</td><td><code>fetch()</code> 封装 + 全局错误拦截 + Token 注入</td><td>统一处理 401/RFC7807</td></tr>
+  <tr><td>表格</td><td>自研轻量表格组件（虚拟滚动可后置）</td><td>BOM 表潜在行数 ~10k</td></tr>
+  <tr><td>图表</td><td>ECharts 5</td><td>仪表盘趋势/瀑布图</td></tr>
+  <tr><td>流程图</td><td>Mermaid</td><td>用于产线物理拓扑可选展示</td></tr>
+  <tr><td>构建</td><td>无构建（直接静态文件）<br/>可选 Vite</td><td>v1 不引入；v2 视复杂度切 Vite</td></tr>
+</table>
+
+<!-- ================== 7. 非功能性 ================== -->
+<h2 id="sec-7">7. 非功能性需求</h2>
+
+<table>
+  <tr><th>方面</th><th>目标</th><th>实现要点</th></tr>
+  <tr><td>性能</td><td>项目 BOM 展开 (≤2000 行) p95 &lt; 800ms；MRP 全量运算 (5 万行) p95 &lt; 5s</td><td>SQL 索引覆盖；EF Core <code>AsNoTracking</code>；批量查询；Redis 缓存物料目录</td></tr>
+  <tr><td>并发</td><td>采购到货/领料并发安全</td><td>批次行级锁 + 乐观锁 (RowVersion)；幂等 Key</td></tr>
+  <tr><td>可观测</td><td>所有 API 含 traceId；MRP 引擎产出 Run 维度指标</td><td>Serilog + OpenTelemetry → OTLP</td></tr>
+  <tr><td>安全</td><td>JWT + 角色 RBAC；敏感字段（单价、供应商联系人）按角色脱敏</td><td>Action Filter 统一鉴权；DTO 投影分级</td></tr>
+  <tr><td>审计</td><td>关键写操作（PO 下达、领料、URD 升级）入审计表</td><td><code>audit_log</code>: 用户/动作/对象/前后值</td></tr>
+  <tr><td>本地化</td><td>中文界面；时间统一 Asia/Shanghai</td><td>日期/数量统一格式化层</td></tr>
+  <tr><td>备份</td><td>每日全量 + binlog 增量</td><td>MySQL <code>mysqldump</code> + cron；保留 30 天</td></tr>
+</table>
+
+<!-- ================== 8. 路线图 ================== -->
+<h2 id="sec-8">8. 实施路线与里程碑</h2>
+
+<div class="mermaid">
+gantt
+  title MRP 系统研发里程碑（基线方案）
+  dateFormat  YYYY-MM-DD
+  axisFormat  %m-%d
+  section M0 评审
+  设计评审定稿            :done,    m0, 2026-04-30, 5d
+  section M1 数据底座
+  数据库 DDL & 主数据导入  :         m1a, after m0, 7d
+  Excel 历史数据迁移脚本   :         m1b, after m1a, 5d
+  section M2 后端骨架
+  ASP.NET Core 项目模板    :         m2a, after m0, 5d
+  客户/项目/产线 CRUD API  :         m2b, after m2a, 7d
+  模组目录 + BOM API       :         m2c, after m2b, 7d
+  采购/库存 API            :         m2d, after m2c, 10d
+  MRP 引擎 v1              :         m2e, after m2d, 10d
+  section M3 前端
+  布局/路由/登录           :         m3a, after m2a, 5d
+  产线结构编辑器           :         m3b, after m2c, 10d
+  仪表盘 + MRP 控制台      :         m3c, after m2e, 10d
+  采购/库存/研发页面       :         m3d, after m3b, 10d
+  section M4 联调上线
+  联调 + UAT               :         m4a, after m3c, 10d
+  生产部署 + 培训          :         m4b, after m4a, 5d
+</div>
+
+<h2 id="sec-9">9. 待讨论清单（与负责人确认后定稿）</h2>
+<ol>
+  <li><strong>多层 BOM</strong>：是否在 v1 就支持模组→子组件→零件的多阶 BOM？还是先按一阶展开 + 子组件用"虚拟模组"过渡？</li>
+  <li><strong>项目实例 vs 主数据</strong>：当某条产线里"临时改了一颗物料的用量"，是否允许覆盖主数据？建议按<em>项目级 BOM 覆盖（override 表）</em>处理。</li>
+  <li><strong>研发模组的 BOM 提前介入</strong>：URD 阶段是否允许预留 BOM？我们目前假设是研发完成后再录入 BOM。</li>
+  <li><strong>采购批量策略</strong>：是否要支持<em>最小起订量</em>（MOQ）和<em>包装规格</em>（按 100 件起订）？这会影响 MRP 净需求向上取整。</li>
+  <li><strong>跨项目共用件调拨</strong>：库存可能被多个项目预占，是否在 v1 就支持<em>项目预留 vs 总库存</em>分层（推荐支持）？</li>
+  <li><strong>权限模型</strong>：项目经理只能看到自己负责的客户/项目，还是全公司可见？</li>
+  <li><strong>与现有 Excel 流程并行期</strong>：是否需要导入/导出 Excel 同步给采购线下流转？建议支持《03-项目集成和交付清单》模板的双向导入导出。</li>
+  <li><strong>价格字段</strong>：物料单价是否纳入系统？根据 SOUL.md 规则，价格信息由销售团队统一处理；MRP 默认<em>不显示金额</em>，仅在管理员视图开启。</li>
+  <li><strong>研发→成品的编码策略</strong>：研发模组试制时使用 <code>HHMxxx-UD</code> 后缀（如 HHM10B-025-UD），转产时是否自动派生成新编码并保留映射？</li>
+  <li><strong>通知渠道</strong>：缺料/迟料告警是否只走站内信，还是默认对接企业微信群机器人？</li>
+</ol>
+
+<hr class="soft"/>
+<p style="color:var(--c-muted);font-size:12.5px">
+本设计文档将持续迭代。下一步建议在标注 <em>"待讨论"</em> 的 10 个问题上与项目负责人逐项确认，定稿后切入 M1 阶段。
+</p>
+
+</main>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose',
+    themeVariables: { fontFamily: 'Microsoft YaHei, PingFang SC, Segoe UI, Arial' }});
+</script>
+</body>
+</html>

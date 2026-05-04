@@ -1,5 +1,6 @@
 ---
 id: MOD-SPE-12
+Module_Part_No: PRD-MOD-202604001
 name: 12 通道 SPE 净化模块
 category: SPE
 version: 1.2
