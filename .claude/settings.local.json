@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Get-Process EXCEL -ErrorAction SilentlyContinue | Select-Object Id, StartTime, MainWindowTitle | Format-Table\")",
+      "Bash(powershell -Command \"Get-Process EXCEL -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Milliseconds 500; Get-Process EXCEL -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command \"Get-Process EXCEL -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(powershell -Command \"Get-Process EXCEL -ErrorAction SilentlyContinue | Format-Table\")",
+      "Bash(powershell -Command \"Get-Process EXCEL -ErrorAction SilentlyContinue | Format-Table Id, MainWindowTitle\")",
+      "Bash(powershell -Command \"Get-Process EXCEL -ErrorAction SilentlyContinue\")",
+      "Bash(echo \"exit=$?\")",
+      "Bash(powershell -Command 'Get-Process EXCEL -ErrorAction Stop 2>$null; Write-Host done')",
+      "Bash(D:/ProgramData/anaconda3/python.exe -c ' *)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\TestClaude\\\\SmartLabOS-AI-Assistant\\\\卡片生成\\\\build\\\\probe_compile.ps1\")"
+    ]
+  }
+}

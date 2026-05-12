@@ -1,0 +1,19 @@
+1. 根据目录：
+“C:\TestClaude\SmartLabOS-AI-Assistant\设计资料\01-SmartLabOS-Card-Templates(知识卡片体系)\templates”  之下的：
+01-module-card-template-模块卡片.md，02-platform-card-template-平台卡片.md， 03-solution-card-template-方案卡片.md
+三种卡片模版，生成一个”卡片输入录入程序.xlsx“ ，输入三种卡片的信息；
+SHEET：01-卡片输入-模块
+SHEET：02-卡片输入-平台
+SHEET：03-卡片输入-方案
+在这三个SHEET中分别生成“模块，平台，方案”三种卡片的卡片内容输入界面，包括三类卡片的如下信息：
+卡片文件名称：自动生成保存的MD文件的文件名("MOD-"模块，"PLT-"平台，"SOL-"方案，这个是文件开头字母) ；
+卡片内信息字段名称： 固定显示/预先设置；
+卡片内信息字段内容： 要求用户输入的内容（如果是可选项，显示下拉菜单供用户选择填入)；
+卡片内信息输入时注意事项:  固定显示/预先设置；
+每一页准备三个VBA的按钮： "清除当前输入项" ,  "清除所有输入项",   "输出卡片内容到MD文档"
+2. 生成的MD卡片内容文件保存目录：“C:\TestClaude\SmartLabOS-AI-Assistant\设计资料\01-SmartLabOS-Card-Templates(知识卡片体系)\examples”
+模块卡片名称： "MOD-XXXXXX-XXXXX.md"
+平台卡片名称： "PLT-XXXXXX-XXXXX.md"
+方案卡片名称： "SOL-XXXXXX-XXXXX.md"
+3. 请在：“C:\TestClaude\SmartLabOS-AI-Assistant\设计资料\01-SmartLabOS-Card-Templates(知识卡片体系)\templates\卡片输入录入程序.xlsx”
+文件中完成上述卡片输入内容的布局设计，VBA按钮的设计
