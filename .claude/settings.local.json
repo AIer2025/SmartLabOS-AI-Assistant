@@ -10,7 +10,15 @@
       "Bash(echo \"exit=$?\")",
       "Bash(powershell -Command 'Get-Process EXCEL -ErrorAction Stop 2>$null; Write-Host done')",
       "Bash(D:/ProgramData/anaconda3/python.exe -c ' *)",
-      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\TestClaude\\\\SmartLabOS-AI-Assistant\\\\卡片生成\\\\build\\\\probe_compile.ps1\")"
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\TestClaude\\\\SmartLabOS-AI-Assistant\\\\卡片生成\\\\build\\\\probe_compile.ps1\")",
+      "Bash(pip list *)",
+      "Bash(pip3 list *)",
+      "Bash(olevba \"card.xlsm\" --decode)",
+      "Bash(cp \"卡片输入录入程序\\(最新程序-20260509\\)-模版 - 模块.xlsm\" \"卡片输入录入程序\\(最新程序-20260509\\)-模版 - 模块.xlsm.bak_20260518\")",
+      "Read(//c/c/TestClaude/SmartLabOS-AI-Assistant/卡片生成/**)",
+      "PowerShell(& 'C:\\\\Users\\\\littl\\\\AppData\\\\Local\\\\Temp\\\\patch_vba.ps1')",
+      "PowerShell(& 'C:\\\\Users\\\\littl\\\\AppData\\\\Local\\\\Temp\\\\verify_vba.ps1')",
+      "PowerShell(& 'C:\\\\Users\\\\littl\\\\AppData\\\\Local\\\\Temp\\\\smoke_export.ps1')"
     ]
   }
 }

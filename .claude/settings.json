@@ -56,5 +56,8 @@
       "c:\\TestClaude\\SmartLabOS-AI-Assistant\\卡片生成",
       "c:\\TestClaude\\食检院-海康威视监控录像提案"
     ]
+  },
+  "enabledPlugins": {
+    "claude-code-setup@claude-plugins-official": true
   }
 }
