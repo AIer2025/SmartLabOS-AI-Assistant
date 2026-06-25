@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 180
   consumables: "锥形瓶-150ml / 容量瓶-50ml"
   sub_functions: []
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: "(1)1g  30S / (2)5g  90S / (3)10g  120"
   consumables: 锥形瓶-250ml
   sub_functions: [225 加盐]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

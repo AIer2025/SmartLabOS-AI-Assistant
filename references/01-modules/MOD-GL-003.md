@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 180
   consumables: 定制过滤杯-30ml
   sub_functions: [81-前后气缸伸出, 82-前后气缸缩回]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

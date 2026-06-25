@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 97
   consumables: "尖底离心管-50ml / 盐管"
   sub_functions: [220-拆盖，221-装盖，222-拆盖加液装盖涡旋，223-拆盖加盐装盖涡旋，224-加液，225-加盐，227-装盖涡旋]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

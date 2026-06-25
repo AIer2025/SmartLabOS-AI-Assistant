@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 295
   consumables: 2ml 离心管
   sub_functions: [165-拆盖, 166-装盖]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

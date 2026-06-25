@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>低温冷冻析出模块 · URS 用户需求规格 · SmartLabOS</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#dfe6ef;
+    --bg:#f4f7fb; --card:#ffffff;
+    --brand:#0c5c8f; --brand2:#0a9396; --accent:#ee9b00; --danger:#c1121f; --ok:#1f9d6b;
+    --cold:#2563b5; --chip:#eef4fa; --radius:14px; --shadow:0 6px 22px rgba(15,27,45,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#06243c 0%,#123e72 55%,#2563b5 130%);
+    color:#fff;padding:46px 0 40px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:340px;height:340px;
+    background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#bcd9ff;
+    border:1px solid rgba(188,217,255,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:26px;font-weight:700;letter-spacing:.5px}
+  header.hero .sub{font-size:15px;color:#d6e6f2;margin-bottom:22px;max-width:760px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:8px;padding:6px 13px;font-size:13px}
+  section{padding:34px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--cold);color:#fff;width:30px;height:30px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 18px;font-size:14.5px}
+  h3{font-size:16px;margin:20px 0 10px;color:var(--ink)}
+  h4{font-size:14.5px;margin:14px 0 6px;color:var(--brand2)}
+  p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#eaf1fb;color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  td code,.mod{font-family:Consolas,monospace;background:#eef4fa;color:var(--brand);
+    padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}
+  .note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#eaf2fb;border-color:var(--cold)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}
+  @media(max-width:880px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .kpi .k .v{font-size:23px;font-weight:700;color:var(--cold)}
+  .kpi .k .l{font-size:12.5px;color:var(--muted)}
+  .slotgrid text{font-family:"Microsoft YaHei",sans-serif}
+  footer{background:#06243c;color:#9db8cf;padding:26px 0;font-size:13px}
+  .crumbs{font-size:12.5px;color:var(--muted);margin:18px 0 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">上海海关项目 · 新建模组 URS · 配套检验标准 6 / 8</span>
+    <h1>低温冷冻析出模块（−18 ℃ 冷冻静置）<br>用户需求规格说明书 URS</h1>
+    <div class="sub">为满足 <b>GB 31658.28—2025</b> §8.1 中「加萃取盐包涡旋后 <b>−18 ℃ 冷冻 30 min</b>」的低温析出 / 脂质冻析步骤而新建。
+    现有 97 个模组中浓缩 / 离心控温最低仅 1~4 ℃，<b>无 −18 ℃ 冷冻 / 低温静置模组</b>，故依 SmartLabOS「URS 规则」额外立项。</div>
+    <div class="hmeta">
+      <span>❄ 控温 −18 ℃ ± 2 ℃</span>
+      <span>⏱ 冷冻静置 30 min（GB 规定）</span>
+      <span>🧪 50 ml 离心管</span>
+      <span>📐 单平台 1 模块位（暂定）</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- 1 用途 -->
+<section id="purpose">
+  <h2><span class="num">1</span>用途与立项依据</h2>
+  <p class="lead">说明本模组在 GB 31658.28—2025 乙酰孕激素类残留前处理产线中的位置与必要性。</p>
+  <div class="card">
+    <h4>工艺位置</h4>
+    <p>位于「加乙腈涡旋 → 加萃取盐包（4 g Na₂SO₄ + 1 g NaCl）涡旋 1~2 min」<b>之后</b>、「4 ℃ 9000 r/min 离心 5 min」<b>之前</b>。
+    国标原文：<i>"……加萃取盐包涡旋 1~2 min，<b>−18 ℃ 冷冻 30 min</b>，4 ℃、9000 r/min 离心 5 min。"</i></p>
+    <h4>用途</h4>
+    <p>对加盐盐析后的乙腈—水两相体系进行 <b>−18 ℃ 低温冷冻静置</b>，促使盐析分层充分、共萃脂质 / 蜡质冷冻析出（冻析除脂），降低后续上清的基质杂质负荷，提高乙酰孕激素回收率与色谱信噪比，并为下一步冷冻离心创造稳定的低温分层条件。</p>
+  </div>
+  <div class="note warn"><b>为何须新建（既有模组缺口）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li>离心 / 浓缩控温模组（<code>MOD-LX-005</code> 1~10 ℃、<code>MOD-NS-008</code> 25~55 ℃）<u>最低仅到 1~4 ℃</u>，达不到 −18 ℃。</li>
+    <li>金属浴 / 恒温模组（<code>MOD-PY-002</code>、<code>MOD-FY-002</code>）为<b>加热</b>方向，无深冷能力。</li>
+    <li>97 个模组目录中<b>无任何冷冻 / 低温静置功能码</b>，无近似替代，故按「URS 规则」额外立项。</li>
+  </ul></div>
+</section>
+
+<!-- 2 URS 功能需求 -->
+<section id="urs">
+  <h2><span class="num">2</span>URS 功能需求</h2>
+  <p class="lead">面向自动化集成的用户需求条目（User Requirement Specification）。</p>
+  <table>
+    <tr><th>编号</th><th>需求项</th><th>需求描述</th><th>类别</th></tr>
+    <tr><td>URS-01</td><td>低温冷冻</td><td>提供 <b>−18 ℃ ± 2 ℃</b> 制冷腔体，对 50 ml 离心管内乙腈—水盐析体系冷冻静置</td><td>必须</td></tr>
+    <tr><td>URS-02</td><td>定时静置</td><td>冷冻保持时间可设定，本工艺取 GB 规定 <b>30 min</b>；到时声光提示并允许机械臂取料</td><td>必须</td></tr>
+    <tr><td>URS-03</td><td>容器适配</td><td>适配 <b>50 ml 离心管</b>，多孔位并行（建议 ≥4 孔，便于与 <code>MOD-LX-005</code> 四孔位离心衔接）</td><td>必须</td></tr>
+    <tr><td>URS-04</td><td>自动上下料</td><td>支持机械臂自动放入 / 取出，上下料统一计 <b>60 s</b>，与产线节拍口径一致</td><td>必须</td></tr>
+    <tr><td>URS-05</td><td>温度监控</td><td>实时温度采集与超温报警；冷凝 / 结霜自动除霜，避免管壁结冰夹持失败</td><td>必须</td></tr>
+    <tr><td>URS-06</td><td>通讯接口</td><td>MODBUS TCP，纳入 SmartLabOS 平台统一调度（与既有模组一致）</td><td>必须</td></tr>
+    <tr><td>URS-07</td><td>安全</td><td>低温防护（防冻伤、门联锁、断电保冷）；制冷剂 / 压缩机符合安规</td><td>必须</td></tr>
+    <tr><td>URS-08</td><td>平台兼容</td><td>外形对齐标准模块（450×180/250×600 量级），占用 <b>1 个标准模块位</b>（暂定，详设核算）</td><td>期望</td></tr>
+  </table>
+</section>
+
+<!-- 3 关键参数 -->
+<section id="param">
+  <h2><span class="num">3</span>关键参数</h2>
+  <div class="kpi">
+    <div class="k"><div class="v">−18 ℃</div><div class="l">控制温度（±2 ℃）</div></div>
+    <div class="k"><div class="v">30 min</div><div class="l">冷冻静置时长（GB）</div></div>
+    <div class="k"><div class="v">1860 s</div><div class="l">单步平台耗时（1800+60）</div></div>
+    <div class="k"><div class="v">1 位</div><div class="l">模块位占用（暂定）</div></div>
+  </div>
+  <table>
+    <tr><th>参数</th><th>取值</th><th>来源 / 说明</th></tr>
+    <tr><td>控制温度</td><td>−18 ℃ ± 2 ℃</td><td>GB 31658.28—2025 §8.1「−18 ℃ 冷冻」</td></tr>
+    <tr><td>冷冻保持时间</td><td>30 min（1800 s）</td><td>GB 规定时长，按「URS 规则」直接取用</td></tr>
+    <tr><td>上下料时间</td><td>60 s</td><td>SmartLabOS 统一上下料口径（共享简报第 2 节）</td></tr>
+    <tr><td><b>计入平台单步耗时</b></td><td><b>1800 + 60 = 1860 s</b></td><td>= GB 时长 + 上下料，已计入 WS-02 平台节拍</td></tr>
+    <tr><td>适配容器</td><td>50 ml 离心管</td><td>与盐析（<code>MOD-YJ-004</code>）/ 离心（<code>MOD-LX-005</code>）一致</td></tr>
+    <tr><td>孔位</td><td>建议 ≥ 4 孔并行</td><td>对齐四孔位冷冻离心，平衡通量</td></tr>
+    <tr><td>通讯</td><td>MODBUS TCP</td><td>与既有模组一致，纳入统一调度</td></tr>
+  </table>
+  <div class="note info"><b>节拍计入说明</b>本模组单步平台耗时按「<b>GB 规定 30 min（1800 s） + 上下料 60 s = 1860 s</b>」计入所在工作站 WS-VETDRUG-SaltCentrifuge-SHHG-02 的平台总节拍（详见主方案 <code>6.html</code> 第 ⑦ 节）。</div>
+</section>
+
+<!-- 4 示意 -->
+<section id="diagram" style="border-bottom:none">
+  <h2><span class="num">4</span>结构与流程示意</h2>
+  <p class="lead">左：模组在产线中的逻辑位置（Mermaid）；右：腔体俯视示意（SVG）。</p>
+
+  <div class="mermaid">
+flowchart LR
+  A[加乙腈 10mL 涡旋]:::ext --> B[加萃取盐包<br/>涡旋 1~2min]:::salt --> C[【本模组】<br/>−18℃ 冷冻 30min]:::cold --> D[4℃ 9000rpm<br/>离心 5min]:::lx --> E[取上层 4mL]:::ext
+  classDef ext fill:#e3eef7,stroke:#0c5c8f,color:#0c5c8f;
+  classDef salt fill:#fff0e6,stroke:#c9760f,color:#9a5a08;
+  classDef cold fill:#dcebfb,stroke:#2563b5,color:#123e72;
+  classDef lx fill:#e9f7f9,stroke:#1496a6,color:#0c6470;
+  </div>
+
+  <div class="card">
+    <h4>制冷腔体俯视示意（4 孔位 · 50 ml 离心管）</h4>
+    <svg viewBox="0 0 360 200" class="slotgrid" width="100%">
+      <rect x="2" y="2" width="356" height="196" rx="10" fill="#f3f8ff" stroke="#2563b5"/>
+      <text x="180" y="20" text-anchor="middle" font-size="12" fill="#123e72" font-weight="700">低温冷冻析出模块 · −18 ℃ 制冷腔</text>
+      <rect x="26" y="40" width="308" height="92" rx="10" fill="#dcebfb" stroke="#2563b5"/>
+      <text x="180" y="58" text-anchor="middle" font-size="10.5" fill="#123e72">制冷腔体（压缩机 / 半导体制冷 + 强制风循环）</text>
+      <circle cx="78" cy="96" r="20" fill="#fff" stroke="#2563b5"/><text x="78" y="100" text-anchor="middle" font-size="9" fill="#123e72">50ml</text>
+      <circle cx="138" cy="96" r="20" fill="#fff" stroke="#2563b5"/><text x="138" y="100" text-anchor="middle" font-size="9" fill="#123e72">50ml</text>
+      <circle cx="222" cy="96" r="20" fill="#fff" stroke="#2563b5"/><text x="222" y="100" text-anchor="middle" font-size="9" fill="#123e72">50ml</text>
+      <circle cx="282" cy="96" r="20" fill="#fff" stroke="#2563b5"/><text x="282" y="100" text-anchor="middle" font-size="9" fill="#123e72">50ml</text>
+      <rect x="26" y="150" width="150" height="34" rx="7" fill="#eaf1fb" stroke="#516074"/>
+      <text x="101" y="171" text-anchor="middle" font-size="9.5" fill="#2b3543">温控 / 除霜 / 报警单元</text>
+      <rect x="184" y="150" width="150" height="34" rx="7" fill="#eaf1fb" stroke="#516074"/>
+      <text x="259" y="171" text-anchor="middle" font-size="9.5" fill="#2b3543">机械臂上下料口（联锁门）</text>
+    </svg>
+  </div>
+  <div class="note ok"><b>数据来源声明</b>本 URS 关键参数（温度 −18 ℃、时长 30 min）引自 GB 31658.28—2025 §8.1；上下料 60 s、模块位口径引自 SmartLabOS 共享技术简报与 <code>references/01-modules</code> 通用约定，<b>未做杜撰</b>。本文件为<b>新建模组用户需求</b>，待详细设计后并入模组库。</div>
+  <p class="crumbs">输出文件：projects/上海海关项目/低温冷冻析出-模块-URS.html　|　配套主方案：6.html　|　标准：GB 31658.28—2025 §8.1</p>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    上海海关项目 · 检验标准 6 / 8 配套新建模组 URS · 低温冷冻析出（−18 ℃ / 30 min）<br>
+    <span style="color:#6b8aa6">本 URS 依据 GB 31658.28—2025 §8.1 整理；现有 97 个模组无 −18 ℃ 冷冻能力，按 SmartLabOS URS 规则额外立项，参数以国标原文及现场确认为准。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#dcebfb',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#2563b5',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

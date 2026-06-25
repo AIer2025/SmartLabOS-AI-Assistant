@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 1800
   consumables: 50ml西林瓶/125mlpp瓶/50ml尖底瓶/100ml/200ml尖底瓶
   sub_functions: [201-复溶, 202-浓缩排空, 203-预热, 204-退出预热, 205-浓缩+复溶]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

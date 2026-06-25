@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 0
   consumables: 25ml容量瓶，50ml容量瓶，100ml容量瓶，200ml容量瓶，125ml PP广口瓶
   sub_functions: [NA]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

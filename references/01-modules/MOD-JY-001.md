@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 30S
   consumables: 面包瓶-150ml
   sub_functions: [175 拆盖, 176装盖, 178加液]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

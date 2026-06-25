@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 220
   consumables: 离心管-50ml
   sub_functions: []
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

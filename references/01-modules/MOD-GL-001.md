@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 210
   consumables: "注射针筒-2.5cc / 针式过滤器-25mm / 移液枪-1ml / 西林瓶接样瓶-2ml"
   sub_functions: [NA]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

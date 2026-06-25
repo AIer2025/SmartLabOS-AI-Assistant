@@ -1,0 +1,17 @@
+# .NET build output
+bin/
+obj/
+*.user
+.vs/
+
+# publish
+publish/
+*.pubxml.user
+
+# logs
+logs/
+*.log
+
+# python
+__pycache__/
+*.pyc

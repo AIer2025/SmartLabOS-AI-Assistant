@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 252
   consumables: 250ml锥形瓶、磁力子
   sub_functions: [搅拌]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

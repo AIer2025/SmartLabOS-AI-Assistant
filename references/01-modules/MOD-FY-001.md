@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 180
   consumables: 15ml比色管,25ml比色管,30mlPP瓶,50ml离心管,250ml锥型瓶,500ml培养瓶
   sub_functions: [670-接样1(50ml离心管)移液, 671-接样2(比色管)移液, 672-接样3(比色管)移液, 673-接样4(锥形瓶)移液, 674-管路清洗, 675-500ml肖特瓶拆盖, 676-500ml肖特瓶装盖, 677-1#接样瓶装盖, 678-1接样瓶装盖, 680-2接样瓶拆盖, 681-2接样瓶装盖, 683-3接样瓶拆盖, 684-3接样瓶装盖, 686-4接样瓶拆盖, 687-4接样瓶装盖, 689-移液前准备]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

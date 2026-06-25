@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 44
   consumables: "试剂瓶-500ml / "
   sub_functions: [651-清洗]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

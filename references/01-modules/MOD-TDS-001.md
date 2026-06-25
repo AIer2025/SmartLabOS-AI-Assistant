@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 270
   consumables: "塑料瓶-30ml / 塑料瓶-125ml"
   sub_functions: [60 测TDS ，61 TDS校准]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

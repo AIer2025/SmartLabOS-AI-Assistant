@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 36S
   consumables: 容量瓶-50ml,100ml,200ml,250ml
   sub_functions: [706-定容高压纯水, 707-定容中压纯水, 708-定容低压纯水, 705-拆盖/加液/平摇/装盖]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 3600
   consumables: 离心管-5ml
   sub_functions: [646-开盖停止平摇, 648启动预热, 649加热关闭]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

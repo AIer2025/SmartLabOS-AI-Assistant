@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 420
   consumables: 离心管-2ml
   sub_functions: [185-离心机定位, 186-离心机预冷, 187-离心机取盖, 188-离心机启动, 189-离心机除水, 190-离心机停止]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

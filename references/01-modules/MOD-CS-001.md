@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: NA
   consumables: 西林瓶-10ml
   sub_functions: [726 1#超声启动 727 2#超声启动 728 排废水]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

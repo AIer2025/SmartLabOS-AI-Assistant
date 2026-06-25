@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 1200
   consumables: "固相萃取柱-30ml / 钳口瓶-35ml / 钳口瓶-10ml / "
   sub_functions: [122-活化, 123-SPE底座到过柱位, 124-extra 30cc spe全流程, 125-过滤&接液]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

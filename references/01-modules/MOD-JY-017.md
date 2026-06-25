@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 70
   consumables: PP瓶-125ml
   sub_functions: [91-拆盖, 92-加液, 93-装盖]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

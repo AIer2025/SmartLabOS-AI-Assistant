@@ -1,0 +1,39 @@
+namespace SmartLabOS.DataMaintenance.Api.Presales;
+
+/// <summary>
+/// 售前功能涉及的服务器端路径与外部命令配置。
+/// 取自 appsettings.json 的 "Presales" 节，部署时只需改配置、无需重新编译。
+/// </summary>
+public sealed class PresalesPaths
+{
+    /// <summary>项目根（包含 references/、potocol/、projects/）。</summary>
+    public string ProjectRoot { get; }
+    /// <summary>提案输出根目录 projects/。</summary>
+    public string ProjectsDir { get; }
+    /// <summary>流程标准 MD 目录 potocol/MD。</summary>
+    public string ProtocolDir { get; }
+    /// <summary>提案 HTML 输出模版文件。</summary>
+    public string TemplateFile { get; }
+    /// <summary>Claude Code 可执行命令（PATH 中可解析的命令或绝对路径）。</summary>
+    public string ClaudeExecutable { get; }
+    /// <summary>单次生成的超时分钟数。</summary>
+    public int GenerationTimeoutMinutes { get; }
+
+    public PresalesPaths(IConfiguration config)
+    {
+        var s = config.GetSection("Presales");
+        ProjectRoot = Norm(s["ProjectRoot"]) ?? @"C:\TestClaude\SmartLabOS-AI-Assistant";
+        ProjectsDir = Norm(s["ProjectsDir"]) ?? Path.Combine(ProjectRoot, "projects");
+        ProtocolDir = Norm(s["ProtocolDir"]) ?? Path.Combine(ProjectRoot, "potocol", "MD");
+        TemplateFile = Norm(s["TemplateFile"])
+            ?? Path.Combine(ProjectsDir, "上海海关项目", "SmartLabOS-技术提案输出模版.html");
+        ClaudeExecutable = string.IsNullOrWhiteSpace(s["ClaudeExecutable"]) ? "claude" : s["ClaudeExecutable"]!.Trim();
+        GenerationTimeoutMinutes = int.TryParse(s["GenerationTimeoutMinutes"], out var m) && m > 0 ? m : 60;
+    }
+
+    private static string? Norm(string? path) =>
+        string.IsNullOrWhiteSpace(path) ? null : path.Trim();
+
+    /// <summary>校验并返回某项目的输出目录（projects/&lt;name&gt;）。</summary>
+    public string ProjectDir(string projectName) => Path.Combine(ProjectsDir, projectName);
+}

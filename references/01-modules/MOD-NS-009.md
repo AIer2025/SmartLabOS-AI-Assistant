@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: NA
   consumables: 西林瓶-35ml
   sub_functions: [200 浓缩]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 270
   consumables: "西林瓶-10ml / 西林瓶-2ml / 离心管-15ml"
   sub_functions: []
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

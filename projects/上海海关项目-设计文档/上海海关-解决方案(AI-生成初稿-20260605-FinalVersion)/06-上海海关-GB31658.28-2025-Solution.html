@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案六 · GB 31658.28—2025 乙酰孕激素类残留 · SmartLabOS 前处理方案</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#d4e7ee;
+    --bg:#f1f9fb; --card:#ffffff;
+    --brand:#0e7490; --brand2:#0891b2; --accent:#ee6c4d; --danger:#c1121f; --cold:#2563eb;
+    --chip:#e0f2f7; --radius:14px; --shadow:0 6px 22px rgba(10,40,55,.08);
+  }
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#052f3d 0%,#0e7490 55%,#0891b2 130%);color:#fff;padding:46px 0 40px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:340px;height:340px;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#a5e8f5;border:1px solid rgba(165,232,245,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:.5px}
+  header.hero .sub{font-size:16px;color:#cdecf3;margin-bottom:22px;max-width:800px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 13px;font-size:13px}
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.03)}
+  nav.toc ul{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0 auto;max-width:1180px;padding:8px 22px}
+  nav.toc a{text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 12px;border-radius:8px}
+  nav.toc a:hover{background:var(--chip);color:var(--brand)}
+  section{padding:38px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 22px;font-size:14.5px}
+  h3{font-size:17px;margin:26px 0 12px}p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin:16px 0}
+  .proc{background:#052f3d;color:#cce9f1;border-radius:var(--radius);padding:20px 24px;font-size:14px;border-left:5px solid var(--accent);margin:14px 0}
+  .proc b{color:#ffd166}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}
+  @media(max-width:880px){.g2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#e0f2f7;color:var(--ink);font-weight:600;font-size:13px}tr:last-child td{border-bottom:none}
+  td code,.mod{font-family:Consolas,monospace;background:#e0f2f7;color:var(--brand);padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600}
+  .t-enz{background:#fde0d3;color:#c2410c}.t-ext{background:#d9eef7;color:#0e7490}.t-cold{background:#dbeafe;color:#1d4ed8}.t-spe{background:#d8f3f0;color:#0a7a72}.t-filt{background:#fef3d6;color:#a9760a}
+  .plat{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+  .pcard{flex:1;min-width:220px;border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .pcard.sel{border:2px solid var(--brand);box-shadow:0 6px 18px rgba(14,116,144,.16)}
+  .pcard h4{margin:0 0 6px;font-size:15px}.pcard .big{font-size:13px;color:var(--muted)}
+  .pcard .pick{font-size:12px;color:var(--brand2);font-weight:700;margin-top:8px}.pcard .no{font-size:12px;color:var(--muted);margin-top:8px}
+  .ws{border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);overflow:hidden;margin:18px 0}
+  .ws-head{padding:14px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .ws-head h4{margin:0;font-size:16px}.ws-head .pid{font-size:12px;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px}
+  .ws-body{padding:6px 20px 16px}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}.note.warn{background:#fff6e5;border-color:var(--accent)}.note.info{background:#e0f2f7;border-color:var(--brand)}.note.cold{background:#eaf2fe;border-color:var(--cold)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin:16px 0;overflow-x:auto}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}
+  @media(max-width:880px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .kpi .k .v{font-size:25px;font-weight:700;color:var(--brand)}.kpi .k .l{font-size:12.5px;color:var(--muted)}
+  footer{background:#052f3d;color:#9fc9d6;padding:28px 0;font-size:13px}
+  .crumbs{font-size:12.5px;color:var(--muted);margin:18px 0 0}.crumbs a{color:var(--brand);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">上海海关项目 · 检验标准 6 / 8</span>
+    <h1>动物性食品及尿液中乙酰孕激素类药物残留量测定<br>SmartLabOS 自动化前处理解决方案</h1>
+    <div class="sub">依据 <b>GB 31658.28—2025</b> 第 8.1 酶解与提取 &amp; 8.2 净化流程
+    （55 ℃ 酶解—乙腈 + 萃取盐包盐析—冷冻—增强型除脂固相萃取柱净化—基质匹配外标法），自模组库选型组建工作站串联为产线。</div>
+    <div class="hmeta">
+      <span>📋 标准：GB 31658.28—2025</span>
+      <span>🧪 基质：组织·蛋·奶·奶粉·尿液</span>
+      <span>💊 6 种乙酰孕激素</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><ul>
+  <li><a href="#std">① 标准解读</a></li>
+  <li><a href="#flow">② 工艺流程</a></li>
+  <li><a href="#platform">③ 平台选型</a></li>
+  <li><a href="#modules">④ 模组选型</a></li>
+  <li><a href="#ws">⑤ 工作站</a></li>
+  <li><a href="#solution">⑥ 解决方案串联</a></li>
+  <li><a href="#kpi">⑦ 通量与合规</a></li>
+  <li><a href="#utility">⑧ 公用工程</a></li>
+</ul></nav>
+
+<div class="wrap">
+
+<section id="std">
+  <h2><span class="num">1</span>标准与检测原理</h2>
+  <p class="lead">GB 31658.28—2025《食品安全国家标准 动物性食品及尿液中乙酰孕激素类药物残留量的测定 液相色谱-串联质谱法》</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:6px">检测原理</h3>
+      <p>试样经 <b>β-葡萄糖醛苷酶/芳基硫酸酯酶水解</b>后，残留的乙酰孕激素用<b>乙腈提取</b>（萃取盐包盐析 + 低温冷冻沉淀脂质），
+      经<b>增强型除脂固相萃取柱</b>净化，LC-MS/MS 测定，<b>基质匹配外标法</b>定量。</p>
+      <ul class="clean">
+        <li>醋酸氟孕酮、醋酸甲地孕酮、醋酸美仑孕酮等 共 <b>6 种</b></li>
+        <li>萃取盐包：4 g Na₂SO₄ + 1 g NaCl（QuEChERS 式盐析）</li>
+        <li>基质广：组织 / 蛋 / 奶 / 奶粉 / 尿液</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:6px">前处理关键参数（按基质取样）</h3>
+      <table style="box-shadow:none;margin:0">
+        <tr><th>环节</th><th>关键条件</th></tr>
+        <tr><td>取样</td><td>组织/蛋 5 g + 缓冲液 3 mL；奶 5 g / 奶粉 1 g / 尿 5 mL + 缓冲液 0.5 mL</td></tr>
+        <tr><td>酶解</td><td>酶 100 µL，<b>55 ℃ 避光振荡 2 h</b></td></tr>
+        <tr><td>提取盐析</td><td>乙腈 10 mL 涡旋；萃取盐包涡旋 1~2 min；<b>−18 ℃ 冷冻 30 min</b></td></tr>
+        <tr><td>离心 / 取样</td><td><b>4 ℃ · 9000 r/min · 5 min</b>；取上层 4 mL + 水 1 mL 涡旋</td></tr>
+        <tr><td>SPE 净化</td><td>过增强型除脂柱，收集全部流出液（pass-through）</td></tr>
+        <tr><td>浓缩 / 复溶 / 过滤</td><td>40 ℃ 氮吹近干；60% 乙腈水 1.0 mL 溶解；0.2 µm 过滤</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="flow">
+  <h2><span class="num">2</span>前处理工艺流程拆解</h2>
+  <div class="proc">
+    <b>8.1 酶解与提取</b> —— 取样 + 乙酸铵缓冲液 → 加酶 100 µL <b>混匀</b> → <b>55 ℃ 避光振荡 2 h</b> → 室温涡旋 1 min →
+    + 乙腈 10 mL 涡旋 → + 萃取盐包 <b>涡旋 1~2 min</b> → <b>−18 ℃ 冷冻 30 min</b> → <b>4 ℃ 9000 r/min 离心 5 min</b> →
+    取上层 4 mL + 水 1 mL 涡旋 → 备用。
+  </div>
+  <div class="proc" style="border-left-color:var(--brand2)">
+    <b>8.2 净化</b> —— 备用液<b>过增强型除脂 SPE 柱</b>，收集全部流出液 → <b>40 ℃ 氮吹近干</b> →
+    60% 乙腈水 1.0 mL <b>涡旋溶解</b> → <b>0.2 µm 过滤</b>（浑浊时先 10000 r/min 离心 5 min 再过滤）。
+  </div>
+  <div class="mermaid">
+flowchart LR
+  A([5g 试料+缓冲液+酶]):::s --> B[55℃避光振荡2h]:::enz
+  B --> C[涡旋·加乙腈]:::ext
+  C --> D[加萃取盐包涡旋]:::ext
+  D --> E[−18℃冷冻30min]:::cold
+  E --> F[4℃ 9000rpm离心]:::cold
+  F --> G[取上层4mL+水]:::ext
+  G --> H[增强型除脂SPE<br/>收集全部流出液]:::spe
+  H --> I[40℃氮吹近干<br/>60%乙腈水复溶]:::spe
+  I --> J[0.2µm过滤]:::filt
+  J --> K([LC-MS/MS<br/>基质匹配外标法]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  classDef enz fill:#fde0d3,stroke:#c2410c,color:#c2410c;
+  classDef ext fill:#d9eef7,stroke:#0e7490,color:#0e7490;
+  classDef cold fill:#dbeafe,stroke:#1d4ed8,color:#1d4ed8;
+  classDef spe fill:#d8f3f0,stroke:#0a7a72,color:#0a7a72;
+  classDef filt fill:#fef3d6,stroke:#a9760a,color:#a9760a;
+  </div>
+</section>
+
+<section id="platform">
+  <h2><span class="num">3</span>平台选型</h2>
+  <p class="lead">含 55 ℃ 酶解（恒温瓶颈）+ 盐析冷冻 + pass-through SPE，采用「专用恒温工站 + 主提取工站 + SPE 工站」组合。</p>
+  <div class="plat">
+    <div class="pcard sel"><h4>PLT-800 ★ 酶解/SPE</h4><div class="big">3 模组 · 4 托盘 · 0.68 ㎡</div><div class="pick">✓ 酶解恒温工站、SPE 净化工站功能集中、模组少</div></div>
+    <div class="pcard sel"><h4>PLT-1200 ★ 盐析提取</h4><div class="big">6 模组 · 8 托盘 · 1.02 ㎡</div><div class="pick">✓ 盐析提取工站需加液+加盐+冷冻+离心+取样 ≥5 模位</div></div>
+    <div class="pcard"><h4>PLT-1400</h4><div class="big">6 模组 · 8 托盘（1×8）· 1.19 ㎡</div><div class="no">○ 多基质大批量可选，本方案非必需</div></div>
+  </div>
+  <div class="note info"><b>选型结论</b>
+  本方案按三座工站分工配置：酶解恒温工站与增强型除脂 SPE 净化过滤工站功能集中、所需模组较少，均选用 <b>PLT-800</b>；
+  盐析提取冷冻离心工站需加液、加盐、冷冻、离心、取样多模组协同，选用 <b>PLT-1200</b>。</div>
+</section>
+
+<section id="modules">
+  <h2><span class="num">4</span>模组选型（引用模组库 ID）</h2>
+  <p class="lead">全部模组取自 <code>references/01-modules/</code>。注意 55 ℃ 恒温与 −18 ℃ 冷冻见偏差说明。</p>
+  <table>
+    <tr><th>工艺功能</th><th>模组 ID</th><th>模组名称</th><th>关键参数</th><th>对应步骤</th></tr>
+    <tr><td><span class="tag t-enz">加液涡旋</span></td><td><span class="mod">MOD-WX-006</span></td><td>50ml 离心管正压加液涡旋模块</td><td>50ml×2，1–3000 rpm</td><td>加缓冲液/乙腈 + 酶涡旋</td></tr>
+    <tr><td><span class="tag t-enz">恒温酶解</span></td><td><span class="mod">MOD-PY-002</span></td><td>50ml 离心管金属浴模块</td><td>16 工位，<b>25–70 ℃</b>，150–600 rpm</td><td>55 ℃ 避光振荡 2 h ✓</td></tr>
+    <tr><td><span class="tag t-ext">加盐</span></td><td><span class="mod">MOD-YJ-004</span></td><td>50ml 离心管加盐涡旋模块</td><td>50ml×2，1–3000 rpm</td><td>萃取盐包（4g Na₂SO₄+1g NaCl）</td></tr>
+    <tr><td><span class="tag t-cold">冷冻沉淀</span></td><td><span class="mod">（外设）</span></td><td>−18 ℃ 低温冷冻位（见偏差）</td><td>−18 ℃，30 min</td><td>冷冻沉淀脂质</td></tr>
+    <tr><td><span class="tag t-cold">冷冻离心</span></td><td><span class="mod">MOD-LX-005</span></td><td>50ml×4 孔位离心机模块</td><td>500–8000 rpm，1–10 ℃</td><td>4 ℃ 离心（9000 r/min 见偏差）</td></tr>
+    <tr><td><span class="tag t-ext">取上层</span></td><td><span class="mod">MOD-YY-003</span></td><td>10ml 移液模块</td><td>1–10 mL，±1%</td><td>取上层 4 mL + 加水 1 mL</td></tr>
+    <tr><td><span class="tag t-spe">SPE</span></td><td><span class="mod">MOD-SPE-002</span></td><td>SPE 自动上样模块（pass-through 净化）</td><td>1–20 mL，正压 1–4 bar</td><td>增强型除脂柱，收集流出液</td></tr>
+    <tr><td><span class="tag t-spe">浓缩</span></td><td><span class="mod">MOD-NS-008</span></td><td>10ml 西林瓶离心浓缩模块</td><td>1–10 mL，25–55 ℃</td><td>40 ℃ 氮吹近干</td></tr>
+    <tr><td><span class="tag t-filt">复溶</span></td><td><span class="mod">MOD-JY-012</span></td><td>8 通道正压加液模块</td><td>1–4 bar，±1%</td><td>60% 乙腈水 1.0 mL</td></tr>
+    <tr><td><span class="tag t-filt">过滤</span></td><td><span class="mod">MOD-GL-001</span></td><td>2.5cc 注射器过滤模块</td><td>1–6 bar</td><td>0.2 µm 过滤</td></tr>
+    <tr><td><span class="tag t-filt">备用离心</span></td><td><span class="mod">MOD-LX-004</span></td><td>2ml-6 孔位高速离心模块</td><td>1000–14000 rpm</td><td>浑浊样品 10000 r/min 离心 ✓</td></tr>
+  </table>
+</section>
+
+<section id="ws">
+  <h2><span class="num">5</span>工作站组成</h2>
+  <p class="lead">3 个功能工作站，SVG 为平台俯视模组排布。</p>
+
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(100deg,#c2410c,#ea580c)">
+      <h4>工作站 1 · 酶解恒温工站（55 ℃ · 通量瓶颈）</h4><span class="pid">平台 PLT-800 · 3 模位</span>
+    </div>
+    <div class="ws-body">
+      <p>实现：按基质加乙酸铵缓冲液 + 加酶 → 混匀 → 55 ℃ 避光振荡 2 h（金属浴恒温平摇）。</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 560 170" width="100%" height="170" font-family="Segoe UI">
+          <rect x="8" y="8" width="544" height="154" rx="12" fill="#f1f9fb" stroke="#c2410c" stroke-width="2"/>
+          <text x="24" y="30" font-size="13" fill="#c2410c" font-weight="700">PLT-800 · 酶解恒温工站（3 模位）</text>
+          <rect x="24" y="44" width="150" height="78" rx="8" fill="#fde0d3" stroke="#c2410c"/>
+          <text x="99" y="76" font-size="11" fill="#c2410c" text-anchor="middle" font-weight="700">MOD-WX-006</text>
+          <text x="99" y="94" font-size="10" fill="#33455c" text-anchor="middle">加缓冲液/酶涡旋</text>
+          <rect x="186" y="44" width="190" height="78" rx="8" fill="#fde0d3" stroke="#c2410c"/>
+          <text x="281" y="72" font-size="11" fill="#c2410c" text-anchor="middle" font-weight="700">MOD-PY-002</text>
+          <text x="281" y="89" font-size="10" fill="#33455c" text-anchor="middle">金属浴55℃避光2h</text>
+          <text x="281" y="104" font-size="9" fill="#6b7c93" text-anchor="middle">25–70℃ · 16位平摇</text>
+          <rect x="388" y="44" width="146" height="78" rx="8" fill="#eef2f6" stroke="#6b7c93" stroke-dasharray="4"/>
+          <text x="461" y="76" font-size="11" fill="#33455c" text-anchor="middle" font-weight="700">移液枪加酶 100µL</text>
+          <text x="461" y="94" font-size="10" fill="#33455c" text-anchor="middle">奶粉需先还原</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(100deg,#0e7490,#0891b2)">
+      <h4>工作站 2 · 盐析提取 + 冷冻离心工站</h4><span class="pid">平台 PLT-1200 · 6 模位</span>
+    </div>
+    <div class="ws-body">
+      <p>实现：加乙腈涡旋 → 加萃取盐包涡旋 → −18 ℃ 冷冻 30 min → 4 ℃ 离心 → 取上层 4 mL + 加水 1 mL。</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 880 170" width="100%" height="170" font-family="Segoe UI">
+          <rect x="8" y="8" width="864" height="154" rx="12" fill="#f1f9fb" stroke="#0e7490" stroke-width="2"/>
+          <text x="24" y="30" font-size="13" fill="#0e7490" font-weight="700">PLT-1200 · 盐析提取冷冻离心工站</text>
+          <rect x="24" y="44" width="150" height="78" rx="8" fill="#d9eef7" stroke="#0e7490"/>
+          <text x="99" y="76" font-size="11" fill="#0e7490" text-anchor="middle" font-weight="700">MOD-WX-006</text>
+          <text x="99" y="94" font-size="10" fill="#33455c" text-anchor="middle">加乙腈涡旋</text>
+          <rect x="186" y="44" width="150" height="78" rx="8" fill="#d9eef7" stroke="#0e7490"/>
+          <text x="261" y="76" font-size="11" fill="#0e7490" text-anchor="middle" font-weight="700">MOD-YJ-004</text>
+          <text x="261" y="94" font-size="10" fill="#33455c" text-anchor="middle">加萃取盐包涡旋</text>
+          <rect x="348" y="44" width="150" height="78" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-dasharray="5 3"/>
+          <text x="423" y="72" font-size="11" fill="#1d4ed8" text-anchor="middle" font-weight="700">−18℃冷冻位</text>
+          <text x="423" y="89" font-size="9.5" fill="#1d4ed8" text-anchor="middle">⚠ 外设/选配</text>
+          <text x="423" y="104" font-size="9" fill="#6b7c93" text-anchor="middle">冷冻30min</text>
+          <rect x="510" y="44" width="150" height="78" rx="8" fill="#dbeafe" stroke="#1d4ed8"/>
+          <text x="585" y="76" font-size="11" fill="#1d4ed8" text-anchor="middle" font-weight="700">MOD-LX-005</text>
+          <text x="585" y="94" font-size="10" fill="#33455c" text-anchor="middle">4℃冷冻离心</text>
+          <rect x="672" y="44" width="182" height="78" rx="8" fill="#d9eef7" stroke="#0e7490"/>
+          <text x="763" y="76" font-size="11" fill="#0e7490" text-anchor="middle" font-weight="700">MOD-YY-003</text>
+          <text x="763" y="94" font-size="10" fill="#33455c" text-anchor="middle">取上层4mL+加水</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(100deg,#0a9396,#12b0a0)">
+      <h4>工作站 3 · 增强型除脂 SPE 净化 + 过滤工站</h4><span class="pid">平台 PLT-800 · 3 模位</span>
+    </div>
+    <div class="ws-body">
+      <p>实现：过增强型除脂 SPE 柱收集全部流出液 → 40 ℃ 氮吹近干 → 60% 乙腈水复溶 → 0.2 µm 过滤（浑浊先高速离心）。</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 560 160" width="100%" height="160" font-family="Segoe UI">
+          <rect x="8" y="8" width="544" height="144" rx="12" fill="#f1f9fb" stroke="#0a9396" stroke-width="2"/>
+          <text x="24" y="30" font-size="13" fill="#0a7a72" font-weight="700">PLT-800 · 除脂 SPE 净化过滤工站（3 模位）</text>
+          <rect x="24" y="44" width="150" height="74" rx="8" fill="#d8f3f0" stroke="#0a9396"/>
+          <text x="99" y="74" font-size="11" fill="#0a7a72" text-anchor="middle" font-weight="700">MOD-SPE-002</text>
+          <text x="99" y="92" font-size="10" fill="#33455c" text-anchor="middle">除脂柱 pass-through</text>
+          <rect x="186" y="44" width="150" height="74" rx="8" fill="#fde7df" stroke="#c44a26"/>
+          <text x="261" y="74" font-size="11" fill="#c44a26" text-anchor="middle" font-weight="700">MOD-NS-008</text>
+          <text x="261" y="92" font-size="10" fill="#33455c" text-anchor="middle">40℃氮吹近干</text>
+          <rect x="348" y="44" width="150" height="74" rx="8" fill="#fef3d6" stroke="#a9760a"/>
+          <text x="423" y="74" font-size="11" fill="#a9760a" text-anchor="middle" font-weight="700">MOD-GL-001</text>
+          <text x="423" y="92" font-size="10" fill="#33455c" text-anchor="middle">复溶+0.2µm过滤</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="solution">
+  <h2><span class="num">6</span>样品制备解决方案（工作站串联）</h2>
+  <p class="lead">3 个工作站按前处理顺序串联，酶解工站批处理，对接后端 LC-MS/MS（外标法）。</p>
+  <div class="mermaid">
+flowchart LR
+  S([5g/5mL 试料]):::s --> W1
+  subgraph W1[工作站1 · 酶解恒温 · PLT-800]
+    direction TB
+    a1[加缓冲液+酶混匀]-->a2[55℃避光振荡2h]
+  end
+  W1 --> W2
+  subgraph W2[工作站2 · 盐析提取冷冻离心 · PLT-1200]
+    direction TB
+    b1[加乙腈涡旋]-->b2[加盐包涡旋]-->b3[−18℃冷冻]-->b4[4℃离心取上层]
+  end
+  W2 --> W3
+  subgraph W3[工作站3 · 除脂SPE净化过滤 · PLT-800]
+    direction TB
+    c1[过除脂柱收集流出液]-->c2[40℃氮吹近干复溶]-->c3[0.2µm过滤]
+  end
+  W3 --> E([LC-MS/MS<br/>基质匹配外标法]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  </div>
+  <div class="note ok"><b>方案对应解决方案库范式</b>
+  对应「酶解 → QuEChERS 盐析提取 → 冷冻除脂 → pass-through SPE → 浓缩复溶过滤 → LC-MS/MS」范式，
+  工作站派生自已验证的 WS-PEST-Thermostatic（恒温）/ Hydrolysis / Extract / SPE / Concentrate 系列工站。</div>
+</section>
+
+<section id="kpi">
+  <h2><span class="num">7</span>通量、合规性与偏差说明</h2>
+  <div class="kpi">
+    <div class="k"><div class="v">3</div><div class="l">工作站数量</div></div>
+    <div class="k"><div class="v">11</div><div class="l">选用模组数</div></div>
+    <div class="k"><div class="v">6</div><div class="l">目标乙酰孕激素</div></div>
+    <div class="k"><div class="v">2</div><div class="l">偏差/缺口项</div></div>
+  </div>
+
+  <div class="note ok"><b>✓ 可严格满足项</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>55 ℃ 避光酶解 2 h</b> —— MOD-PY-002 50ml 离心管金属浴模块（25–70 ℃、150–600 rpm、16 位）满足 55 ℃ 恒温平摇。</li>
+    <li><b>萃取盐包盐析</b> —— MOD-YJ-004 加盐涡旋模块支持 QuEChERS 盐包定量投加。</li>
+    <li><b>增强型除脂 SPE（pass-through）、40 ℃ 氮吹、0.2 µm 过滤</b> 均有对应模组；浑浊样品备用 10000 r/min 由 MOD-LX-004 满足。</li>
+  </ul></div>
+
+  <div class="note cold"><b>❄ 偏差/缺口说明（诚实标注，需与客户确认）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>−18 ℃ 冷冻 30 min：</b>模组库内最低控温为冷冻离心 1 ℃ 及存储 0–10 ℃，<u>无 −18 ℃ 冷冻沉淀模组</u>。
+    建议在盐析提取工站旁集成 <b>−18 ℃ 低温冷冻外设位</b>（机械臂转运），完成脂质冷冻沉淀。</li>
+    <li><b>4 ℃ · 9000 r/min 离心：</b>MOD-LX-005 上限 8000 r/min、最低 1 ℃。9000 r/min <u>略超上限</u>，建议选配高速冷冻离心外设，或经验证以 8000 r/min·≤4 ℃ 等效。</li>
+  </ul></div>
+
+  <div class="note info"><b>合规与现场</b>涉乙腈、甲醇等有机溶剂 + 低温冷冻，工站要求通风 + 压缩空气 + 排废 + 低温位供冷。
+  奶粉需按 7.1 还原为液态奶（前置离线步骤）。全部参数引用自 <code>references/</code>，无编造数据。</div>
+  <div class="note ok"><b>报价</b> 涉及价格、报价信息请联系销售团队获取报价。</div>
+  <p class="crumbs">输出文件：projects/上海海关项目/6.html　|　标准：GB 31658.28—2025　|　数据源：references/01~06</p>
+</section>
+
+<!-- 8 公用工程 -->
+<section id="utility" style="border-bottom:none">
+  <h2><span class="num">8</span>公用工程与场地要求</h2>
+  <p class="lead">本产线各平台规格、总占地、总耗电功率及排风、上下水、压缩空气等公用工程要求（数据引用自 <code>references/02-platforms</code> 与各工作站 electrical_environment）。</p>
+
+  <div class="kpi">
+    <div class="k"><div class="v">3 站</div><div class="l">工作站 / 平台数</div></div>
+    <div class="k"><div class="v">2.38 ㎡</div><div class="l">平台净占地（含通道≈6–8㎡）</div></div>
+    <div class="k"><div class="v">≈5.4 / 9 kVA</div><div class="l">总功率（不含冷冻外设）</div></div>
+    <div class="k"><div class="v">≈560 kg</div><div class="l">设备总重</div></div>
+  </div>
+
+  <h3>平台规格与占地</h3>
+  <table>
+    <tr><th>工作站</th><th>平台型号</th><th>外形尺寸 (长×宽×高 mm)</th><th>占地</th><th>整机重量</th><th>标称/峰值功率</th></tr>
+    <tr><td>WS1 酶解恒温</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>175 kg</td><td>1.8 / 3 kVA</td></tr>
+    <tr><td>WS2 盐析提取冷冻离心</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>210 kg</td><td>1.8 / 3 kVA</td></tr>
+    <tr><td>WS3 除脂 SPE 净化过滤</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>175 kg</td><td>1.8 / 3 kVA</td></tr>
+    <tr><td colspan="3"><b>合计（不含 −18 ℃ 冷冻外设）</b></td><td><b>2.38 ㎡</b></td><td><b>≈560 kg</b></td><td><b>≈5.4 / 9 kVA</b></td></tr>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">注：单工作站电气取自工作站库 electrical_environment（标称 1.8 kVA、峰值 3 kVA）；<b>−18 ℃ 低温冷冻外设</b>的制冷功率与占地需另行计列（建议预留 ≈ 0.5 ㎡、1~2 kVA）。设备高 2055 mm，要求<b>层高 ≥ 3 m</b>、<b>地面承重 ≥ 500 kg/㎡</b>。</p>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:6px">⚡ 供电</h3>
+      <ul class="clean">
+        <li>主电 <b>220 V 单相</b> + 控制电 <b>24 V</b>；WS3 含浓缩模组（MOD-NS-008）另需 <b>48 V</b></li>
+        <li>平台总装机：标称 ≈ 5.4 kVA、峰值 ≈ 9 kVA；<b>另计 −18 ℃ 冷冻外设 + 55 ℃ 金属浴、4 ℃ 冷冻离心制冷负载</b></li>
+        <li>建议配 <b>3 kVA 在线式 UPS</b>；制冷设备单独回路</li>
+        <li>独立配电箱 + 漏电/接地保护，设备必须可靠接地</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:6px">💨 排风 / 通风 / 散热</h3>
+      <ul class="clean">
+        <li>涉<b>乙腈、甲醇、甲酸</b> + <b>40 ℃ 氮吹</b> → <b>防爆排风</b>，罩口面风速 ≥ 0.5 m/s</li>
+        <li><b>−18 ℃ 冷冻外设、4 ℃ 冷冻离心、55 ℃ 金属浴</b>均产热，机房需保证<b>制冷散热与环境控温（15~30 ℃）</b></li>
+        <li>排风经活性炭吸附达标后高空排放</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:6px">🚰 上水 / 下水 / 废液</h3>
+      <ul class="clean">
+        <li><b>上水：</b>一级纯水（GB/T 6682），供配液、复溶（60% 乙腈水）及清洗用水；奶粉还原用水</li>
+        <li><b>下水：</b>平台排废口接<b>独立排废管路</b>，废液<u>不得直排市政下水</u></li>
+        <li>乙腈 / 甲醇有机废液<b>分类收集</b>至危废中转罐，集中处置</li>
+        <li>地面设<b>地漏 / 防渗托盘</b></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:6px">🟦 压缩空气 / 真空</h3>
+      <ul class="clean">
+        <li>洁净干燥<b>压缩空气 0.4–0.7 MPa</b>（SPE、过滤模组）</li>
+        <li><b>真空泵</b>：除脂 SPE、离心浓缩配套（建议带冷阱）</li>
+        <li>压缩空气需除水除油，避免污染样品流路</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    上海海关项目 · 方案六（共八）· 动物性食品及尿液乙酰孕激素类残留前处理自动化方案<br>
+    <span style="color:#6fa8b8">本方案依据 GB 31658.28—2025 整理，−18 ℃ 冷冻位与 9000 r/min 离心须经现场 URS 确认。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#d9eef7',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#0e7490',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

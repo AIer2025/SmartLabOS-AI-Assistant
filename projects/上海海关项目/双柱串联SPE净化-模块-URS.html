@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双柱串联 SPE 净化模块 · URS 用户需求规格 · SmartLabOS</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#dfe6ef;
+    --bg:#f4f7fb; --card:#ffffff;
+    --brand:#0c5c8f; --brand2:#0a9396; --accent:#ee9b00; --danger:#c1121f; --ok:#1f9d6b;
+    --spe:#0a7a72; --chip:#eef4fa; --radius:14px; --shadow:0 6px 22px rgba(15,27,45,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#06243c 0%,#0a3f4a 55%,#0a9396 130%);
+    color:#fff;padding:46px 0 40px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:340px;height:340px;
+    background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#9fe7e0;
+    border:1px solid rgba(159,231,224,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:26px;font-weight:700;letter-spacing:.5px}
+  header.hero .sub{font-size:15px;color:#d6e6f2;margin-bottom:22px;max-width:760px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:8px;padding:6px 13px;font-size:13px}
+  section{padding:34px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--spe);color:#fff;width:30px;height:30px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 18px;font-size:14.5px}
+  h3{font-size:16px;margin:20px 0 10px;color:var(--ink)}
+  h4{font-size:14.5px;margin:14px 0 6px;color:var(--brand2)}
+  p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#e3f3f1;color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  td code,.mod{font-family:Consolas,monospace;background:#eef4fa;color:var(--brand);
+    padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}
+  .note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#e6f5f3;border-color:var(--spe)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}
+  @media(max-width:880px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .kpi .k .v{font-size:23px;font-weight:700;color:var(--spe)}
+  .kpi .k .l{font-size:12.5px;color:var(--muted)}
+  .slotgrid text{font-family:"Microsoft YaHei",sans-serif}
+  footer{background:#06243c;color:#9db8cf;padding:26px 0;font-size:13px}
+  .crumbs{font-size:12.5px;color:var(--muted);margin:18px 0 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">上海海关项目 · 新建模组 URS · 配套检验标准 8 / 8</span>
+    <h1>双柱串联 SPE 净化模块（ENVI-Carb 柱串接氨基柱）<br>用户需求规格说明书 URS</h1>
+    <div class="sub">为满足 <b>GB/T 21981—2008</b> §7.2 中「<b>ENVI-Carb 柱串接氨基柱、减压抽干、中途取下上柱、分别洗脱</b>」的双柱串联净化工序而新建。
+    现有 97 个模组中的 SPE 模组（<code>MOD-SPE-001/002/003/004</code>）均为<b>单柱自动上样</b>，<b>无法实现两柱上下串接 / 程控解联 / 分柱洗脱</b>，故依 SmartLabOS「URS 规则」额外立项。</div>
+    <div class="hmeta">
+      <span>🧪 双柱：ENVI-Carb 500mg/6mL + 氨基柱 500mg/6mL</span>
+      <span>💧 上样 2~3 mL/min</span>
+      <span>⏱ 单步 1140 s（1080+60）</span>
+      <span>📐 单平台 1 模块位（暂定）</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- 1 用途 -->
+<section id="purpose">
+  <h2><span class="num">1</span>用途与立项依据</h2>
+  <p class="lead">说明本模组在 GB/T 21981—2008 动物源食品激素多残留前处理产线中的位置与必要性。</p>
+  <div class="card">
+    <h4>工艺位置</h4>
+    <p>位于「§7.1 提取上清加水 100 mL 稀释」<b>之后</b>、「§7.2 洗脱液氮气吹干」<b>之前</b>，承担 §7.2 全部双柱串联净化工序。
+    国标原文：<i>"……提取液以 2~3 mL/min 上样于活化过的 ENVI-Carb 柱，减压抽干；将活化好的<b>氨基柱串接在 ENVI-Carb 柱下方</b>，用二氯甲烷-甲醇溶液 6 mL 洗脱并收集；<b>取下 ENVI-Carb 柱</b>，再用二氯甲烷-甲醇溶液 2 mL 洗氨基柱……"</i></p>
+    <h4>用途</h4>
+    <p>对稀释后的酶解—甲醇提取液执行<b>两支固相萃取小柱上下串接</b>的净化：稀释液先经 ENVI-Carb（石墨化炭黑）柱吸附保留 → 减压抽干 → <b>下方串接氨基（NH₂）柱</b> → 以二氯甲烷-甲醇(7+3) 6 mL 同时穿过双柱洗脱并收集 → <b>程控解联（取下 ENVI-Carb 上柱）</b> → 单独以二氯甲烷-甲醇 2 mL 补洗氨基柱、合并洗脱液。通过双吸附剂互补保留与分柱洗脱，深度去除色素、脂质与极性基质，提高 50 种激素回收率与色谱信噪比。</p>
+  </div>
+  <div class="note warn"><b>为何须新建（既有模组缺口）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><code>MOD-SPE-001/002/003/004</code> 均为<b>单柱自动上样 SPE（功能码 121）</b>，结构上仅一个柱位，<u>无法将两支柱上下串接、也无中途解联取柱与分柱洗脱能力</u>。</li>
+    <li>用两台单柱 SPE（MOD-SPE-004×2）+ 移液串接近似，需在两柱间手工/机械拆装并精确对齐流路，<b>难以还原"上下直串、整体抽干、洗脱中途取下上柱"</b>的工艺语义，柱间死体积与对位误差不可控，故不采用近似替代。</li>
+    <li>97 个模组目录中<b>无任何双柱串联 / 程控串接解联功能码</b>，无可靠近似替代，故按「URS 规则」额外立项。</li>
+  </ul></div>
+</section>
+
+<!-- 2 URS 功能需求 -->
+<section id="urs">
+  <h2><span class="num">2</span>URS 功能需求</h2>
+  <p class="lead">面向自动化集成的用户需求条目（User Requirement Specification）。</p>
+  <table>
+    <tr><th>编号</th><th>需求项</th><th>需求描述</th><th>类别</th></tr>
+    <tr><td>URS-01</td><td>双柱位</td><td>提供<b>上柱位（ENVI-Carb 500 mg/6 mL）</b>与<b>下柱位（氨基柱 500 mg/6 mL）</b>，支持上下直串安装</td><td>必须</td></tr>
+    <tr><td>URS-02</td><td>程控串接 / 解联</td><td>可<b>程序控制将下方氨基柱串接到 ENVI-Carb 柱下方</b>，洗脱后<b>程控取下 ENVI-Carb 上柱（解联）</b>，再单独补洗氨基柱</td><td>必须</td></tr>
+    <tr><td>URS-03</td><td>柱活化</td><td>ENVI-Carb 柱依次用二氯甲烷-甲醇 / 甲醇 / 水各 6 mL 活化；氨基柱用二氯甲烷-甲醇 6 mL 活化</td><td>必须</td></tr>
+    <tr><td>URS-04</td><td>上样流速</td><td>上样流速可控 <b>2~3 mL/min</b>，闭环稳流，避免柱干 / 流速不均</td><td>必须</td></tr>
+    <tr><td>URS-05</td><td>减压抽干</td><td>提供<b>真空减压抽干</b>能力，上样后将上柱抽干至无残液</td><td>必须</td></tr>
+    <tr><td>URS-06</td><td>梯度洗脱与收集</td><td>双柱串联以二氯甲烷-甲醇(7+3) <b>6 mL</b> 洗脱、解联后氨基柱 <b>2 mL</b> 补洗，洗脱液合并收集入接收瓶</td><td>必须</td></tr>
+    <tr><td>URS-07</td><td>多路供液</td><td>对接 <code>MOD-JY-012</code> 8 通道正压加液，供活化 / 上样 / 洗脱溶剂多路精准给液</td><td>必须</td></tr>
+    <tr><td>URS-08</td><td>自动上下料</td><td>支持机械臂自动放入 / 取出柱与接收瓶，上下料统一计 <b>60 s</b>，与产线节拍口径一致</td><td>必须</td></tr>
+    <tr><td>URS-09</td><td>通讯接口</td><td>MODBUS TCP，纳入 SmartLabOS 平台统一调度（与既有模组一致）</td><td>必须</td></tr>
+    <tr><td>URS-10</td><td>平台兼容</td><td>外形对齐标准模块，占用 <b>1 个标准模块位</b>（暂定，详设核算）</td><td>期望</td></tr>
+  </table>
+</section>
+
+<!-- 3 关键参数 -->
+<section id="param">
+  <h2><span class="num">3</span>关键参数</h2>
+  <div class="kpi">
+    <div class="k"><div class="v">双柱</div><div class="l">ENVI-Carb + 氨基柱（500mg/6mL）</div></div>
+    <div class="k"><div class="v">2~3 mL/min</div><div class="l">上样流速</div></div>
+    <div class="k"><div class="v">1140 s</div><div class="l">单步平台耗时（1080+60）</div></div>
+    <div class="k"><div class="v">1 位</div><div class="l">模块位占用（暂定）</div></div>
+  </div>
+  <table>
+    <tr><th>参数</th><th>取值</th><th>来源 / 说明</th></tr>
+    <tr><td>上柱 / 下柱</td><td>ENVI-Carb 500 mg/6 mL（上）+ 氨基柱 500 mg/6 mL（下）</td><td>GB/T 21981—2008 §4.5 / §7.2</td></tr>
+    <tr><td>上样流速</td><td>2~3 mL/min</td><td>GB/T 21981—2008 §7.2「以 2~3 mL/min 上样」</td></tr>
+    <tr><td>洗脱溶剂</td><td>二氯甲烷-甲醇(7+3)：双柱 6 mL + 氨基柱补洗 2 mL</td><td>GB/T 21981—2008 §7.2</td></tr>
+    <tr><td>抽干 / 解联</td><td>减压抽干；洗脱后取下 ENVI-Carb 上柱</td><td>GB/T 21981—2008 §7.2</td></tr>
+    <tr><td>单步功能耗时</td><td>1080 s（≈ 双柱活化 + 2~3 mL/min 上样 + 减压抽干 + 6 mL/2 mL 梯度洗脱）</td><td>按 GB §7.2 工艺合理时长估算（URS 规则）</td></tr>
+    <tr><td>上下料时间</td><td>60 s</td><td>SmartLabOS 统一上下料口径（共享简报第 2 节）</td></tr>
+    <tr><td><b>计入平台单步耗时</b></td><td><b>1080 + 60 = 1140 s</b></td><td>= GB 合理时长 + 上下料，已计入 WS-03 平台节拍</td></tr>
+    <tr><td>多路供液</td><td>对接 <code>MOD-JY-012</code>（占 0 位，10 s）</td><td>活化 / 上样 / 洗脱溶剂供给</td></tr>
+    <tr><td>通讯</td><td>MODBUS TCP</td><td>与既有模组一致，纳入统一调度</td></tr>
+  </table>
+  <div class="note info"><b>节拍计入说明</b>本模组单步平台耗时按「<b>GB §7.2 合理时长 1080 s + 上下料 60 s = 1140 s</b>」计入所在工作站 WS-HORMONE-DualSPE-SHHG-03 的平台总节拍（详见主方案 <code>8.html</code> 第 ⑦ 节，WS3 合计 1545 s/循环）。</div>
+</section>
+
+<!-- 4 示意 -->
+<section id="diagram" style="border-bottom:none">
+  <h2><span class="num">4</span>结构与流程示意</h2>
+  <p class="lead">左：模组在产线中的逻辑位置与双柱串接 / 解联时序（Mermaid）；右：双柱位俯视示意（SVG）。</p>
+
+  <div class="mermaid">
+flowchart TB
+  A[稀释提取液<br/>2~3 mL/min 上样]:::ext --> B[ENVI-Carb 上柱<br/>保留 · 减压抽干]:::spe
+  B --> C[下方串接氨基柱]:::spe
+  C --> D[DCM-MeOH 7+3 6mL<br/>双柱洗脱并收集]:::spe
+  D --> E[取下 ENVI-Carb 上柱<br/>程控解联]:::warn
+  E --> F[DCM-MeOH 2mL<br/>补洗氨基柱·合并]:::spe
+  F --> G[洗脱液 → 氮吹干]:::conc
+  classDef ext fill:#e3eef7,stroke:#0c5c8f,color:#0c5c8f;
+  classDef spe fill:#d8f3f0,stroke:#0a7a72,color:#0a7a72;
+  classDef warn fill:#fff0e6,stroke:#c9760f,color:#9a5a08;
+  classDef conc fill:#fde9d9,stroke:#c9760f,color:#9a5a08;
+  </div>
+
+  <div class="card">
+    <h4>双柱位俯视示意（ENVI-Carb 串接氨基柱 · 程控解联）</h4>
+    <svg viewBox="0 0 360 210" class="slotgrid" width="100%">
+      <rect x="2" y="2" width="356" height="206" rx="10" fill="#f2faf9" stroke="#0a7a72"/>
+      <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0a3f4a" font-weight="700">双柱串联 SPE 净化模块 · 双柱位</text>
+      <!-- upper column -->
+      <rect x="60" y="36" width="70" height="50" rx="6" fill="#d8f3f0" stroke="#0a7a72"/>
+      <text x="95" y="58" text-anchor="middle" font-size="9.5" fill="#0a3f4a" font-weight="700">ENVI-Carb</text>
+      <text x="95" y="72" text-anchor="middle" font-size="8.5" fill="#0a7a72">500mg/6mL 上柱</text>
+      <!-- connector -->
+      <line x1="95" y1="86" x2="95" y2="104" stroke="#0a7a72" stroke-width="2" stroke-dasharray="3 2"/>
+      <text x="150" y="98" text-anchor="middle" font-size="8.5" fill="#c9760f">程控串接/解联</text>
+      <!-- lower column -->
+      <rect x="60" y="104" width="70" height="50" rx="6" fill="#d8f3f0" stroke="#0a7a72"/>
+      <text x="95" y="126" text-anchor="middle" font-size="9.5" fill="#0a3f4a" font-weight="700">氨基柱 NH₂</text>
+      <text x="95" y="140" text-anchor="middle" font-size="8.5" fill="#0a7a72">500mg/6mL 下柱</text>
+      <!-- collection -->
+      <rect x="60" y="168" width="70" height="32" rx="6" fill="#fde9d9" stroke="#c9760f"/>
+      <text x="95" y="188" text-anchor="middle" font-size="9" fill="#9a5a08">洗脱液接收瓶</text>
+      <!-- right: solvent / vacuum -->
+      <rect x="200" y="36" width="146" height="50" rx="7" fill="#eef4fa" stroke="#0c5c8f"/>
+      <text x="273" y="58" text-anchor="middle" font-size="9.5" fill="#0c5c8f" font-weight="700">MOD-JY-012 多路供液</text>
+      <text x="273" y="72" text-anchor="middle" font-size="8.5" fill="#516074">活化/上样/洗脱溶剂</text>
+      <rect x="200" y="96" width="146" height="46" rx="7" fill="#eaf1fb" stroke="#516074"/>
+      <text x="273" y="116" text-anchor="middle" font-size="9.5" fill="#2b3543" font-weight="700">真空减压抽干单元</text>
+      <text x="273" y="130" text-anchor="middle" font-size="8.5" fill="#516074">上样后上柱抽干</text>
+      <rect x="200" y="152" width="146" height="48" rx="7" fill="#eaf1fb" stroke="#516074"/>
+      <text x="273" y="172" text-anchor="middle" font-size="9.5" fill="#2b3543" font-weight="700">流速控制 2~3 mL/min</text>
+      <text x="273" y="186" text-anchor="middle" font-size="8.5" fill="#516074">闭环稳流 / 机械臂解联</text>
+    </svg>
+  </div>
+  <div class="note ok"><b>数据来源声明</b>本 URS 关键参数（双柱型号 ENVI-Carb 500mg/6mL + 氨基柱 500mg/6mL、上样 2~3 mL/min、二氯甲烷-甲醇 6 mL/2 mL 洗脱、减压抽干、串接/解联工序）引自 GB/T 21981—2008 §4.5 / §7.2 原文；单步时长按 §7.2 工艺合理估算，上下料 60 s、模块位口径引自 SmartLabOS 共享技术简报与 <code>references/01-modules</code> 通用约定，<b>未做杜撰</b>。本文件为<b>新建模组用户需求</b>，待详细设计后并入模组库。</div>
+  <p class="crumbs">输出文件：projects/上海海关项目/双柱串联SPE净化-模块-URS.html　|　配套主方案：8.html　|　标准：GB/T 21981—2008 §7.2</p>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    上海海关项目 · 检验标准 8 / 8 配套新建模组 URS · 双柱串联 SPE 净化（ENVI-Carb 串接氨基柱）<br>
+    <span style="color:#6b8aa6">本 URS 依据 GB/T 21981—2008 §7.2 整理；现有 97 个模组的 SPE 均为单柱自动上样，无双柱串接/解联/分柱洗脱能力，按 SmartLabOS URS 规则额外立项，参数以国标原文及现场确认为准。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#d8f3f0',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#0a7a72',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

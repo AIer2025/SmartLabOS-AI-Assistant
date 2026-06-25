@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 1603
   consumables: "pp瓶-30ml / 离心管-50ml"
   sub_functions: [72-校准液CP1清洗校准清洗，73-校准液CP2 校准清洗]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

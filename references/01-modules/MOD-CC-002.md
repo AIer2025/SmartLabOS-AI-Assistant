@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 30
   consumables: ""
   sub_functions: [628-预出仓, 629-出仓, 631-取料, 632-放料, 633-取放料]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     []

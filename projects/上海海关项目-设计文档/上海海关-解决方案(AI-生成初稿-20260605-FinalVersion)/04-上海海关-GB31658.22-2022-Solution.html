@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案四 · GB 31658.22—2022 β-受体激动剂残留 · SmartLabOS 前处理方案</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#e6dcd6;
+    --bg:#fbf6f3; --card:#ffffff;
+    --brand:#bc3908; --brand2:#e85d04; --accent:#0a7d6b; --danger:#9d0208;
+    --chip:#fbe9df; --radius:14px; --shadow:0 6px 22px rgba(45,20,10,.08);
+  }
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#5a1a02 0%,#bc3908 55%,#e85d04 130%);color:#fff;padding:46px 0 40px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:340px;height:340px;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#ffd9b3;border:1px solid rgba(255,217,179,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:.5px}
+  header.hero .sub{font-size:16px;color:#ffe2cc;margin-bottom:22px;max-width:800px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 13px;font-size:13px}
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.03)}
+  nav.toc ul{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0 auto;max-width:1180px;padding:8px 22px}
+  nav.toc a{text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 12px;border-radius:8px}
+  nav.toc a:hover{background:var(--chip);color:var(--brand)}
+  section{padding:38px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 22px;font-size:14.5px}
+  h3{font-size:17px;margin:26px 0 12px}p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);margin:16px 0}
+  .proc{background:#3a1402;color:#f5dcc8;border-radius:var(--radius);padding:20px 24px;font-size:14px;border-left:5px solid var(--accent);margin:14px 0}
+  .proc b{color:#ffd166}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}
+  @media(max-width:880px){.g2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#fbe9df;color:var(--ink);font-weight:600;font-size:13px}tr:last-child td{border-bottom:none}
+  td code,.mod{font-family:Consolas,monospace;background:#fbe9df;color:var(--brand);padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600}
+  .t-enz{background:#fbe2d3;color:#bc3908}.t-ph{background:#e3eef7;color:#0c5c8f}.t-ext{background:#efe3fb;color:#7b3fc4}.t-spe{background:#d8f3f0;color:#0a7a72}.t-filt{background:#fef3d6;color:#a9760a}
+  .plat{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+  .pcard{flex:1;min-width:220px;border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .pcard.sel{border:2px solid var(--brand);box-shadow:0 6px 18px rgba(188,57,8,.16)}
+  .pcard h4{margin:0 0 6px;font-size:15px}.pcard .big{font-size:13px;color:var(--muted)}
+  .pcard .pick{font-size:12px;color:var(--brand2);font-weight:700;margin-top:8px}.pcard .no{font-size:12px;color:var(--muted);margin-top:8px}
+  .ws{border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);overflow:hidden;margin:18px 0}
+  .ws-head{padding:14px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .ws-head h4{margin:0;font-size:16px}.ws-head .pid{font-size:12px;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px}
+  .ws-body{padding:6px 20px 16px}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}.note.warn{background:#fff6e5;border-color:#ee9b00}.note.info{background:#fbe9df;border-color:var(--brand)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .svgwrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin:16px 0;overflow-x:auto}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}
+  @media(max-width:880px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .kpi .k .v{font-size:25px;font-weight:700;color:var(--brand)}.kpi .k .l{font-size:12.5px;color:var(--muted)}
+  footer{background:#3a1402;color:#e0b89f;padding:28px 0;font-size:13px}
+  .crumbs{font-size:12.5px;color:var(--muted);margin:18px 0 0}.crumbs a{color:var(--brand);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">上海海关项目 · 检验标准 4 / 8</span>
+    <h1>动物性食品中 β-受体激动剂残留量测定<br>SmartLabOS 自动化前处理解决方案</h1>
+    <div class="sub">依据 <b>GB 31658.22—2022</b> 第 8.1 酶解与提取 &amp; 8.2 萃取/净化/浓缩流程
+    （37 ℃ 酶解 16 h—高氯酸沉淀调 pH—乙酸乙酯/叔丁基甲醚萃取—MCX 阳离子交换柱净化—内标法），自模组库选型组建工作站串联为产线。</div>
+    <div class="hmeta">
+      <span>📋 标准：GB 31658.22—2022</span>
+      <span>🧪 基质：猪·牛·羊 肌肉·肝·肾</span>
+      <span>💊 18 种 β-激动剂（克仑特罗等）</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><ul>
+  <li><a href="#std">① 标准解读</a></li>
+  <li><a href="#flow">② 工艺流程</a></li>
+  <li><a href="#platform">③ 平台选型</a></li>
+  <li><a href="#modules">④ 模组选型</a></li>
+  <li><a href="#ws">⑤ 工作站</a></li>
+  <li><a href="#solution">⑥ 解决方案串联</a></li>
+  <li><a href="#kpi">⑦ 通量与合规</a></li>
+  <li><a href="#utility">⑧ 公用工程</a></li>
+</ul></nav>
+
+<div class="wrap">
+
+<section id="std">
+  <h2><span class="num">1</span>标准与检测原理</h2>
+  <p class="lead">GB 31658.22—2022《食品安全国家标准 动物性食品中 β-受体激动剂残留量的测定 液相色谱-串联质谱法》</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:6px">检测原理</h3>
+      <p>试料中残留的 β-受体激动剂，经<b>酶解、高氯酸沉淀蛋白</b>后，用<b>乙酸乙酯、叔丁基甲醚萃取</b>，
+      经<b>混合型阳离子交换（MCX）固相萃取柱</b>净化，LC-MS/MS 测定，<b>内标法</b>定量。</p>
+      <ul class="clean">
+        <li>18 种 β-激动剂（克仑特罗、莱克多巴胺、沙丁胺醇等）+ 同位素内标</li>
+        <li>检测限 0.2 µg/kg、定量限 0.5 µg/kg</li>
+        <li>回收率 60%~120%，批内/批间 RSD ≤20%</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:6px">前处理关键参数</h3>
+      <table style="box-shadow:none;margin:0">
+        <tr><th>环节</th><th>关键条件</th></tr>
+        <tr><td>取样 / 酶解</td><td>2 g（±0.05 g）+ 乙酸铵缓冲液 6 mL + 酶 40 µL，<b>37 ℃ 避光振荡 16 h</b></td></tr>
+        <tr><td>沉淀 / 调 pH</td><td>内标 100 µL；高氯酸调 <b>pH 1.0±0.2</b>；NaOH 调 <b>pH 10±0.5</b>；8000 r/min</td></tr>
+        <tr><td>液液萃取</td><td>乙酸乙酯 15 mL 振荡 5 min，5000 r/min；叔丁基甲醚 10 mL 重复，合并有机相</td></tr>
+        <tr><td>浓缩 / 复溶</td><td>50 ℃ 氮吹干；2% 甲酸 5 mL 溶解</td></tr>
+        <tr><td>SPE 净化</td><td>MCX 60 mg/3 mL：甲醇/2%甲酸活化 → 上样 → 2%甲酸/甲醇淋洗 → 5% 氨化甲醇 3 mL 洗脱</td></tr>
+        <tr><td>定容 / 过滤</td><td>甲醇-0.1%甲酸(10+90) 0.5 mL；过 0.22 µm 膜</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="flow">
+  <h2><span class="num">2</span>前处理工艺流程拆解</h2>
+  <div class="proc">
+    <b>8.1 酶解与提取</b> —— 2 g + 乙酸铵缓冲液 6 mL + β-葡萄糖醛酸酶/芳基硫酸酯酶 40 µL <b>涡旋混匀</b> →
+    <b>37 ℃ 避光水浴振荡 16 h</b> → 室温备用。
+  </div>
+  <div class="proc" style="border-left-color:var(--brand2)">
+    <b>8.2 萃取/净化/浓缩</b> —— + 内标 100 µL 涡旋 → 8000 r/min 离心 → 取上清 → + 高氯酸调 <b>pH 1.0</b> → 离心 →
+    NaOH 调 <b>pH 10</b> → + 乙酸乙酯 15 mL <b>振荡 5 min</b> → 5000 r/min 取上层 → 水相 + 叔丁基甲醚 10 mL 重复 → 合并有机相 →
+    <b>50 ℃ 氮吹干</b> → 2% 甲酸 5 mL 溶解 → <b>MCX SPE 净化</b> → 洗脱液 <b>50 ℃ 氮吹干</b> → 甲醇-甲酸 0.5 mL 复溶 → <b>0.22 µm 过滤</b>。
+  </div>
+  <div class="mermaid">
+flowchart LR
+  A([2g 试料+缓冲液+酶]):::s --> B[涡旋混匀]:::enz
+  B --> C[37℃避光振荡16h]:::enz
+  C --> D[加内标·离心取上清]:::ph
+  D --> E[高氯酸调pH1.0·离心]:::ph
+  E --> F[NaOH调pH10]:::ph
+  F --> G[乙酸乙酯/叔丁基甲醚<br/>萃取·离心·取有机相]:::ext
+  G --> H[50℃氮吹干<br/>2%甲酸溶解]:::ext
+  H --> I[MCX SPE净化<br/>活化·上样·淋洗·洗脱]:::spe
+  I --> J[50℃氮吹干<br/>甲醇-甲酸复溶]:::spe
+  J --> K[0.22µm过滤]:::filt
+  K --> L([LC-MS/MS<br/>内标法]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  classDef enz fill:#fbe2d3,stroke:#bc3908,color:#bc3908;
+  classDef ph fill:#e3eef7,stroke:#0c5c8f,color:#0c5c8f;
+  classDef ext fill:#efe3fb,stroke:#7b3fc4,color:#7b3fc4;
+  classDef spe fill:#d8f3f0,stroke:#0a7a72,color:#0a7a72;
+  classDef filt fill:#fef3d6,stroke:#a9760a,color:#a9760a;
+  </div>
+  <div class="note warn"><b>工艺特点：16 h 酶解为通量瓶颈</b>
+  37 ℃ 避光酶解 16 h 远长于其它单元操作，须设<b>专用恒温工站</b>并配大批容量（≥48 位），以「批处理 + 隔夜运行」消解节拍瓶颈。</div>
+</section>
+
+<section id="platform">
+  <h2><span class="num">3</span>平台选型</h2>
+  <p class="lead">本流程单元操作最多（酶解 + 调 pH + 双萃取 + SPE），采用「专用工站分工 + 多平台组合」。</p>
+  <div class="plat">
+    <div class="pcard sel"><h4>PLT-800 ★ 酶解/SPE</h4><div class="big">3 模组 · 4 托盘 · 0.68 ㎡</div><div class="pick">✓ 酶解恒温工站、SPE 净化工站功能集中、模组少，PLT-800 节省占地</div></div>
+    <div class="pcard sel"><h4>PLT-1200 ★ 调pH/萃取</h4><div class="big">6 模组 · 8 托盘 · 1.02 ㎡</div><div class="pick">✓ 沉淀调 pH 工站、液液萃取浓缩工站均需 5–6 模位</div></div>
+    <div class="pcard"><h4>PLT-1400</h4><div class="big">6 模组 · 8 托盘（1×8）· 1.19 ㎡</div><div class="no">○ 大体积分液场景可选，本方案非必需</div></div>
+  </div>
+  <div class="note info"><b>选型结论</b>
+  本方案按四座工站分工配置：酶解恒温工站选用 <b>PLT-800</b>，沉淀调 pH 工站与液液萃取浓缩工站均选用 <b>PLT-1200</b>，SPE 净化过滤工站选用 <b>PLT-800</b>。</div>
+</section>
+
+<section id="modules">
+  <h2><span class="num">4</span>模组选型（引用模组库 ID）</h2>
+  <p class="lead">全部模组取自 <code>references/01-modules/</code>。本标准含 <b>pH 调节</b>、<b>37 ℃ 恒温</b>、<b>MCX 阳离子交换 SPE</b> 三项特色功能，均有对应模组。</p>
+  <table>
+    <tr><th>工艺功能</th><th>模组 ID</th><th>模组名称</th><th>关键参数</th><th>对应步骤</th></tr>
+    <tr><td><span class="tag t-enz">加液涡旋</span></td><td><span class="mod">MOD-WX-006</span></td><td>50ml 离心管正压加液涡旋模块</td><td>50ml×2，1–3000 rpm</td><td>乙酸铵缓冲液 6 mL + 酶</td></tr>
+    <tr><td><span class="tag t-enz">恒温酶解</span></td><td><span class="mod">MOD-CC-003</span></td><td>离心管恒温 37 ℃ 衍生反应模块</td><td>避光，37 ℃ ±0.5 ℃，0–999 min</td><td>避光振荡 16 h ✓</td></tr>
+    <tr><td><span class="tag t-ph">离心</span></td><td><span class="mod">MOD-LX-005</span></td><td>50ml×4 孔位离心机模块</td><td>500–8000 rpm，1–10 ℃</td><td>8000 / 5000 r/min ✓</td></tr>
+    <tr><td><span class="tag t-ph">pH 调节</span></td><td><span class="mod">MOD-PH-001</span></td><td>50ml 离心管 pH 调测模块 V2.0</td><td>50ml，1–3000 rpm，闭环测控</td><td>高氯酸 pH1.0 / NaOH pH10 ✓</td></tr>
+    <tr><td><span class="tag t-ph">正压加液</span></td><td><span class="mod">MOD-JY-012</span></td><td>8 通道正压加液模块</td><td>1–4 bar，±1%</td><td>高氯酸 5 mL / 各试剂</td></tr>
+    <tr><td><span class="tag t-ext">振荡</span></td><td><span class="mod">MOD-ZD-001</span></td><td>50ml 垂直震荡模块</td><td>50ml×2，1–500 rpm</td><td>萃取振荡 5 min ×2</td></tr>
+    <tr><td><span class="tag t-ext">转移</span></td><td><span class="mod">MOD-YY-004</span></td><td>50ml 全量液体转移模块</td><td>40 s/周期</td><td>取上清/取有机相合并</td></tr>
+    <tr><td><span class="tag t-ext">浓缩</span></td><td><span class="mod">MOD-NS-002</span></td><td>50ml 西林瓶离心浓缩模块</td><td>1–30 mL，25–55 ℃</td><td>50 ℃ 氮吹干（有机相）</td></tr>
+    <tr><td><span class="tag t-spe">SPE</span></td><td><span class="mod">MOD-SPE-002</span></td><td>SPE 自动上样模块（活化/上样/淋洗/洗脱）</td><td>1–20 mL，正压 1–4 bar，精度 0.1%</td><td>MCX 3cc 净化 ✓</td></tr>
+    <tr><td><span class="tag t-spe">浓缩</span></td><td><span class="mod">MOD-NS-005</span></td><td>15ml 西林瓶离心浓缩模块</td><td>1–10 mL，25–55 ℃</td><td>洗脱液 50 ℃ 氮吹干</td></tr>
+    <tr><td><span class="tag t-filt">复溶/过滤</span></td><td><span class="mod">MOD-JY-012</span> / <span class="mod">MOD-GL-002</span></td><td>正压复溶加液 + 5cc 针式过滤</td><td>±1%；1–4 bar</td><td>甲醇-甲酸 0.5 mL；0.22 µm</td></tr>
+  </table>
+</section>
+
+<section id="ws">
+  <h2><span class="num">5</span>工作站组成</h2>
+  <p class="lead">4 个功能工作站，SVG 为平台俯视模组排布。</p>
+
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(100deg,#bc3908,#e85d04)">
+      <h4>工作站 1 · 酶解恒温工站（通量瓶颈 · 隔夜运行）</h4><span class="pid">平台 PLT-800 · 3 模位</span>
+    </div>
+    <div class="ws-body">
+      <p>实现：加乙酸铵缓冲液 + 加酶 → 涡旋混匀 → 37 ℃ 避光振荡 16 h。配 ≥48 位恒温位，批处理隔夜运行。</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 560 170" width="100%" height="170" font-family="Segoe UI">
+          <rect x="8" y="8" width="544" height="154" rx="12" fill="#fbf6f3" stroke="#bc3908" stroke-width="2"/>
+          <text x="24" y="30" font-size="13" fill="#bc3908" font-weight="700">PLT-800 · 酶解恒温工站（3 模位）</text>
+          <rect x="24" y="44" width="150" height="78" rx="8" fill="#fbe2d3" stroke="#bc3908"/>
+          <text x="99" y="76" font-size="11" fill="#bc3908" text-anchor="middle" font-weight="700">MOD-WX-006</text>
+          <text x="99" y="94" font-size="10" fill="#33455c" text-anchor="middle">加缓冲液/酶涡旋</text>
+          <rect x="186" y="44" width="190" height="78" rx="8" fill="#fbe2d3" stroke="#bc3908"/>
+          <text x="281" y="72" font-size="11" fill="#bc3908" text-anchor="middle" font-weight="700">MOD-CC-003</text>
+          <text x="281" y="89" font-size="10" fill="#33455c" text-anchor="middle">恒温37℃避光16h</text>
+          <text x="281" y="104" font-size="9" fill="#6b7c93" text-anchor="middle">±0.5℃ · ≥48位</text>
+          <rect x="388" y="44" width="146" height="78" rx="8" fill="#eef2f6" stroke="#6b7c93" stroke-dasharray="4"/>
+          <text x="461" y="76" font-size="11" fill="#33455c" text-anchor="middle" font-weight="700">移液枪加酶 40µL</text>
+          <text x="461" y="94" font-size="10" fill="#33455c" text-anchor="middle">夹爪 一体式手指</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(100deg,#0c5c8f,#0a7eb8)">
+      <h4>工作站 2 · 沉淀调 pH 工站</h4><span class="pid">平台 PLT-1200 · 6 模位</span>
+    </div>
+    <div class="ws-body">
+      <p>实现：加内标涡旋 → 8000 rpm 离心取上清 → 加高氯酸调 pH 1.0 → 离心 → NaOH 调 pH 10。</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 880 170" width="100%" height="170" font-family="Segoe UI">
+          <rect x="8" y="8" width="864" height="154" rx="12" fill="#fbf6f3" stroke="#0c5c8f" stroke-width="2"/>
+          <text x="24" y="30" font-size="13" fill="#0c5c8f" font-weight="700">PLT-1200 · 沉淀调 pH 工站</text>
+          <rect x="24" y="44" width="150" height="78" rx="8" fill="#e3eef7" stroke="#0c5c8f"/>
+          <text x="99" y="76" font-size="11" fill="#0c5c8f" text-anchor="middle" font-weight="700">MOD-WX-006</text>
+          <text x="99" y="94" font-size="10" fill="#33455c" text-anchor="middle">加内标/高氯酸涡旋</text>
+          <rect x="186" y="44" width="150" height="78" rx="8" fill="#e3eef7" stroke="#0c5c8f"/>
+          <text x="261" y="76" font-size="11" fill="#0c5c8f" text-anchor="middle" font-weight="700">MOD-LX-005</text>
+          <text x="261" y="94" font-size="10" fill="#33455c" text-anchor="middle">8000rpm 离心</text>
+          <rect x="348" y="44" width="150" height="78" rx="8" fill="#e3eef7" stroke="#0c5c8f"/>
+          <text x="423" y="76" font-size="11" fill="#0c5c8f" text-anchor="middle" font-weight="700">MOD-PH-001</text>
+          <text x="423" y="94" font-size="10" fill="#33455c" text-anchor="middle">调pH 1.0→10</text>
+          <rect x="510" y="44" width="150" height="78" rx="8" fill="#e3eef7" stroke="#0c5c8f"/>
+          <text x="585" y="76" font-size="11" fill="#0c5c8f" text-anchor="middle" font-weight="700">MOD-JY-012</text>
+          <text x="585" y="94" font-size="10" fill="#33455c" text-anchor="middle">正压加酸/碱</text>
+          <rect x="672" y="44" width="182" height="78" rx="8" fill="#e3eef7" stroke="#0c5c8f"/>
+          <text x="763" y="76" font-size="11" fill="#0c5c8f" text-anchor="middle" font-weight="700">MOD-YY-004</text>
+          <text x="763" y="94" font-size="10" fill="#33455c" text-anchor="middle">取上清转移</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(100deg,#7b3fc4,#9d4edd)">
+      <h4>工作站 3 · 液液萃取 + 浓缩工站</h4><span class="pid">平台 PLT-1200 · 6 模位</span>
+    </div>
+    <div class="ws-body">
+      <p>实现：加乙酸乙酯振荡萃取 → 5000 rpm 离心取上层 → 水相加叔丁基甲醚重复 → 合并有机相 → 50 ℃ 氮吹干 → 2% 甲酸溶解。</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 880 170" width="100%" height="170" font-family="Segoe UI">
+          <rect x="8" y="8" width="864" height="154" rx="12" fill="#fbf6f3" stroke="#7b3fc4" stroke-width="2"/>
+          <text x="24" y="30" font-size="13" fill="#7b3fc4" font-weight="700">PLT-1200 · 液液萃取浓缩工站</text>
+          <rect x="24" y="44" width="150" height="78" rx="8" fill="#efe3fb" stroke="#7b3fc4"/>
+          <text x="99" y="76" font-size="11" fill="#7b3fc4" text-anchor="middle" font-weight="700">MOD-JY-012</text>
+          <text x="99" y="94" font-size="10" fill="#33455c" text-anchor="middle">加乙酸乙酯/甲醚</text>
+          <rect x="186" y="44" width="150" height="78" rx="8" fill="#efe3fb" stroke="#7b3fc4"/>
+          <text x="261" y="76" font-size="11" fill="#7b3fc4" text-anchor="middle" font-weight="700">MOD-ZD-001</text>
+          <text x="261" y="94" font-size="10" fill="#33455c" text-anchor="middle">振荡 5min</text>
+          <rect x="348" y="44" width="150" height="78" rx="8" fill="#efe3fb" stroke="#7b3fc4"/>
+          <text x="423" y="76" font-size="11" fill="#7b3fc4" text-anchor="middle" font-weight="700">MOD-LX-005</text>
+          <text x="423" y="94" font-size="10" fill="#33455c" text-anchor="middle">5000rpm 离心</text>
+          <rect x="510" y="44" width="150" height="78" rx="8" fill="#efe3fb" stroke="#7b3fc4"/>
+          <text x="585" y="76" font-size="11" fill="#7b3fc4" text-anchor="middle" font-weight="700">MOD-YY-004</text>
+          <text x="585" y="94" font-size="10" fill="#33455c" text-anchor="middle">取上层合并</text>
+          <rect x="672" y="44" width="182" height="78" rx="8" fill="#fde7df" stroke="#c44a26"/>
+          <text x="763" y="76" font-size="11" fill="#c44a26" text-anchor="middle" font-weight="700">MOD-NS-002</text>
+          <text x="763" y="94" font-size="10" fill="#33455c" text-anchor="middle">50℃氮吹干+复溶</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(100deg,#0a9396,#12b0a0)">
+      <h4>工作站 4 · MCX SPE 净化 + 过滤进样工站</h4><span class="pid">平台 PLT-800 · 3 模位</span>
+    </div>
+    <div class="ws-body">
+      <p>实现：MCX 柱活化(甲醇/2%甲酸) → 上样 → 淋洗(2%甲酸/甲醇) → 5% 氨化甲醇洗脱 → 50 ℃ 氮吹干 → 甲醇-甲酸复溶 → 0.22 µm 过滤。</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 560 160" width="100%" height="160" font-family="Segoe UI">
+          <rect x="8" y="8" width="544" height="144" rx="12" fill="#fbf6f3" stroke="#0a9396" stroke-width="2"/>
+          <text x="24" y="30" font-size="13" fill="#0a7a72" font-weight="700">PLT-800 · MCX SPE 净化过滤工站（3 模位）</text>
+          <rect x="24" y="44" width="150" height="74" rx="8" fill="#d8f3f0" stroke="#0a9396"/>
+          <text x="99" y="74" font-size="11" fill="#0a7a72" text-anchor="middle" font-weight="700">MOD-SPE-002</text>
+          <text x="99" y="92" font-size="10" fill="#33455c" text-anchor="middle">MCX 自动净化</text>
+          <rect x="186" y="44" width="150" height="74" rx="8" fill="#fde7df" stroke="#c44a26"/>
+          <text x="261" y="74" font-size="11" fill="#c44a26" text-anchor="middle" font-weight="700">MOD-NS-005</text>
+          <text x="261" y="92" font-size="10" fill="#33455c" text-anchor="middle">洗脱液氮吹干</text>
+          <rect x="348" y="44" width="150" height="74" rx="8" fill="#fef3d6" stroke="#a9760a"/>
+          <text x="423" y="74" font-size="11" fill="#a9760a" text-anchor="middle" font-weight="700">MOD-GL-002</text>
+          <text x="423" y="92" font-size="10" fill="#33455c" text-anchor="middle">复溶+0.22µm过滤</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="solution">
+  <h2><span class="num">6</span>样品制备解决方案（工作站串联）</h2>
+  <p class="lead">4 个工作站按前处理顺序串联，酶解工站隔夜批处理，后三工站日间流转，对接后端 LC-MS/MS。</p>
+  <div class="mermaid">
+flowchart LR
+  S([2g 试料]):::s --> W1
+  subgraph W1[工作站1 · 酶解恒温 · PLT-800]
+    direction TB
+    a1[加缓冲液+酶涡旋]-->a2[37℃避光振荡16h]
+  end
+  W1 --> W2
+  subgraph W2[工作站2 · 沉淀调pH · PLT-1200]
+    direction TB
+    b1[加内标离心取上清]-->b2[高氯酸调pH1.0]-->b3[NaOH调pH10]
+  end
+  W2 --> W3
+  subgraph W3[工作站3 · 液液萃取浓缩 · PLT-1200]
+    direction TB
+    c1[乙酸乙酯/甲醚萃取]-->c2[离心取有机相合并]-->c3[50℃氮吹干·2%甲酸溶解]
+  end
+  W3 --> W4
+  subgraph W4[工作站4 · MCX SPE净化过滤 · PLT-800]
+    direction TB
+    d1[MCX活化上样淋洗洗脱]-->d2[氮吹干复溶]-->d3[0.22µm过滤]
+  end
+  W4 --> E([LC-MS/MS<br/>内标法定量]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  </div>
+  <div class="note ok"><b>方案对应解决方案库范式</b>
+  对应「酶解/水解 → 沉淀调 pH → 液液萃取浓缩 → SPE 净化 → 复溶过滤 → LC-MS/MS」范式，工作站派生自已验证的
+  WS-PEST-Hydrolysis（调 pH）/ Extract / SPE / Concentrate / Thermostatic（恒温反应）系列工站。</div>
+</section>
+
+<section id="kpi">
+  <h2><span class="num">7</span>通量、合规性与说明</h2>
+  <div class="kpi">
+    <div class="k"><div class="v">4</div><div class="l">工作站数量</div></div>
+    <div class="k"><div class="v">11</div><div class="l">选用模组数</div></div>
+    <div class="k"><div class="v">18</div><div class="l">目标 β-激动剂</div></div>
+    <div class="k"><div class="v">16h</div><div class="l">酶解（瓶颈）</div></div>
+  </div>
+
+  <div class="note ok"><b>✓ 三项特色功能均有对应模组、可严格满足</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>37 ℃ 避光酶解 16 h</b> —— MOD-CC-003 恒温 37 ℃ 衍生反应模块（±0.5 ℃、避光、0–999 min），完全满足。</li>
+    <li><b>pH 1.0 / pH 10 闭环调节</b> —— MOD-PH-001 pH 调测模块支持加酸/加碱闭环测控。</li>
+    <li><b>8000 / 5000 r/min 离心</b> —— MOD-LX-005（500–8000 rpm）满足。</li>
+    <li><b>MCX 阳离子交换 SPE</b> —— MOD-SPE-002 自动 SPE 模块支持 3cc 混合型阳离子交换柱，八步流速闭环控制。</li>
+  </ul></div>
+
+  <div class="note warn"><b>通量与排产建议</b>
+  16 h 酶解为节拍瓶颈，建议：① 酶解工站配 ≥48 位恒温容量，<u>隔夜批处理</u>；
+  ② 后三工站（调 pH→萃取→SPE）日间连续流转，与酶解错峰排班，最大化日通量；③ 叔丁基甲醚、乙酸乙酯易挥发，萃取/氮吹工站须强化通风防爆。</div>
+
+  <div class="note info"><b>合规与现场</b>
+  涉高氯酸（强氧化性）、NaOH（强碱）、乙酸乙酯/叔丁基甲醚（易燃），工站要求通风 + 压缩空气 + 排废 + 防爆；
+  高氯酸操作区建议独立排风。全部参数引用自 <code>references/</code>，无编造数据。</div>
+  <div class="note ok"><b>报价</b> 涉及价格、报价信息请联系销售团队获取报价。</div>
+  <p class="crumbs">输出文件：projects/上海海关项目/4.html　|　标准：GB 31658.22—2022　|　数据源：references/01~06</p>
+</section>
+
+<!-- 8 公用工程 -->
+<section id="utility" style="border-bottom:none">
+  <h2><span class="num">8</span>公用工程与场地要求</h2>
+  <p class="lead">本产线各平台规格、总占地、总耗电功率及排风、上下水、压缩空气等公用工程要求（数据引用自 <code>references/02-platforms</code> 与各工作站 electrical_environment）。</p>
+
+  <div class="kpi">
+    <div class="k"><div class="v">4 站</div><div class="l">工作站 / 平台数</div></div>
+    <div class="k"><div class="v">3.40 ㎡</div><div class="l">平台净占地（含通道≈9–11㎡）</div></div>
+    <div class="k"><div class="v">≈7.2 / 12 kVA</div><div class="l">总功率（标称/峰值）</div></div>
+    <div class="k"><div class="v">≈770 kg</div><div class="l">设备总重</div></div>
+  </div>
+
+  <h3>平台规格与占地</h3>
+  <table>
+    <tr><th>工作站</th><th>平台型号</th><th>外形尺寸 (长×宽×高 mm)</th><th>占地</th><th>整机重量</th><th>标称/峰值功率</th></tr>
+    <tr><td>WS1 酶解恒温</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>175 kg</td><td>1.8 / 3 kVA</td></tr>
+    <tr><td>WS2 沉淀调 pH</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>210 kg</td><td>1.8 / 3 kVA</td></tr>
+    <tr><td>WS3 液液萃取浓缩</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>210 kg</td><td>1.8 / 3 kVA</td></tr>
+    <tr><td>WS4 MCX-SPE 净化过滤</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>175 kg</td><td>1.8 / 3 kVA</td></tr>
+    <tr><td colspan="3"><b>合计</b></td><td><b>3.40 ㎡</b></td><td><b>≈770 kg</b></td><td><b>≈7.2 / 12 kVA</b></td></tr>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">注：单工作站电气取自工作站库 electrical_environment（标称 1.8 kVA、峰值 3 kVA）；酶解恒温模组（MOD-CC-003）16 h 长时运行持续耗电。设备高 2055 mm，要求<b>层高 ≥ 3 m</b>、<b>地面承重 ≥ 500 kg/㎡</b>；含通道占地按平台净占地 2.5~3 倍预留。</p>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:6px">⚡ 供电</h3>
+      <ul class="clean">
+        <li>主电 <b>220 V 单相</b> + 控制电 <b>24 V</b>；WS3 含浓缩模组（MOD-NS-002）另需 <b>48 V</b></li>
+        <li>总装机：标称 ≈ 7.2 kVA、峰值 ≈ 12 kVA；酶解恒温持续负载</li>
+        <li>建议配 <b>3 kVA 在线式 UPS</b>，保障 16 h 酶解过程不断电</li>
+        <li>独立配电箱 + 漏电/接地保护，设备必须可靠接地</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:6px">💨 排风 / 通风</h3>
+      <ul class="clean">
+        <li>涉<b>乙酸乙酯、叔丁基甲醚（易燃）、甲醇、氨化甲醇</b> + <b>50 ℃ 氮吹</b> → <b>防爆排风</b></li>
+        <li>酶解 37 ℃ 避光，注意舱体散热排风</li>
+        <li>各工站设万向抽气罩，罩口面风速 ≥ 0.5 m/s</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note warn"><b>⚠ 高氯酸专用排风（安全关键）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li>WS2 使用 <b>高氯酸（强氧化性、与有机物接触有爆炸风险）</b>调 pH，<u>必须配置高氯酸专用通风系统（带水洗冲淋功能的耐酸排风管路与风机）</u>。</li>
+    <li><b>严禁</b>高氯酸废气与有机溶剂废气共用同一排风管道，须独立成系统、独立排放。</li>
+    <li>高氯酸操作区与有机萃取区在布局上分隔，避免交叉。</li>
+  </ul></div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3 style="margin-top:6px">🚰 上水 / 下水 / 废液</h3>
+      <ul class="clean">
+        <li><b>上水：</b>一级纯水（GB/T 6682），供配液、SPE 活化/淋洗及清洗用水</li>
+        <li><b>下水：</b>平台排废口接<b>独立排废管路</b>，废液<u>不得直排市政下水</u></li>
+        <li><b>高氯酸废液单独耐酸收集并中和处理</b>；强碱（NaOH）废液、有机废液（乙酸乙酯/叔丁基甲醚/甲醇）<b>分罐分类</b>，绝不混排</li>
+        <li>地面设<b>地漏 / 防渗托盘 + 耐酸地坪</b></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:6px">🟦 压缩空气 / 真空</h3>
+      <ul class="clean">
+        <li>洁净干燥<b>压缩空气 0.4–0.7 MPa</b>（正压加液、SPE、过滤模组）</li>
+        <li><b>真空泵</b>：SPE 抽干、离心浓缩配套（建议带冷阱）</li>
+        <li>压缩空气需除水除油，避免污染样品流路</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    上海海关项目 · 方案四（共四）· 动物性食品 β-受体激动剂残留前处理自动化方案<br>
+    <span style="color:#c98f6f">本方案依据 GB 31658.22—2022 整理，技术参数以国家标准原文及现场 URS 确认为准。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#fbe2d3',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#bc3908',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

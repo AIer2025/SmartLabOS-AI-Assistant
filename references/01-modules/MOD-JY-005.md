@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 44
   consumables: 500ml溶剂瓶
   sub_functions: [651 启动右注射泵，652 清洗左注射泵，653 清洗右注射泵]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

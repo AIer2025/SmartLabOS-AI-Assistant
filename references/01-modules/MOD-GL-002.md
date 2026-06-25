@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 520
   consumables: "离心管-15ml / 西林瓶-10ml / 离心管-2ml / 西林瓶-2ml / 针式过滤器-13mm"
   sub_functions: [251-清洗标针]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

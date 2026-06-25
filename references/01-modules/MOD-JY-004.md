@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 135
   consumables: "萃取瓶-250ml / 萃取瓶-500ml / 萃取瓶-1250ml / 西林瓶-2ml / 西林瓶-10ml"
   sub_functions: [250 加内标]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

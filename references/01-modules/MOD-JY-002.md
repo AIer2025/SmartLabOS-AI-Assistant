@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 582
   consumables: 锥形瓶-250ml
   sub_functions: [611-拆盖/加液/装盖, 612-磁力子弹夹更换完成]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800

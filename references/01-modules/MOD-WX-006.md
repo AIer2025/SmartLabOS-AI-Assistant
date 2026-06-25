@@ -38,6 +38,8 @@ process_capability_1:
   cycle_time_sec: 300
   consumables: 离心管-50ml
   sub_functions: [165-拆盖, 166-装盖, 167-去加液位，168-去待机位，169-拆盖/去加液，170-装盖/涡旋]
+module_up_unload_time:
+  up_unload_time: 60s
 platform_compatibility:
   compatible_platforms:
     - PLT-800
