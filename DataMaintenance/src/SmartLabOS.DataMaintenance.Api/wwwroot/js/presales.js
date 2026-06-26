@@ -181,7 +181,7 @@
   }
 
   function addItemRow(box, value, label) {
-    const MAX = (state.options.limits && state.options.limits.maxItems) || 10;
+    const MAX = (state.options.limits && state.options.limits.maxItems) || 20;
     if (box.children.length >= MAX) {
       toast(`${label}最多 ${MAX} 条`, "bad");
       return;
@@ -300,7 +300,7 @@
     if (collectChecks("psProtocols").length === 0) {
       toast("请至少选择一个流程标准", "bad"); return;
     }
-    if (!confirm("将调用本机 Claude Code 在项目目录下自动生成提案文件，过程可能需要数分钟。是否开始？")) return;
+    if (!confirm("将调用本机 Claude Code 在项目目录下自动生成提案文件：\n先生成解决方案 HTML 与 URS 文档，再据此生成 WORD(.docx) 提案。\n两阶段过程可能需要较长时间。是否开始？")) return;
     try {
       await api(`/api/presales/projects/${state.current.id}/generate`, { method: "POST", body: "{}" });
       toast("已开始生成方案", "ok");
@@ -346,11 +346,17 @@
     if (!files.length) { box.innerHTML = `<p class="hint">尚无生成文件。</p>`; return; }
     files.forEach((f) => {
       const name = typeof f === "string" ? f : f.name;
+      const isDocx = /\.docx$/i.test(name);
+      const isUrs = /URS/i.test(name);
       const a = document.createElement("a");
-      a.className = "ps-file" + (/URS/i.test(name) ? " ps-file-urs" : "");
+      a.className = "ps-file" + (isDocx ? " ps-file-docx" : isUrs ? " ps-file-urs" : "");
       a.href = `/api/presales/projects/${state.current.id}/file?name=${encodeURIComponent(name)}`;
-      a.target = "_blank";
-      a.textContent = (/URS/i.test(name) ? "📋 " : "📄 ") + name;
+      if (isDocx) {
+        a.download = name;            // WORD 文档下载而非内联打开
+      } else {
+        a.target = "_blank";
+      }
+      a.textContent = (isDocx ? "📝 " : isUrs ? "📋 " : "📄 ") + name;
       box.appendChild(a);
     });
   }

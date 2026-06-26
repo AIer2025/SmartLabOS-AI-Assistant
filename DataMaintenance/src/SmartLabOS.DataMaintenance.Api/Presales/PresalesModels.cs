@@ -14,9 +14,9 @@ public sealed class PresalesProject
     public string? CurrentStatus { get; set; }
     /// <summary>6.2.2 已选流程标准(potocol/MD 文件名)。</summary>
     public List<string> Protocols { get; set; } = new();
-    /// <summary>6.2.3 客户挑战(≤10项, 每项≤200字)。</summary>
+    /// <summary>6.2.3 客户挑战(≤20项, 每项≤200字)。</summary>
     public List<string> Challenges { get; set; } = new();
-    /// <summary>6.2.4 客户期望(≤10项, 每项≤200字)。</summary>
+    /// <summary>6.2.4 客户期望(≤20项, 每项≤200字)。</summary>
     public List<string> Expectations { get; set; } = new();
     /// <summary>6.2.5 流程范围(采样/制样/分样/前处理/检测/出具报告)。</summary>
     public List<string> ProcessScope { get; set; } = new();
@@ -59,6 +59,6 @@ public static class PresalesOptions
         { "设备操作软件", "智慧实验室软件" };
 
     public const int MaxStatusLen = 1500;
-    public const int MaxItems = 10;
+    public const int MaxItems = 20;
     public const int MaxItemLen = 200;
 }

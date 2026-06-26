@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新建模块 URS · 50ml 高速冷冻离心模块（−2 ℃ / 10000 r·min⁻¹）· SmartLabOS</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#dfe6ef;
+    --bg:#f4f7fb; --card:#ffffff; --brand:#0c5c8f; --brand2:#0a9396;
+    --accent:#ee9b00; --danger:#c1121f; --ok:#1f9d6b; --chip:#eef4fa;
+    --radius:14px; --shadow:0 6px 22px rgba(15,27,45,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#3a0a0a 0%,#7a1f12 55%,#c1121f 130%);
+    color:#fff;padding:42px 0 36px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:320px;height:320px;
+    background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#ffd1cc;
+    border:1px solid rgba(255,209,204,.45);border-radius:30px;padding:4px 14px;margin-bottom:14px}
+  header.hero h1{margin:0 0 6px;font-size:26px;font-weight:700}
+  header.hero .sub{font-size:15px;color:#ffe3df;margin-bottom:18px;max-width:760px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:8px;padding:6px 13px;font-size:13px}
+  section{padding:30px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--danger);color:#fff;width:30px;height:30px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 18px;font-size:14.5px}
+  h3{font-size:16px;margin:20px 0 10px}
+  h4{font-size:14px;margin:12px 0 6px;color:var(--brand2)}
+  p{margin:10px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#fbeceb;color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  code,.mod{font-family:Consolas,monospace;background:#fbeceb;color:var(--danger);
+    padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}
+  .note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#eaf2fb;border-color:var(--brand)}
+  .note.bad{background:#fdeceb;border-color:var(--danger)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow);margin:14px 0}
+  footer{background:#3a0a0a;color:#e8b9b3;padding:24px 0;font-size:13px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">用户需求规格书（URS）· 新建模块 · 端到端验证-20260626</span>
+    <h1>50 mL 高速冷冻离心模块（−2 ℃ / 10000 r·min⁻¹）</h1>
+    <div class="sub">为满足 <b>GB 31658.17—2021 §8.1 提取离心</b>「−2 ℃、10000 r/min、5 min」之硬性要求，
+    现有模组库 50 mL 离心模块（<code>MOD-LX-005</code>，1–10 ℃ / ≤8000 r/min）无法达标，按指令 5.3 提出新建模块 URS。</div>
+    <div class="hmeta">
+      <span>🧊 控温 −5 ℃ ~ +10 ℃</span>
+      <span>🌀 转速 ≤ 10000 r/min</span>
+      <span>🧪 50 mL 离心管 × 4（对称）</span>
+      <span>⏱ 处理时间 360 s（含上下料 60 s）</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- 1 立项背景 -->
+<section>
+  <h2><span class="num">1</span>立项背景与缺口分析</h2>
+  <p class="lead">本 URS 因「现有模块能力缺口」触发，依据指令第 5.3 条产出。</p>
+  <div class="note bad"><b>能力缺口（与标准比对）</b>
+  GB 31658.17—2021 §8.1 规定提取离心条件为 <b>−2 ℃、10000 r/min、5 min</b>。检索 SmartLabOS 模组库 97 个模块，
+  50 mL 规格离心仅有 <code>MOD-LX-005</code>（50ml×4 孔位离心机模块）：控温范围 <b>1–10 ℃</b>、最高转速 <b>8000 r/min</b>，
+  <u>既无法达到 −2 ℃ 的负温，也无法达到 10000 r/min</u>。其余 2 mL 高速离心模块（<code>MOD-LX-004</code>，14000 r/min）
+  仅适配 2 mL 离心管，无法处理 50 mL 提取液。故 50 mL 负温高速离心为真实缺口，需新建模块。</div>
+  <table>
+    <tr><th>条款</th><th>标准要求</th><th>现有 <code>MOD-LX-005</code></th><th>判定</th></tr>
+    <tr><td>温度</td><td>−2 ℃</td><td>1 ~ 10 ℃</td><td>❌ 不达标</td></tr>
+    <tr><td>转速</td><td>10000 r/min</td><td>500 ~ 8000 r/min</td><td>❌ 不达标</td></tr>
+    <tr><td>容器</td><td>50 mL 离心管</td><td>50 mL 离心管 × 4</td><td>✅ 一致</td></tr>
+    <tr><td>时间</td><td>离心 5 min</td><td>cycle 420 s（含取放）</td><td>△ 可达</td></tr>
+  </table>
+</section>
+
+<!-- 2 模块定义 -->
+<section>
+  <h2><span class="num">2</span>拟建模块定义</h2>
+  <table>
+    <tr><th>项目</th><th>内容</th></tr>
+    <tr><td>拟用模块 ID</td><td><code>MOD-LX-006</code>（建议，待模组库正式编号）</td></tr>
+    <tr><td>模块名称</td><td>50 mL 高速冷冻离心模块（−5 ℃ ~ +10 ℃ / ≤10000 r/min）</td></tr>
+    <tr><td>功能类别</td><td>离心（兼容 PLT-800 / PLT-1200 / PLT-1400）</td></tr>
+    <tr><td>派生基准</td><td>在 <code>MOD-LX-005</code> 基础上升级压缩机制冷至负温、主轴升速至 10000 r/min</td></tr>
+    <tr><td>占用模块位</td><td>3（与 <code>MOD-LX-005</code> 同体量，估算）</td></tr>
+  </table>
+</section>
+
+<!-- 3 功能需求 -->
+<section>
+  <h2><span class="num">3</span>功能与性能需求（URS 条目）</h2>
+  <table>
+    <tr><th>编号</th><th>需求项</th><th>规格 / 验收标准</th><th>来源</th></tr>
+    <tr><td>URS-01</td><td>控温范围</td><td><b>−5 ℃ ~ +10 ℃</b>，覆盖标准 −2 ℃；控温精度 ±1 ℃</td><td>GB 31658.17 §8.1</td></tr>
+    <tr><td>URS-02</td><td>最高转速</td><td><b>≥ 10000 r/min</b>，转速精度 ±50 r/min</td><td>GB 31658.17 §8.1</td></tr>
+    <tr><td>URS-03</td><td>容器与装载</td><td>50 mL 离心管 × 4，对称装载，带盖密封运行</td><td>派生自 <code>MOD-LX-005</code></td></tr>
+    <tr><td>URS-04</td><td>离心时间</td><td>1 ~ 10 min 可设；本流程取 <b>5 min</b></td><td>GB 31658.17 §8.1</td></tr>
+    <tr><td>URS-05</td><td>自动上下料</td><td>机械臂自动开/关门、取放管，上下料时间 ≤ 60 s</td><td>项目「自动上下料」</td></tr>
+    <tr><td>URS-06</td><td>安全联锁</td><td>门未关禁止启动；振动 &gt; 300 µm 降速报警；运行中禁开门</td><td>派生自 <code>MOD-LX-005</code></td></tr>
+    <tr><td>URS-07</td><td>预冷</td><td>支持运行前预冷至设定负温，缩短到温等待</td><td>工艺需要</td></tr>
+    <tr><td>URS-08</td><td>通讯/集成</td><td>MODBUS TCP，纳入 SmartLabOS 调度与追溯</td><td>智慧实验室软件</td></tr>
+  </table>
+  <div class="note info"><b>处理时间（计入平台总耗时）</b>
+  按指令 5.3：新建模块处理时间 = 规范规定时间 + 上下料时间 = <b>离心 5 min（300 s）+ 上下料 60 s = 360 s</b>。
+  该 360 s 已计入主方案「提取·冷冻离心+合并平台」处理耗时。</div>
+</section>
+
+<!-- 4 工作流程 -->
+<section>
+  <h2><span class="num">4</span>工作流程（拟定）</h2>
+  <div class="mermaid">
+flowchart LR
+  A([机械臂取 50mL 提取管]):::s --> B[开门]:::c --> C[对称装入 4 管]:::c --> D[关门·密封]:::c
+  D --> E[预冷至 −2 ℃]:::c --> F[10000 r/min<br/>离心 5 min]:::h --> G[降速·除水]:::c --> H[开门取管]:::c --> I([转下一工序]):::s
+  classDef s fill:#3a0a0a,color:#fff,stroke:none;
+  classDef c fill:#fbeceb,stroke:#c1121f,color:#7a1f12;
+  classDef h fill:#fde4e2,stroke:#c1121f,color:#7a1f12;
+  </div>
+  <p style="font-size:13px;color:var(--muted)">流程派生自 <code>MOD-LX-005</code> 工作流（入口开启→放管→离心→停止→取管），新增「预冷至负温」与「升速至 10000 r/min」两项升级动作。</p>
+</section>
+
+<!-- 5 接口/公用工程 -->
+<section style="border-bottom:none">
+  <h2><span class="num">5</span>接口、公用工程与验收</h2>
+  <div class="card">
+    <h4>接口与公用工程</h4>
+    <ul class="clean">
+      <li>供电：24 V 控制电 + 制冷压缩机电源（功率较 <code>MOD-LX-005</code> 提升，详设阶段核定）</li>
+      <li>压缩空气：用于气动夹紧/密封（沿用现有离心模块）</li>
+      <li>真空/除水：与 <code>MOD-LX-005</code> 一致（vacuum −80 kPa 量级）</li>
+      <li>排热/通风：负温压缩机散热需通风</li>
+    </ul>
+  </div>
+  <div class="note ok"><b>验收标准</b>满足 URS-01~08 全部条目；以标准物质添加回收试验验证回收率落在 60%~110%、批内 RSD ≤ 15%，
+  确认 −2 ℃ / 10000 r/min 离心条件对四环素/磺胺/喹诺酮类回收率的稳定性贡献。</div>
+  <div class="note warn"><b>过渡方案（新模块到位前）</b>可暂用 <code>MOD-LX-005</code> 以 <b>≤4 ℃ / 8000 r/min</b> 经方法学等效性验证后运行，
+  作为新模块交付前的临时措施；正式交付以满足标准 −2 ℃ / 10000 r/min 为准。</div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    新建模块 URS · 50 mL 高速冷冻离心模块 · 项目「端到端验证-20260626」· 依据 GB 31658.17—2021 §8.1<br>
+    <span style="color:#b07c75">本 URS 为售前技术建议，最终规格以详设评审与现场确认为准；模组缺口判定基于 references/01-modules 全量检索。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#fbeceb',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#c1121f',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

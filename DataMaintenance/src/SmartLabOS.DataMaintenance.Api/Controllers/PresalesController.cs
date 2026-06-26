@@ -172,7 +172,7 @@ public sealed class PresalesController : ControllerBase
             {
                 status = p.GenStatus,
                 running = false,
-                outputFiles = ListHtml(p),
+                outputFiles = ListOutputs(p),
                 log = (string?)null,
                 lastGeneratedAt = p.LastGeneratedAt,
             });
@@ -184,7 +184,8 @@ public sealed class PresalesController : ControllerBase
             running = job.Status is "queued" or "running",
             exitCode = job.ExitCode,
             error = job.Error,
-            outputFiles = ListHtml(p),
+            outputFiles = ListOutputs(p),
+            docxFile = job.DocxFile,
             commandFile = job.CommandFile,
             startedAt = job.StartedAt.ToString("yyyy-MM-dd HH:mm:ss"),
             finishedAt = job.FinishedAt?.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -197,7 +198,7 @@ public sealed class PresalesController : ControllerBase
     {
         var p = await _repo.GetAsync(id);
         if (p is null) return NotFound(new { message = $"项目不存在: {id}" });
-        return Ok(new { directory = p.ProjectDir, files = ListHtml(p) });
+        return Ok(new { directory = p.ProjectDir, files = ListOutputs(p) });
     }
 
     /// <summary>在浏览器中查看某个已生成的提案 HTML（仅限该项目目录下、防目录穿越）。</summary>
@@ -216,6 +217,12 @@ public sealed class PresalesController : ControllerBase
             return NotFound(new { message = $"文件不存在: {name}" });
 
         var ext = Path.GetExtension(full).ToLowerInvariant();
+        // WORD 文档以附件下载（带文件名），其余在浏览器内联打开。
+        if (ext == ".docx")
+            return PhysicalFile(full,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                Path.GetFileName(full));
+
         var contentType = ext switch
         {
             ".html" or ".htm" => "text/html; charset=utf-8",
@@ -234,12 +241,17 @@ public sealed class PresalesController : ControllerBase
         Directory.CreateDirectory(p.ProjectDir);
     }
 
-    private static List<object> ListHtml(PresalesProject p)
+    // 列出项目目录下的产出文件：解决方案/URS 的 *.html 与最终 WORD 提案 *.docx。
+    private static readonly string[] OutputPatterns = { "*.html", "*.docx" };
+
+    private static List<object> ListOutputs(PresalesProject p)
     {
         var list = new List<object>();
         if (string.IsNullOrWhiteSpace(p.ProjectDir) || !Directory.Exists(p.ProjectDir)) return list;
-        foreach (var f in Directory.EnumerateFiles(p.ProjectDir, "*.html")
-                                   .OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
+        var files = OutputPatterns
+            .SelectMany(pat => Directory.EnumerateFiles(p.ProjectDir!, pat))
+            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
+        foreach (var f in files)
         {
             var fi = new FileInfo(f);
             list.Add(new
@@ -248,6 +260,7 @@ public sealed class PresalesController : ControllerBase
                 size = fi.Length,
                 modified = fi.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss"),
                 isUrs = fi.Name.Contains("URS", StringComparison.OrdinalIgnoreCase),
+                isDocx = fi.Name.EndsWith(".docx", StringComparison.OrdinalIgnoreCase),
             });
         }
         return list;

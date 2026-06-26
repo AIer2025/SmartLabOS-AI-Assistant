@@ -275,6 +275,7 @@ tr.imp-new { background: #f3fbf5; }
 }
 .ps-file:hover { background: #eef2f7; }
 .ps-file-urs { color: #b7791f; border-color: #f0e0c0; background: #fffaf0; }
+.ps-file-docx { color: #1d4ed8; border-color: #c7d7f5; background: #eef3fe; font-weight: 600; }
 .ps-log-wrap summary { cursor: pointer; font-size: 13px; color: var(--muted); }
 .ps-log {
   margin-top: 8px; max-height: 320px; overflow: auto; background: #0f1720; color: #d6e2f0;

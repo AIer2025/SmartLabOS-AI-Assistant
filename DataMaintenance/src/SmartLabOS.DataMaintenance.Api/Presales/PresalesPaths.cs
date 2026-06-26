@@ -14,6 +14,8 @@ public sealed class PresalesPaths
     public string ProtocolDir { get; }
     /// <summary>提案 HTML 输出模版文件。</summary>
     public string TemplateFile { get; }
+    /// <summary>WORD 提案（详细设计方案版）内容提纲 MD 文件。</summary>
+    public string DocxOutlineFile { get; }
     /// <summary>Claude Code 可执行命令（PATH 中可解析的命令或绝对路径）。</summary>
     public string ClaudeExecutable { get; }
     /// <summary>单次生成的超时分钟数。</summary>
@@ -26,7 +28,9 @@ public sealed class PresalesPaths
         ProjectsDir = Norm(s["ProjectsDir"]) ?? Path.Combine(ProjectRoot, "projects");
         ProtocolDir = Norm(s["ProtocolDir"]) ?? Path.Combine(ProjectRoot, "potocol", "MD");
         TemplateFile = Norm(s["TemplateFile"])
-            ?? Path.Combine(ProjectsDir, "上海海关项目", "SmartLabOS-技术提案输出模版.html");
+            ?? Path.Combine(ProjectRoot, "references", "_templates", "99-SmartLabOS-技术提案输出模版.html");
+        DocxOutlineFile = Norm(s["DocxOutlineFile"])
+            ?? Path.Combine(ProjectRoot, "references", "_templates", "02-SmartLabOS提案标准-详细设计方案版.md");
         ClaudeExecutable = string.IsNullOrWhiteSpace(s["ClaudeExecutable"]) ? "claude" : s["ClaudeExecutable"]!.Trim();
         GenerationTimeoutMinutes = int.TryParse(s["GenerationTimeoutMinutes"], out var m) && m > 0 ? m : 60;
     }
