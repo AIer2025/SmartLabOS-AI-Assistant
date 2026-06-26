@@ -191,3 +191,67 @@ DataMaintenance/database/03-presales-schema.sql
   `1.html`、`50ml高速冷冻离心模块-URS.html`、`Summary-输出总结.md`、
   `生成指令-20260626-163901.txt`、`WORD生成指令-20260626-165404.txt`、
   `build_docx.js`、`端到端验证-20260626_SmartLabOS_Presales_提案_20260626165404.docx`
+
+---
+
+## 附录：后续修改与测试履历（本总结写成之后）
+
+> 本附录记录在 §一~§八 总结成稿、首次提交之后发生的全部改动、问题与复测。
+
+### A1. 同步到 GitHub（首次）
+
+- 远程：`git@github.com:AIer2025/SmartLabOS-AI-Assistant.git`，分支 `main`（仓库惯例：直接提交 main）。
+- 提交 **`851d54f`**「售前方案生成：新增 WORD(.docx) 提案两阶段流程 + HTML 模版路径迁移」
+  - 27 个文件，+4594 / -103；含全部源码改动、模版迁移（新增 `99-…html`、`01/02-提案标准…md`，删除旧 `AI-需求.txt`）、本总结文件、测试项目产物。
+
+### A2. 问题①：Visual Studio Rebuild 后运行起不来
+
+- **现象**：VS 运行抛 `System.IO.IOException: Failed to bind to address http://localhost:5080` + `SocketException(10013) 以一种访问权限不允许的方式做了一个访问套接字的尝试`。
+- **根因**：非编译问题。端口 **5080 落在 Windows 排除端口段 5041–5140 内**（Hyper-V/WSL/Docker 等保留的动态端口段），任何进程都无法绑定。命令行此前用 8088 已绕过，但 VS 按 `launchSettings.json` 仍用 5080。
+- **诊断命令**：`netsh interface ipv4 show excludedportrange protocol=tcp`（确认 5080 在排除段、8088 不在且空闲）。
+- **修复**：`Properties/launchSettings.json` 两处 `5080` → **8088**（https 的 7080 不受影响，保留）。
+- **验证**：以 http profile 实跑，日志 `Now listening on: http://localhost:8088` + `Application started`，接口 200。
+- 提交 **`9ee8e0f`**「修复启动端口：launchSettings 由 5080 改为 8088」（1 文件，+2 / -2）。
+
+> 提醒：排除端口段重启后可能变化；若 8088 日后也被纳入排除段（再报 10013），用上面 `netsh` 命令重新查段、另挑段外端口即可。
+
+### A3. 问题②：运行日志疑似异常（实为正常）
+
+- **现象**：控制台刷屏 `Executing OkObjectResult, writing value of type '<>f__AnonymousType14`10[...]'` + 反复 `GET …/projects/7/generate/status 200`。
+- **结论**：**正常行为**。这是前端每 3 秒轮询生成状态；`AnonymousType`10`` 即状态 DTO 的 10 字段匿名类型（status / running / exitCode / error / outputFiles / **docxFile** / commandFile / startedAt / finishedAt / log）。`docxFile` 字段存在，印证运行的是最新代码。
+
+### A4. 服务端完整两阶段复测（真实端到端，成功）
+
+- 用户从 VS（https `7080`）发起对项目 `端到端验证-20260626`（id=7）的完整生成。
+- 轮询观察：`阶段一 → 阶段二 → succeeded` 自动衔接，**本次未触发空闲超时**（即便触发，A 版已加重试兜底）。
+- 状态返回 `docxFile = 端到端验证-20260626_SmartLabOS_Presales_提案_20260626185640.docx`。
+- **独立 OOXML 校验（本次新产物 185640）**：
+
+```
+大小              : 40,213 字节
+is_zipfile        : True
+zip 完整性(None=OK): None
+部件数            : 26（含 [Content_Types].xml / word/document.xml / _rels/.rels）
+word/document.xml : 617,727 字节
+表格数(w:tbl)     : 56
+文件名格式        : ✅ 匹配 {项目名}_SmartLabOS_Presales_提案_YYYYMMDDHHMMSS.docx
+                   （项目名=端到端验证-20260626，时间戳=20260626185640）
+```
+
+- **意义**：与 §四隔离重跑不同，本次是**经真实服务两阶段一次跑通**，四项需求在生产路径上全部验证通过；同时复验了 A2 的端口修复。
+- 注意：目录现存**两个 docx** —— `165404`（§四隔离测试遗留）与 `185640`（本次正式产物）；以状态接口 `docxFile` 返回者为准。
+
+### A5. 提交本次产物
+
+- 提交 **`14c1836`**「端到端验证产物：服务端完整两阶段跑通生成的 WORD 提案」（6 文件，+96 / -4）
+  - 新增 `…_提案_20260626185640.docx`、`生成指令-20260626-184245.txt`、`WORD生成指令-20260626-185640.txt`；更新 `1.html`、`Summary-输出总结.md`、`build_docx.js`。
+
+### A6. 提交时间线一览
+
+| 提交 | 说明 |
+| --- | --- |
+| `851d54f` | 售前方案生成：两阶段 WORD 流程 + HTML 模版迁移（主功能） |
+| `9ee8e0f` | 修复启动端口 5080 → 8088（VS 绑定失败） |
+| `14c1836` | 端到端验证产物：服务端完整跑通生成的 WORD 提案 |
+
+> 截至本附录，工作区干净，与 `origin/main` 一致。
