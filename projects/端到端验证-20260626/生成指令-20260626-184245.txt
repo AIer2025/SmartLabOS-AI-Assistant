@@ -1,0 +1,47 @@
+﻿# SmartLabOS 售前方案自动生成指令 —— 项目：端到端验证-20260626
+# 生成时间：2026-06-26 18:42:45
+
+1. 知识库（所有技术参数必须引用自此，严禁编造）：
+(1) 模块(共97个)：C:\TestClaude\SmartLabOS-AI-Assistant\references\01-modules
+(2) 平台抽象类(3种)：C:\TestClaude\SmartLabOS-AI-Assistant\references\02-platforms  —— 一个平台最多搭载6个模组、8个托盘
+    托盘资料：C:\TestClaude\SmartLabOS-AI-Assistant\references\06-pallet
+(3) 工作站：C:\TestClaude\SmartLabOS-AI-Assistant\references\03-workstation
+(4) 解决方案：C:\TestClaude\SmartLabOS-AI-Assistant\references\04-solutions
+(5) 项目范例：C:\TestClaude\SmartLabOS-AI-Assistant\references\05-Project
+
+2. 本项目提案输出目录：C:\TestClaude\SmartLabOS-AI-Assistant\projects\端到端验证-20260626
+
+3. 客户需求信息：
+------------------------------------------------------------------
+3.1 客户项目现状：
+实验室目前以人工方式完成兽药残留前处理，效率低、重复性差，希望引入自动化样品制备系统。
+
+3.2 客户挑战：
+  挑战-1：人工SPE净化流速不稳定，回收率波动大
+
+3.3 客户期望：
+  期望-1：实现前处理全自动化，单批次10分钟节拍
+
+3.4 流程范围：采样、制样、分样、前处理、检测、出具报告
+3.5 上下料方式：自动上下料
+3.6 软件功能：智慧实验室软件
+------------------------------------------------------------------
+
+4. 需实现的检验/检测流程标准（逐个生成方案）：
+4.1 标准文档：C:\TestClaude\SmartLabOS-AI-Assistant\potocol\MD\04-GB31658.17-2021.md
+    (a) 实现该文档中记述的「提取 & 净化」前处理流程；
+    (b) 从97个模组中选型，选定3种平台中适合的型号，在平台上搭载模组组成工作站，
+        再由工作站按前处理流程顺序串联成样品制备解决方案；用 HTML 格式给出方案，
+        必要时加入 SVG、Mermaid 图示。HTML 文件保存为：C:\TestClaude\SmartLabOS-AI-Assistant\projects\端到端验证-20260626\1.html
+
+5. 输出格式与计算要求：
+5.1 所有提案 HTML 必须遵循模版的全部内容项：C:\TestClaude\SmartLabOS-AI-Assistant\references\_templates\99-SmartLabOS-技术提案输出模版.html
+5.2 根据各平台所含模块功能码耗时 + 上下料时间，明确列出每个平台处理耗时，
+    叠加得出整个解决方案耗时（明确列出）；各平台处理时间尽量相等，并尽量接近 600 秒(10分钟)，
+    以此为标准拆分/设立平台。
+    本项目采用「自动上下料」，上下料时间按自动方式估算。
+5.3 若97个模块中没有合适模块实现某前处理需求，请输出新建模块的 URS 文档，
+    命名为「xxx-模块-URS.html」，必要时加入 SVG、Mermaid 图示；该新建模块的处理时间
+    采用规范 MD 文档中规定的时间 + 上下料时间，计入平台总耗时。
+
+6. 完成后，请在项目目录下输出一份「Summary-输出总结.md」，列出本次生成的所有文件与方案要点。

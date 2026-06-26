@@ -10,7 +10,7 @@ const {
   VerticalAlign, PageNumber, PageBreak, SectionType
 } = require("docx");
 
-const OUT = "C:\\TestClaude\\SmartLabOS-AI-Assistant\\projects\\端到端验证-20260626\\端到端验证-20260626_SmartLabOS_Presales_提案_20260626165404.docx";
+const OUT = "C:\\TestClaude\\SmartLabOS-AI-Assistant\\projects\\端到端验证-20260626\\端到端验证-20260626_SmartLabOS_Presales_提案_20260626185640.docx";
 
 // ---------- 调色 ----------
 const BRAND = "0C5C8F";   // 主蓝
@@ -171,7 +171,7 @@ body.push(table([3400, 5960], [
   ["1.html", "解决方案 HTML 提案（主方案，含工艺/平台/模组/工作站/耗时测算/公用工程）"],
   ["50ml高速冷冻离心模块-URS.html", "新建模块 URS（按生成指令 5.3，针对 §8.1 离心 −2 ℃/10000 r/min 能力缺口）"],
   ["Summary-输出总结.md", "输出总结（方案要点、对客户需求的回应、待确认事项）"],
-  ["WORD生成指令-20260626-165404.txt", "本 WORD 提案生成指令文档"],
+  ["WORD生成指令-20260626-185640.txt", "本 WORD 提案生成指令文档"],
 ]));
 body.push(noteBox("数据来源声明", [
   "本方案全部模组、平台、托盘、耗时参数均引用自 SmartLabOS 知识库 references/（01-modules、02-platforms、03-workstation、04-solutions、06-pallet）及本项目已生成的 1.html / URS 文件，并经模组卡逐一校验，未做杜撰；现有模组无法满足处按指令 5.3 输出新建模块 URS。",
