@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新建模块 URS · 50ml 离心管微波辅助萃取模块（MOD-WB-001）· SmartLabOS</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{--ink:#0f1b2d;--ink2:#33455c;--muted:#6b7c93;--line:#dfe6ef;--bg:#f4f7fb;--card:#fff;
+    --brand:#7a3ea8;--brand2:#0a9396;--accent:#ee9b00;--danger:#c1121f;--ok:#1f9d6b;
+    --chip:#f2ecfa;--radius:14px;--shadow:0 6px 22px rgba(15,27,45,.08);}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#2c0f3c 0%,#7a3ea8 60%,#b07fd0 130%);color:#fff;padding:44px 0 38px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:340px;height:340px;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#e7d4f5;border:1px solid rgba(231,212,245,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:26px;font-weight:700}
+  header.hero .sub{font-size:15.5px;color:#eaddf5;margin-bottom:20px;max-width:780px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 13px;font-size:13px}
+  section{padding:34px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 20px;font-size:14.5px}
+  h3{font-size:16px;margin:22px 0 10px}
+  p{margin:10px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--chip);color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  tfoot td{background:#f6f0fc;font-weight:700}
+  code,.mod{font-family:Consolas,monospace;background:var(--chip);color:var(--brand);padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}.note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#f3ecfa;border-color:var(--brand)}.note.bad{background:#fdecec;border-color:var(--danger)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin:14px 0}
+  footer{background:#2c0f3c;color:#cdb6e0;padding:24px 0;font-size:13px}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">新建模块需求规格说明书（URS）· 知识库缺口补充</span>
+    <h1>50ml 离心管微波辅助萃取模块<br>MOD-WB-001（拟建）</h1>
+    <div class="sub">本模块用于满足 <b>GB/T 21316—2007</b> 第 7.1 条「乙腈-水 + <b>微波辐照辅助</b>提取」工序。
+    SmartLabOS 现有 97 个模组及客户已确认 11 模组清单中<b>均无微波辐照辅助萃取能力</b>，依指令 5.3 输出新建模块 URS。</div>
+    <div class="hmeta">
+      <span>📋 触发标准：GB/T 21316—2007 §7.1</span>
+      <span>🧩 拟用类别码：WB（微波）</span>
+      <span>⏱ 处理时间：规范 60 s + 上下料 60 s = 120 s/循环</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+
+<section>
+  <h2><span class="num">1</span>缺口背景与必要性</h2>
+  <p class="lead">为何需要新建本模块。</p>
+  <div class="note bad"><b>缺口确认</b>GB/T 21316—2007 §7.1 明确：试样加乙腈-水后须经「<b>家用微波炉光波模式，功率 700 W，微波辐照 30 s</b>」辅助提取（提取与残渣再提取共 2 次，每次 30 s）。
+  经核对 <code>references/01-modules</code> 全部 97 个模组与客户已确认 11 模组清单，<b>无任何具备微波辐照能力的模组</b>（现有超声 <code>MOD-CS-004</code> 为超声空化机理，与微波介电加热机理不同，不可直接等效）。故须新建 <b>MOD-WB-001 微波辅助萃取模块</b>。</div>
+  <div class="note info"><b>过渡替代（须客户确认）</b>若暂不增配本模块，可由超声模组 <code>MOD-CS-004</code> 作为<b>辅助提取的过渡替代</b>（机理不同，须经方法学验证回收率/RSD 满足 §11 要求），但不视为对标准微波工序的严格符合。</div>
+</section>
+
+<section>
+  <h2><span class="num">2</span>模块标识与定位（拟）</h2>
+  <table>
+    <tr><th>字段</th><th>拟定值</th></tr>
+    <tr><td>模块 ID</td><td><code>MOD-WB-001</code>（拟，待编号委员会核准）</td></tr>
+    <tr><td>名称</td><td>50ml 离心管微波辅助萃取模块</td></tr>
+    <tr><td>类别 category</td><td>微波辅助萃取（WB）</td></tr>
+    <tr><td>作业对象</td><td>50 mL 尖底离心管（含乙腈-水提取体系）</td></tr>
+    <tr><td>对应功能码（拟）</td><td>WB10 微波辐照启动 / WB11 控温保护 / WB12 排废</td></tr>
+    <tr><td>兼容平台</td><td>PLT-800 / PLT-1200 / PLT-1400（标准模组位）</td></tr>
+    <tr><td>占用模组位（拟）</td><td>1</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">3</span>功能与性能需求（URS）</h2>
+  <table>
+    <tr><th>编号</th><th>需求项</th><th>规格要求</th><th>依据</th></tr>
+    <tr><td>URS-01</td><td>微波辐照</td><td>微波频率 2450 MHz，功率可调（含 700 W 档位），单次辐照时间 5–300 s 可设（默认 30 s）</td><td>GB/T 21316 §5「700 W」、§7.1「30 s」</td></tr>
+    <tr><td>URS-02</td><td>多次提取</td><td>支持同管多次辐照（≥2 次），与加液/离心工序联动</td><td>§7.1 提取 + 残渣再提取</td></tr>
+    <tr><td>URS-03</td><td>控温保护</td><td>红外/光纤测温，超温自动断电；防有机溶剂暴沸，温度上限可设（建议 ≤60 ℃）</td><td>乙腈低沸点安全</td></tr>
+    <tr><td>URS-04</td><td>容器适配</td><td>50 mL 尖底离心管，单/多工位（建议 ≥4 工位并行）</td><td>与本线 50 mL 体系一致</td></tr>
+    <tr><td>URS-05</td><td>自动上下料</td><td>机械臂自动取放，上下料时间 ≤60 s/模组</td><td>项目「自动上下料」</td></tr>
+    <tr><td>URS-06</td><td>安全防护</td><td>微波泄漏 ≤5 mW/cm²，门连锁、急停、屏蔽腔；防爆/排风接口</td><td>GB 微波安全 / 实验室安全</td></tr>
+    <tr><td>URS-07</td><td>通信</td><td>MODBUS TCP，纳入 SmartLabOS 智慧实验室软件统一调度</td><td>系统集成</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2><span class="num">4</span>工作流程与时序（拟）</h2>
+  <div class="mermaid">
+flowchart LR
+  A([50ml 离心管<br/>含乙腈-水]):::s --> B[机械臂上料<br/>≤60s]:::w --> C[微波辐照 30s<br/>700W · 控温]:::m --> D{需再提取?}:::d
+  D -->|是 残渣再提取| C
+  D -->|否| E[微波停止<br/>排废/降温]:::w --> F[机械臂下料]:::w --> G([转离心工序]):::s
+  classDef s fill:#2c0f3c,color:#fff,stroke:none;
+  classDef w fill:#f3ecfa,stroke:#7a3ea8,color:#5a2a82;
+  classDef m fill:#ffe9c7,stroke:#c9760f,color:#7a4708;
+  classDef d fill:#fff,stroke:#7a3ea8,color:#5a2a82;
+  </div>
+  <div class="card">
+    <h3>处理时间核算（计入 2.html 平台总耗时）</h3>
+    <table>
+      <tr><th>项目</th><th>取值</th><th>依据</th></tr>
+      <tr><td>规范规定微波时间</td><td>30 s × 2 次 = <b>60 s</b></td><td>GB/T 21316 §7.1（提取 + 残渣再提取各 30 s）</td></tr>
+      <tr><td>自动上下料</td><td><b>60 s</b></td><td>项目自动上下料估算（与其他模组一致）</td></tr>
+      <tr><td><b>本模块单循环处理时间</b></td><td><b>120 s</b></td><td>规范时间 60 s + 上下料 60 s（依指令 5.3）</td></tr>
+    </table>
+    <div class="note ok"><b>计入方式</b>本模块 120 s 已计入方案二（2.html）WS-02「微波萃取·离心工站」平台总耗时。</div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">5</span>安全、公用工程与验收</h2>
+  <table>
+    <tr><th>类别</th><th>要求</th></tr>
+    <tr><td>供电</td><td>220 V 单相 + 24 V 控制电；功率随微波档位（700 W 档建议预留 ≥1.5 kVA）</td></tr>
+    <tr><td>排风/防爆</td><td>乙腈挥发，须接万向抽气罩/防爆排风；腔体微波屏蔽且泄漏达标</td></tr>
+    <tr><td>压缩空气</td><td>0.4–0.7 MPa（气动夹持/门连锁，按设计）</td></tr>
+    <tr><td>验收（拟 FAT/SAT）</td><td>微波泄漏检测、控温精度、回收率/RSD 满足 GB/T 21316 §11（约 70%~110%，RSD ≤15%）</td></tr>
+  </table>
+  <div class="note warn"><b>状态</b>本文件为<b>新建模块需求规格（URS）</b>，非现有出货模组卡片；所列功能码、ID、占位均为拟定，须经研发评审、编号核准与样机验证后方可正式纳入 SmartLabOS 模组库。</div>
+</section>
+
+</div>
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    新建模块 URS · MOD-WB-001 微波辅助萃取模块 · 触发标准 GB/T 21316—2007 §7.1 · 处理时间 120 s/循环（已计入 2.html）<br>
+    <span style="color:#9a7fb0">依指令第 5.3 条：97 模组及客户确认清单无对应微波能力，故输出新建模块 URS；参数待研发评审与样机验证确认，不作既有模组使用。</span>
+  </div>
+</footer>
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#f3ecfa',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#7a3ea8',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>
