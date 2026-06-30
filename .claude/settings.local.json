@@ -18,7 +18,10 @@
       "Read(//c/c/TestClaude/SmartLabOS-AI-Assistant/卡片生成/**)",
       "PowerShell(& 'C:\\\\Users\\\\littl\\\\AppData\\\\Local\\\\Temp\\\\patch_vba.ps1')",
       "PowerShell(& 'C:\\\\Users\\\\littl\\\\AppData\\\\Local\\\\Temp\\\\verify_vba.ps1')",
-      "PowerShell(& 'C:\\\\Users\\\\littl\\\\AppData\\\\Local\\\\Temp\\\\smoke_export.ps1')"
+      "PowerShell(& 'C:\\\\Users\\\\littl\\\\AppData\\\\Local\\\\Temp\\\\smoke_export.ps1')",
+      "Bash(ls -la Summary-Newest-Proposal-Generation-20260630.md)",
+      "Bash(ls projects/测试项目/package.json)",
+      "Bash(ls -d \"C:/Users/littl/AppData/Roaming/npm/node_modules/docx\")"
     ]
   }
 }

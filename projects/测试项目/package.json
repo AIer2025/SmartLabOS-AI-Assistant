@@ -1,9 +1,0 @@
-{
-  "name": "smartlabos-presales-docx-test-project",
-  "version": "1.0.0",
-  "private": true,
-  "description": "测试项目（成都市食品检验研究院·兽残专项）WORD 提案重生成。运行 `npm run docx` 即可由 build_docx.js 重新生成 .docx；NODE_PATH 已内置，无需手动设置。docx 库装在全局 npm node_modules。",
-  "scripts": {
-    "docx": "set \"NODE_PATH=C:\\Users\\littl\\AppData\\Roaming\\npm\\node_modules\" && node build_docx.js"
-  }
-}
