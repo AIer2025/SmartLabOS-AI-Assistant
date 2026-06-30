@@ -25,6 +25,11 @@ public sealed class PresalesProject
     /// <summary>6.2.6 软件功能: 设备操作软件 / 智慧实验室软件。</summary>
     public string? SoftwareType { get; set; }
 
+    /// <summary>已选定/已确认的模块ID列表(如 MOD-CC-001)。在「模块选定→模块确认」流程中维护。</summary>
+    public List<string> Modules { get; set; } = new();
+    /// <summary>是否已点击「模块确认」。仅在已确认后才允许进入「方案生成」。</summary>
+    public bool ModulesConfirmed { get; set; }
+
     public string GenStatus { get; set; } = "draft";
     public string? LastCommandFile { get; set; }
     public string? LastGeneratedAt { get; set; }

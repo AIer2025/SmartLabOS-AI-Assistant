@@ -11,6 +11,11 @@
     projects: [],
     current: null,        // 当前选中项目(完整 DTO)
     pollTimer: null,
+    // 模块选定
+    modCatalog: null,     // [{id,name,category}] 全量模块目录(缓存)
+    workingModules: [],   // 当前编辑中的模块ID列表
+    modulesConfirmed: false,
+    modPollTimer: null,
   };
 
   // ---------- 视图切换 ----------
@@ -39,6 +44,8 @@
       state.initialized = false;
       return;
     }
+    // 预载模块目录，便于模块芯片直接显示名称（失败不阻塞主流程）
+    ensureModCatalog().catch(() => {});
     await loadProjects();
   }
 
@@ -85,6 +92,7 @@
   // ---------- 选中并渲染表单 ----------
   async function selectProject(id) {
     stopPoll();
+    stopModPoll();
     let p;
     try { p = await api(`/api/presales/projects/${id}`); }
     catch (e) { toast("读取项目失败：" + e.message, "bad"); return; }
@@ -118,7 +126,210 @@
     renderRadios("psLoading", "psLoading", state.options.loadingMethods, p.loadingMethod);
     renderRadios("psSoftware", "psSoftware", state.options.softwareTypes, p.softwareType);
 
+    // 模块选定（回显已选/已确认模块——重新打开项目时供确认/增删）
+    initModules(p);
+
     $("psGenPanel").hidden = false;
+  }
+
+  // ---------- 模块选定 / 模块确认 ----------
+  function initModules(p) {
+    state.workingModules = (p.modules || []).map((m) => (typeof m === "string" ? m : m.id));
+    state.modulesConfirmed = !!p.modulesConfirmed;
+    $("psModulePanel").hidden = false;
+    $("psModLogWrap").hidden = true;
+    renderModChips();
+  }
+
+  // 模块ID → {id,name,category}（取自全量目录，缺失时退化为仅ID）
+  function modInfo(id) {
+    const c = (state.modCatalog || []).find((m) => m.id === id);
+    return c || { id, name: "", category: "" };
+  }
+
+  function renderModChips() {
+    const box = $("psModChips");
+    box.innerHTML = "";
+    $("psModCount").textContent = state.workingModules.length;
+    const panel = $("psModulePanel");
+    panel.classList.toggle("confirmed", state.modulesConfirmed);
+
+    if (state.workingModules.length === 0) {
+      box.innerHTML = `<span class="ps-mod-empty">尚未选定模块。点击「自动推理选定」或「+ 添加模块」。</span>`;
+    } else {
+      state.workingModules.forEach((id) => {
+        const info = modInfo(id);
+        const chip = document.createElement("span");
+        chip.className = "ps-chip";
+        chip.innerHTML =
+          `<span class="ps-chip-id">${esc(info.id)}</span>` +
+          (info.name ? `<span class="ps-chip-name">${esc(info.name)}</span>` : "");
+        const del = document.createElement("button");
+        del.type = "button"; del.className = "ps-chip-del"; del.title = "移除"; del.textContent = "✕";
+        del.addEventListener("click", () => removeModule(id));
+        chip.appendChild(del);
+        box.appendChild(chip);
+      });
+    }
+    setModBadge(state.modulesConfirmed ? "confirmed" : state.workingModules.length ? "pending" : "none");
+  }
+
+  function removeModule(id) {
+    state.workingModules = state.workingModules.filter((x) => x !== id);
+    state.modulesConfirmed = false;   // 编辑后需重新确认
+    renderModChips();
+  }
+
+  function setModBadge(kind) {
+    const el = $("psModStatus");
+    const map = {
+      running: ["推理中", "ps-st-running"],
+      confirmed: ["已确认", "ps-st-succeeded"],
+      pending: ["待确认", "ps-st-queued"],
+      none: ["未选定", "ps-st-draft"],
+      failed: ["推理失败", "ps-st-failed"],
+    };
+    const [text, cls] = map[kind] || map.none;
+    el.textContent = text;
+    el.className = "ps-badge " + cls;
+  }
+
+  // 自动推理选定（异步调用 Claude Code，轮询结果）
+  async function inferModules() {
+    if (!state.current) return;
+    if (!(await save())) return;      // 先落库，保证 protocols 已保存
+    if (collectChecks("psProtocols").length === 0) {
+      toast("请先至少选择一个流程标准", "bad"); return;
+    }
+    if (!confirm("将调用本机 Claude Code，依据国标与需求自动推理推荐模块。\n该过程可能需要一段时间，期间可继续查看日志。是否开始？")) return;
+    try {
+      await api(`/api/presales/projects/${state.current.id}/modules/select`,
+        { method: "POST", body: "{}" });
+      toast("已开始模块选定（自动推理）", "ok");
+      setModBadge("running");
+      $("psModLogWrap").hidden = false;
+      startModPoll();
+    } catch (e) { toast("启动模块选定失败：" + e.message, "bad"); }
+  }
+
+  function startModPoll() {
+    stopModPoll();
+    state.modPollTimer = setInterval(refreshModStatus, 3000);
+    refreshModStatus();
+  }
+  function stopModPoll() {
+    if (state.modPollTimer) { clearInterval(state.modPollTimer); state.modPollTimer = null; }
+  }
+
+  async function refreshModStatus() {
+    if (!state.current) return;
+    let s;
+    try { s = await api(`/api/presales/projects/${state.current.id}/modules/select/status`); }
+    catch (e) { return; }
+    if (s.log != null) { $("psModLog").textContent = s.log; $("psModLogWrap").hidden = false; }
+
+    if (s.running) {
+      setModBadge("running");
+      if (!state.modPollTimer) startModPoll();
+      return;
+    }
+    stopModPoll();
+    if (s.status === "failed") {
+      setModBadge("failed");
+      toast("模块选定失败：" + (s.error || "见日志"), "bad");
+      return;
+    }
+    if (s.status === "succeeded" || (s.recommended && s.recommended.length)) {
+      // 用推荐结果替换当前选定，待用户增删后确认
+      state.workingModules = (s.recommended || []).map((m) => (typeof m === "string" ? m : m.id));
+      state.modulesConfirmed = !!s.modulesConfirmed;
+      renderModChips();
+      toast(`模块选定完成，推荐 ${state.workingModules.length} 个模块，请确认`, "ok");
+    }
+  }
+
+  // 模块确认（保存最终模块清单并标记已确认）
+  async function confirmModules() {
+    if (!state.current) return;
+    if (state.workingModules.length === 0) {
+      toast("请至少选定一个模块后再确认", "bad"); return;
+    }
+    try {
+      const r = await api(`/api/presales/projects/${state.current.id}/modules/confirm`,
+        { method: "POST", body: JSON.stringify({ modules: state.workingModules }) });
+      state.workingModules = (r.modules || []).map((m) => (typeof m === "string" ? m : m.id));
+      state.modulesConfirmed = !!r.modulesConfirmed;
+      if (state.current) {
+        state.current.modules = r.modules;
+        state.current.modulesConfirmed = r.modulesConfirmed;
+      }
+      renderModChips();
+      toast("模块已确认，可继续「方案生成」", "ok");
+    } catch (e) { toast("模块确认失败：" + e.message, "bad"); }
+  }
+
+  // ---------- 添加模块选择器 ----------
+  async function ensureModCatalog() {
+    if (state.modCatalog) return state.modCatalog;
+    const r = await api("/api/presales/modules");
+    state.modCatalog = r.items || [];
+    return state.modCatalog;
+  }
+
+  async function openModPicker() {
+    try { await ensureModCatalog(); }
+    catch (e) { toast("加载模块目录失败：" + e.message, "bad"); return; }
+    $("psModTotal").textContent = state.modCatalog.length;
+    $("psModSearch").value = "";
+    renderModPickList("");
+    $("psModPickMask").hidden = false;
+    $("psModSearch").focus();
+  }
+
+  function renderModPickList(keyword) {
+    const box = $("psModPickList");
+    box.innerHTML = "";
+    const kw = (keyword || "").trim().toLowerCase();
+    const have = new Set(state.workingModules);
+    let shown = 0;
+    state.modCatalog.forEach((m) => {
+      const hay = `${m.id} ${m.name} ${m.category}`.toLowerCase();
+      if (kw && !hay.includes(kw)) return;
+      shown++;
+      const already = have.has(m.id);
+      const lab = document.createElement("label");
+      lab.className = "ps-mod-pick-item" + (already ? " is-selected" : "");
+      const cb = document.createElement("input");
+      cb.type = "checkbox"; cb.value = m.id;
+      cb.checked = already; cb.disabled = already;
+      cb.addEventListener("change", updateModPickCount);
+      lab.appendChild(cb);
+      lab.appendChild(Object.assign(document.createElement("span"),
+        { innerHTML: `<b>${esc(m.id)}</b> ${esc(m.name)}` +
+            (m.category ? ` <span class="ps-mod-pick-cat">·${esc(m.category)}</span>` : "") +
+            (already ? ` <span class="ps-mod-pick-cat">(已添加)</span>` : "") }));
+      box.appendChild(lab);
+    });
+    if (shown === 0) box.innerHTML = `<p class="hint">无匹配模块。</p>`;
+    updateModPickCount();
+  }
+
+  function updateModPickCount() {
+    $("psModPickCount").textContent =
+      document.querySelectorAll("#psModPickList input:checked:not(:disabled)").length;
+  }
+
+  function addPickedModules() {
+    const picked = Array.from(
+      document.querySelectorAll("#psModPickList input:checked:not(:disabled)")
+    ).map((c) => c.value);
+    if (picked.length === 0) { $("psModPickMask").hidden = true; return; }
+    const set = new Set(state.workingModules);
+    picked.forEach((id) => { if (!set.has(id)) { state.workingModules.push(id); set.add(id); } });
+    state.modulesConfirmed = false;   // 编辑后需重新确认
+    $("psModPickMask").hidden = true;
+    renderModChips();
+    toast(`已添加 ${picked.length} 个模块，请确认`, "ok");
   }
 
   function renderProtocols(selected) {
@@ -300,6 +511,9 @@
     if (collectChecks("psProtocols").length === 0) {
       toast("请至少选择一个流程标准", "bad"); return;
     }
+    if (!state.modulesConfirmed || state.workingModules.length === 0) {
+      toast("请先完成「模块选定 → 模块确认」后再生成方案", "bad"); return;
+    }
     if (!confirm("将调用本机 Claude Code 在项目目录下自动生成提案文件：\n先生成解决方案 HTML 与 URS 文档，再据此生成 WORD(.docx) 提案。\n两阶段过程可能需要较长时间。是否开始？")) return;
     try {
       await api(`/api/presales/projects/${state.current.id}/generate`, { method: "POST", body: "{}" });
@@ -382,8 +596,19 @@
 
     $("psSaveBtn").addEventListener("click", save);
     $("psPreviewBtn").addEventListener("click", preview);
+    $("psSelectModBtn").addEventListener("click", inferModules);
     $("psGenerateBtn").addEventListener("click", generate);
     $("psDeleteBtn").addEventListener("click", deleteProject);
+
+    // 模块选定面板
+    $("psModInferBtn").addEventListener("click", inferModules);
+    $("psModAddBtn").addEventListener("click", openModPicker);
+    $("psModConfirmBtn").addEventListener("click", confirmModules);
+    $("psModPickClose").addEventListener("click", () => ($("psModPickMask").hidden = true));
+    $("psModPickCancel").addEventListener("click", () => ($("psModPickMask").hidden = true));
+    $("psModPickAdd").addEventListener("click", addPickedModules);
+    $("psModPickMask").addEventListener("click", (e) => { if (e.target === $("psModPickMask")) $("psModPickMask").hidden = true; });
+    $("psModSearch").addEventListener("input", (e) => renderModPickList(e.target.value));
 
     $("psPreviewClose").addEventListener("click", () => ($("psPreviewMask").hidden = true));
     $("psPreviewCancel").addEventListener("click", () => ($("psPreviewMask").hidden = true));

@@ -75,7 +75,7 @@
       <main class="content">
         <div id="psEmpty" class="ps-empty">
           <p>请选择左侧项目，或点击「+ 新建项目」开始。</p>
-          <p class="hint">流程：新建项目 → 填写需求信息 → 保存 → 方案生成（调用 Claude Code 在项目目录下生成 *.html 提案）。</p>
+          <p class="hint">流程：新建项目 → 填写需求信息 → 保存 → 模块选定（自动推理，可增删）→ 模块确认 → 方案生成（调用 Claude Code 生成 *.html 提案与 WORD 文档）。</p>
         </div>
 
         <div id="psForm" hidden>
@@ -85,6 +85,7 @@
               <span id="psStatusBadge" class="ps-badge">—</span>
               <button id="psSaveBtn" class="btn" type="button">保存需求</button>
               <button id="psPreviewBtn" class="btn" type="button">预览指令</button>
+              <button id="psSelectModBtn" class="btn" type="button">模块选定 ⚙</button>
               <button id="psGenerateBtn" class="btn btn-primary" type="button">方案生成 ▶</button>
               <button id="psDeleteBtn" class="btn btn-danger" type="button">删除项目</button>
             </div>
@@ -146,6 +147,26 @@
             </div>
           </div>
 
+          <!-- 模块选定 / 模块确认 -->
+          <section class="ps-card ps-mod" id="psModulePanel" hidden>
+            <div class="ps-gen-head">
+              <span class="ps-label">模块选定</span>
+              <span id="psModStatus" class="ps-badge">—</span>
+              <span class="ps-mod-count">已选 <span id="psModCount">0</span></span>
+              <div class="ps-mod-actions">
+                <button id="psModInferBtn" class="btn btn-sm" type="button">自动推理选定</button>
+                <button id="psModAddBtn" class="btn btn-sm" type="button">+ 添加模块</button>
+                <button id="psModConfirmBtn" class="btn btn-sm btn-primary" type="button">模块确认 ✓</button>
+              </div>
+            </div>
+            <p class="hint" id="psModHint">点击「模块选定 ⚙」或「自动推理选定」，系统将依据国标与需求自动推荐模块；可删除/添加后点击「模块确认」。也可直接「添加模块」手工选定。</p>
+            <div id="psModChips" class="ps-mod-chips"></div>
+            <details id="psModLogWrap" class="ps-log-wrap" hidden>
+              <summary>推理日志</summary>
+              <pre id="psModLog" class="ps-log"></pre>
+            </details>
+          </section>
+
           <!-- 生成状态 / 日志 / 产物 -->
           <section class="ps-card ps-gen" id="psGenPanel" hidden>
             <div class="ps-gen-head">
@@ -197,6 +218,27 @@
       </div>
       <div class="modal-foot">
         <button class="btn" id="psPreviewCancel">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加模块对话框 -->
+  <div class="modal-mask" id="psModPickMask" hidden>
+    <div class="modal modal-wide">
+      <div class="modal-head">
+        <h3>添加模块（references/01-modules，共 <span id="psModTotal">0</span> 个）</h3>
+        <button class="icon-btn" id="psModPickClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="ps-mod-pick-bar">
+          <input id="psModSearch" class="ps-mod-search" placeholder="按编号/名称/分类搜索…" />
+          <span class="hint">已勾选 <span id="psModPickCount">0</span> 个</span>
+        </div>
+        <div id="psModPickList" class="ps-mod-pick-list"><!-- 由 JS 生成 --></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="psModPickCancel">取消</button>
+        <button class="btn btn-primary" id="psModPickAdd">添加所选</button>
       </div>
     </div>
   </div>

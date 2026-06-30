@@ -25,6 +25,7 @@ builder.Services.AddSingleton<SmartLabRepository>();
 // 售前方案自动生成：需求仓储 + 路径配置 + Claude Code 执行器（执行器持有内存任务状态，须单例）。
 builder.Services.AddSingleton<PresalesRepository>();
 builder.Services.AddSingleton<PresalesPaths>();
+builder.Services.AddSingleton<ModuleCatalog>();
 builder.Services.AddSingleton<ClaudeCodeRunner>();
 
 // 开发期允许任意来源调试前端；生产部署同源(同一 IIS 站点)无需 CORS。

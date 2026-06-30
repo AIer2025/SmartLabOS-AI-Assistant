@@ -12,6 +12,8 @@ public sealed class PresalesPaths
     public string ProjectsDir { get; }
     /// <summary>流程标准 MD 目录 potocol/MD。</summary>
     public string ProtocolDir { get; }
+    /// <summary>模块知识库目录 references/01-modules（共97个模块卡片 MD）。</summary>
+    public string ModulesDir { get; }
     /// <summary>提案 HTML 输出模版文件。</summary>
     public string TemplateFile { get; }
     /// <summary>WORD 提案（详细设计方案版）内容提纲 MD 文件。</summary>
@@ -27,6 +29,7 @@ public sealed class PresalesPaths
         ProjectRoot = Norm(s["ProjectRoot"]) ?? @"C:\TestClaude\SmartLabOS-AI-Assistant";
         ProjectsDir = Norm(s["ProjectsDir"]) ?? Path.Combine(ProjectRoot, "projects");
         ProtocolDir = Norm(s["ProtocolDir"]) ?? Path.Combine(ProjectRoot, "potocol", "MD");
+        ModulesDir = Norm(s["ModulesDir"]) ?? Path.Combine(ProjectRoot, "references", "01-modules");
         TemplateFile = Norm(s["TemplateFile"])
             ?? Path.Combine(ProjectRoot, "references", "_templates", "99-SmartLabOS-技术提案输出模版.html");
         DocxOutlineFile = Norm(s["DocxOutlineFile"])

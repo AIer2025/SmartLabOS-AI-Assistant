@@ -255,3 +255,70 @@ word/document.xml : 617,727 字节
 | `14c1836` | 端到端验证产物：服务端完整跑通生成的 WORD 提案 |
 
 > 截至本附录，工作区干净，与 `origin/main` 一致。
+
+---
+
+## 附录二：WORD 提案生成拆分为「模块选定 → 模块确认 → 方案生成」（2026-06-30）
+
+> 本附录记录在原两阶段流程之上，新增「模块选定 / 模块确认」前置步骤的全部改动与验证。
+> 需求：方案生成前，先由系统自动推理选出模块并展示，用户可删除/添加、再确认；确认后方可生成；
+> 重新打开已选定模块的项目时回显供确认与增删。
+
+### B1. 需求拆解（四点）
+
+1. **模块选定**：点击后系统自动计算推理，展示自动选定模块一览，可删除/添加。
+   - 删除：移除系统自动选定的模块；
+   - 添加：展示 `references/01-modules` 全部模块，支持多选添加。
+2. **模块确认**：确认所选模块并存入项目提案信息；也可不增删直接确认。
+3. 确认后方可继续「方案生成」。
+4. 重新打开项目时，若此前已选定模块，则回显供确认，删除/添加均可。
+
+### B2. 设计决策（经与用户确认）
+
+- **自动推理引擎**：复用 headless Claude Code（读国标 + 需求 + 97 个模块知识库推理），有据可溯，与既有方案生成一致需异步轮询。`references/01-modules` 无现成「国标→模块」映射表，纯关键词启发式不可靠，故采用 Claude 推理。
+- **生成约束强度**：方案生成 **严格限定** 只能从已确认模块中选型，不得引入清单外模块。
+
+### B3. 数据库
+
+- 新增幂等迁移 `DataMaintenance/database/04-presales-modules.sql`：给 `SmartLabOS-PresalesProject` 增加
+  - `modules`(JSON，已选定/确认的模块ID数组，如 `["MOD-CC-001"]`)
+  - `modules_confirmed`(TINYINT，是否已点击「模块确认」)
+  - MySQL 8 不支持 `ADD COLUMN IF NOT EXISTS`，故用 `INFORMATION_SCHEMA` 判定 + 预处理语句实现幂等。
+- **已对 `SmartLabOS-Presales-AI` 库执行并验证两列就位。**
+
+### B4. 后端改动
+
+| 文件 | 改动 |
+| --- | --- |
+| `Services/ModuleCatalog.cs`（新增） | 扫描 `references/01-modules` 全部 97 个卡片：ID 取文件名（可靠），名称/分类解析自 YAML frontmatter；提供目录、ID 校验/规整、文本抽取；按目录签名缓存。 |
+| `Services/ClaudeCodeRunner.cs` | ①新增异步「模块选定」推理任务：headless Claude 产出 `模块选定-推荐.json`，解析（JSON 失败回退正则抽取 `MOD-XX-000`）后落库为未确认；②把 headless 进程核心重构为通用 `RunHeadlessOnce/WithRetry`（返回 `(exit, fatal)`）供两条流程复用；③生成指令文档注入「模块选型范围 — 强制」清单，强制只用已确认模块。 |
+| `Controllers/PresalesController.cs` | 新增 `GET /modules`（目录）、`GET /projects/{id}/modules`（回显）、`POST .../modules/select` + `/select/status`（推理+轮询）、`POST .../modules/confirm`（确认）；项目 DTO 增 `modules`/`modulesConfirmed`；**方案生成前置校验：未确认即 400 拒绝**。 |
+| `Presales/PresalesModels.cs` | `PresalesProject` 增 `Modules` / `ModulesConfirmed`。 |
+| `Presales/PresalesRepository.cs` | 映射两列 + 新增 `SetModulesAsync`（模块列独立写库，不影响既有需求保存）。 |
+| `Presales/PresalesPaths.cs` | 新增 `ModulesDir`（默认 `references/01-modules`，可配置）。 |
+| `Program.cs` | 注册 `ModuleCatalog` 单例。 |
+
+### B5. 前端改动
+
+- `wwwroot/index.html`：工具栏加「模块选定 ⚙」；需求区与生成面板之间新增「模块选定」面板（自动推理选定 / + 添加模块 / 模块确认 ✓、模块芯片、推理日志）；新增「添加模块」弹窗（97 个可搜索多选）。
+- `wwwroot/js/presales.js`：模块状态机（工作清单 / 已确认标记 / 推理轮询）、芯片增删、选择器多选合并、确认落库、回显，方案生成前置校验。
+- `wwwroot/css/style.css`：模块面板、芯片、选择器样式。
+
+### B6. 验证（构建 + 接口实测）
+
+- **构建**：`dotnet build` 0 警告 0 错误。
+- **接口实测**（http `8088`，临时项目，已清理）：
+  - `GET /modules` → 返回 **97** 项，含名称/分类（如 `MOD-CC-001 800样品存储模块 存储`）；
+  - 未确认模块时 `POST .../generate` → **400**「请先完成「模块选定 → 模块确认」后再生成方案」；
+  - `POST .../modules/confirm`（含 1 个伪造ID `BOGUS-XX-999`）→ 伪造ID被过滤，仅保留真实模块，`modulesConfirmed=true`；
+  - `GET .../modules`（重开场景）→ 正确回显已确认模块；
+  - 空确认 → **400**「请至少选定一个模块后再确认」；
+  - `command-preview` → 指令文档正确嵌入「模块选型范围 — 强制」清单（带模块名/分类与卡片目录）。
+- **未触发计费实跑**：真实「自动推理」需本机 Claude CLI 实跑一次（耗时较长），本次未触发；其余链路均已实测通过。
+
+### B7. 本次未纳入提交的工作区改动
+
+- `launchSettings.json` 的 https 端口 `7080 → 8443`（用户既有改动，与本功能无关）；
+- 删除 `projects/端到端验证-20260626.rar`、新增 `projects/projects.zip`（归档整理，与本功能无关）。
+
+> 以上三项保留在工作区，未随本功能提交。

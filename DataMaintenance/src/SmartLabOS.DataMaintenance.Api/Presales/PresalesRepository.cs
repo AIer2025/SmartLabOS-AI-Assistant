@@ -88,6 +88,21 @@ public sealed class PresalesRepository
         return n > 0;
     }
 
+    /// <summary>
+    /// 保存「模块选定/确认」结果。modules 以 JSON 数组存储，confirmed 标记是否已点击「模块确认」。
+    /// 与需求信息的 UpdateAsync 解耦：模块流程独立写库，互不影响。
+    /// </summary>
+    public async Task SetModulesAsync(long id, IEnumerable<string> modules, bool confirmed)
+    {
+        await using var conn = Open();
+        await conn.ExecuteAsync("""
+            UPDATE `SmartLabOS-PresalesProject` SET
+              `modules`=@modules, `modules_confirmed`=@confirmed
+            WHERE `id`=@id;
+            """,
+            new { id, modules = JsonSerializer.Serialize(modules, JsonOpts), confirmed = confirmed ? 1 : 0 });
+    }
+
     public async Task SetGenStatusAsync(long id, string status, string? commandFile = null, bool markGenerated = false)
     {
         await using var conn = Open();
@@ -170,6 +185,8 @@ public sealed class PresalesRepository
             ProcessScope = JsonList(d, "process_scope"),
             LoadingMethod = Str(d, "loading_method"),
             SoftwareType = Str(d, "software_type"),
+            Modules = JsonList(d, "modules"),
+            ModulesConfirmed = Bool(d, "modules_confirmed"),
             GenStatus = Str(d, "gen_status") ?? "draft",
             LastCommandFile = Str(d, "last_command_file"),
             LastGeneratedAt = DateStr(d, "last_generated_at"),
@@ -199,6 +216,21 @@ public sealed class PresalesRepository
 
     private static string? Str(IDictionary<string, object?> d, string key)
         => d.TryGetValue(key, out var v) && v is not null ? v.ToString() : null;
+
+    private static bool Bool(IDictionary<string, object?> d, string key)
+    {
+        if (!d.TryGetValue(key, out var v) || v is null) return false;
+        return v switch
+        {
+            bool b => b,
+            sbyte sb => sb != 0,
+            byte by => by != 0,
+            short sh => sh != 0,
+            int i => i != 0,
+            long l => l != 0,
+            _ => v.ToString() is "1" or "true" or "True",
+        };
+    }
 
     private static string? DateStr(IDictionary<string, object?> d, string key)
         => d.TryGetValue(key, out var v) && v is DateTime dt ? dt.ToString("yyyy-MM-dd HH:mm:ss") : Str(d, key);

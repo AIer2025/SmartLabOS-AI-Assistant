@@ -24,12 +24,14 @@ public sealed class PresalesController : ControllerBase
     private readonly PresalesRepository _repo;
     private readonly PresalesPaths _paths;
     private readonly ClaudeCodeRunner _runner;
+    private readonly ModuleCatalog _catalog;
 
-    public PresalesController(PresalesRepository repo, PresalesPaths paths, ClaudeCodeRunner runner)
+    public PresalesController(PresalesRepository repo, PresalesPaths paths, ClaudeCodeRunner runner, ModuleCatalog catalog)
     {
         _repo = repo;
         _paths = paths;
         _runner = runner;
+        _catalog = catalog;
     }
 
     // ----------------------- 选项 -----------------------
@@ -132,6 +134,106 @@ public sealed class PresalesController : ControllerBase
         return ok ? NoContent() : NotFound(new { message = $"项目不存在: {id}" });
     }
 
+    // ----------------------- 模块选定 / 模块确认 -----------------------
+
+    /// <summary>全部可选模块目录（references/01-modules，共97个）。供「添加模块」选择器使用。</summary>
+    [HttpGet("modules")]
+    public IActionResult Modules()
+    {
+        var items = _catalog.All().Select(m => new { id = m.Id, name = m.Name, category = m.Category });
+        return Ok(new { items });
+    }
+
+    /// <summary>取某项目当前的模块选定情况（已选模块 + 是否已确认）。重新打开项目时回显用。</summary>
+    [HttpGet("projects/{id:long}/modules")]
+    public async Task<IActionResult> GetModules(long id)
+    {
+        var p = await _repo.GetAsync(id);
+        if (p is null) return NotFound(new { message = $"项目不存在: {id}" });
+        return Ok(BuildModulesDto(p));
+    }
+
+    /// <summary>触发「模块选定」自动推理（异步调用 Claude Code，前端轮询 /modules/select/status）。</summary>
+    [HttpPost("projects/{id:long}/modules/select")]
+    public async Task<IActionResult> SelectModules(long id)
+    {
+        var p = await _repo.GetAsync(id);
+        if (p is null) return NotFound(new { message = $"项目不存在: {id}" });
+        if (p.Protocols.Count == 0)
+            return BadRequest(new { message = "请先在需求信息中至少选择一个流程标准，再进行模块选定" });
+        if (_runner.IsSelecting(id))
+            return Conflict(new { message = "该项目正在进行模块选定，请稍候" });
+
+        EnsureDir(p);
+        await _runner.StartModuleSelectionAsync(p);
+        return Accepted(new { message = "已开始模块选定（自动推理）", status = "running" });
+    }
+
+    /// <summary>轮询「模块选定」自动推理状态/结果。</summary>
+    [HttpGet("projects/{id:long}/modules/select/status")]
+    public async Task<IActionResult> SelectModulesStatus(long id)
+    {
+        var p = await _repo.GetAsync(id);
+        if (p is null) return NotFound(new { message = $"项目不存在: {id}" });
+
+        var job = _runner.GetSelectJob(id);
+        if (job is null)
+        {
+            // 进程内无实时任务（如服务重启）：回退到库中已保存的选定结果
+            return Ok(new
+            {
+                status = p.Modules.Count > 0 ? "succeeded" : "idle",
+                running = false,
+                recommended = Decorate(p.Modules),
+                modulesConfirmed = p.ModulesConfirmed,
+                log = (string?)null,
+            });
+        }
+
+        return Ok(new
+        {
+            status = job.Status,
+            running = job.Status is "queued" or "running",
+            recommended = Decorate(job.Recommended),
+            error = job.Error,
+            startedAt = job.StartedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+            finishedAt = job.FinishedAt?.ToString("yyyy-MM-dd HH:mm:ss"),
+            log = job.LogTail(),
+        });
+    }
+
+    public sealed record ConfirmModulesRequest(List<string>? Modules);
+
+    /// <summary>「模块确认」：保存用户最终选定的模块清单，并标记为已确认。允许空确认前的增删后提交。</summary>
+    [HttpPost("projects/{id:long}/modules/confirm")]
+    public async Task<IActionResult> ConfirmModules(long id, [FromBody] ConfirmModulesRequest req)
+    {
+        var p = await _repo.GetAsync(id);
+        if (p is null) return NotFound(new { message = $"项目不存在: {id}" });
+
+        // 仅保留知识库中真实存在的模块ID（去重、保持顺序）
+        var modules = _catalog.Normalize(req.Modules);
+        if (modules.Count == 0)
+            return BadRequest(new { message = "请至少选定一个模块后再确认" });
+
+        await _repo.SetModulesAsync(id, modules, confirmed: true);
+        var updated = await _repo.GetAsync(id);
+        return Ok(BuildModulesDto(updated!));
+    }
+
+    private object BuildModulesDto(PresalesProject p) => new
+    {
+        modules = Decorate(p.Modules),
+        modulesConfirmed = p.ModulesConfirmed,
+    };
+
+    /// <summary>把模块ID清单补全为 {id,name,category}，便于前端直接展示。</summary>
+    private List<object> Decorate(IEnumerable<string> ids) => ids.Select(id =>
+    {
+        var info = _catalog.Find(id);
+        return (object)new { id, name = info?.Name ?? "", category = info?.Category ?? "" };
+    }).ToList();
+
     // ----------------------- 方案生成 -----------------------
 
     [HttpGet("projects/{id:long}/command-preview")]
@@ -150,6 +252,8 @@ public sealed class PresalesController : ControllerBase
         if (p is null) return NotFound(new { message = $"项目不存在: {id}" });
         if (p.Protocols.Count == 0)
             return BadRequest(new { message = "请至少选择一个流程标准后再生成方案" });
+        if (!p.ModulesConfirmed || p.Modules.Count == 0)
+            return BadRequest(new { message = "请先完成「模块选定 → 模块确认」后再生成方案" });
         if (_runner.IsRunning(id))
             return Conflict(new { message = "该项目的方案正在生成中，请稍候" });
 
@@ -307,7 +411,7 @@ public sealed class PresalesController : ControllerBase
         return null;
     }
 
-    private static object ToDto(PresalesProject p) => new
+    private object ToDto(PresalesProject p) => new
     {
         id = p.Id,
         projectName = p.ProjectName,
@@ -319,6 +423,8 @@ public sealed class PresalesController : ControllerBase
         processScope = p.ProcessScope,
         loadingMethod = p.LoadingMethod,
         softwareType = p.SoftwareType,
+        modules = Decorate(p.Modules),
+        modulesConfirmed = p.ModulesConfirmed,
         genStatus = p.GenStatus,
         lastCommandFile = p.LastCommandFile,
         lastGeneratedAt = p.LastGeneratedAt,

@@ -22,15 +22,19 @@ public sealed class ClaudeCodeRunner
 {
     private readonly PresalesPaths _paths;
     private readonly PresalesRepository _repo;
+    private readonly ModuleCatalog _catalog;
     private readonly ILogger<ClaudeCodeRunner> _log;
 
     // 项目ID -> 实时任务状态（仅最近一次运行）
     private readonly ConcurrentDictionary<long, GenJob> _jobs = new();
+    // 项目ID -> 最近一次「模块选定」推理任务状态
+    private readonly ConcurrentDictionary<long, ModuleSelectJob> _selectJobs = new();
 
-    public ClaudeCodeRunner(PresalesPaths paths, PresalesRepository repo, ILogger<ClaudeCodeRunner> log)
+    public ClaudeCodeRunner(PresalesPaths paths, PresalesRepository repo, ModuleCatalog catalog, ILogger<ClaudeCodeRunner> log)
     {
         _paths = paths;
         _repo = repo;
+        _catalog = catalog;
         _log = log;
     }
 
@@ -38,6 +42,12 @@ public sealed class ClaudeCodeRunner
 
     public bool IsRunning(long projectId) =>
         _jobs.TryGetValue(projectId, out var j) && j.Status is "queued" or "running";
+
+    public ModuleSelectJob? GetSelectJob(long projectId) =>
+        _selectJobs.TryGetValue(projectId, out var j) ? j : null;
+
+    public bool IsSelecting(long projectId) =>
+        _selectJobs.TryGetValue(projectId, out var j) && j.Status is "queued" or "running";
 
     /// <summary>
     /// 启动一次方案生成（不阻塞）。返回所写指令文件的文件名。
@@ -92,8 +102,9 @@ public sealed class ClaudeCodeRunner
                 $"请严格按照以下指令文档完成 SmartLabOS 售前技术方案的生成。所有技术参数必须引用自 references/ 知识库，" +
                 $"禁止编造。指令文档内容如下：\n\n{commandText}";
 
-            var exit1 = await RunClaudeWithRetryAsync(project, htmlPrompt, job, sb, "HTML 提案");
-            if (exit1 is null) return;          // 启动失败/超时：FailAsync 已在内部调用
+            var (exit1, fatal1) = await RunHeadlessWithRetryAsync(
+                project, htmlPrompt, sb, "HTML 提案", pid => job.ProcessId = pid);
+            if (fatal1 is not null) { await FailAsync(project, job, null, fatal1); return; }
             if (exit1 != 0)
             {
                 await FailAsync(project, job, exit1, $"HTML 提案生成失败：claude 退出码 {exit1}");
@@ -115,8 +126,9 @@ public sealed class ClaudeCodeRunner
                 $"请严格按照以下指令文档，基于已生成的 HTML 提案与 URS 文档，产出一份 WORD(.docx) 详细设计方案提案。" +
                 $"所有技术参数必须引用自 references/ 知识库及本项目目录下已生成的 HTML 文件，禁止编造。指令文档内容如下：\n\n{wordCommand}";
 
-            var exit2 = await RunClaudeWithRetryAsync(project, wordPrompt, job, sb, "WORD 提案");
-            if (exit2 is null) return;
+            var (exit2, fatal2) = await RunHeadlessWithRetryAsync(
+                project, wordPrompt, sb, "WORD 提案", pid => job.ProcessId = pid);
+            if (fatal2 is not null) { await FailAsync(project, job, null, fatal2); return; }
             if (exit2 != 0)
             {
                 await FailAsync(project, job, exit2, $"WORD 提案生成失败：claude 退出码 {exit2}");
@@ -157,10 +169,11 @@ public sealed class ClaudeCodeRunner
 
     /// <summary>
     /// 运行一个阶段，并在命中疑似瞬态错误（见 TransientErrorMarkers）且退出码非 0 时自动重试。
-    /// 返回最终退出码；若进程未能启动/超时（已 FailAsync），返回 null。
+    /// 返回 (退出码, 致命错误)：正常退出时 Fatal 为 null；进程未能启动/超时时 Exit 为 null、Fatal 为原因。
+    /// 本方法不直接改写任务状态/数据库，由调用方据 Fatal/Exit 决定如何收尾。
     /// </summary>
-    private async Task<int?> RunClaudeWithRetryAsync(
-        PresalesProject project, string prompt, GenJob job, StringBuilder sb, string phaseLabel, int maxAttempts = 2)
+    private async Task<(int? Exit, string? Fatal)> RunHeadlessWithRetryAsync(
+        PresalesProject project, string prompt, StringBuilder sb, string phaseLabel, Action<int> setPid, int maxAttempts = 2)
     {
         for (int attempt = 1; ; attempt++)
         {
@@ -168,9 +181,9 @@ public sealed class ClaudeCodeRunner
                 AppendLog(sb, $"[重试] {phaseLabel}：第 {attempt}/{maxAttempts} 次尝试…");
 
             var markLen = SbLength(sb);
-            var exit = await RunClaudeOnceAsync(project, prompt, job, sb);
-            if (exit is null) return null;   // 启动失败/超时：FailAsync 已在内部调用
-            if (exit == 0) return 0;
+            var (exit, fatal) = await RunHeadlessOnceAsync(project, prompt, sb, setPid);
+            if (fatal is not null) return (null, fatal);   // 启动失败/超时
+            if (exit == 0) return (0, null);
 
             var recent = RecentLog(sb, markLen);
             var transient = TransientErrorMarkers.Any(m => recent.Contains(m, StringComparison.OrdinalIgnoreCase));
@@ -178,17 +191,18 @@ public sealed class ClaudeCodeRunner
             {
                 if (transient)
                     AppendLog(sb, $"[重试] {phaseLabel}：已达最大重试次数({maxAttempts})，放弃。");
-                return exit;
+                return (exit, null);
             }
             AppendLog(sb, $"[重试] {phaseLabel}：检测到疑似瞬态错误，准备重试。");
         }
     }
 
     /// <summary>
-    /// 启动一次 headless claude 进程并等待其结束。返回退出码；
-    /// 若进程未能启动或超时（此时已调用 FailAsync 标记失败），返回 null。
+    /// 启动一次 headless claude 进程并等待其结束。返回 (退出码, 致命错误)：
+    /// 正常结束时 (ExitCode, null)；进程未能启动或超时时 (null, 原因)。不改写任务状态/数据库。
     /// </summary>
-    private async Task<int?> RunClaudeOnceAsync(PresalesProject project, string prompt, GenJob job, StringBuilder sb)
+    private async Task<(int? Exit, string? Fatal)> RunHeadlessOnceAsync(
+        PresalesProject project, string prompt, StringBuilder sb, Action<int> setPid)
     {
         // 直接启动 claude(.exe)，不经 cmd.exe —— 规避 cmd 对引号的特殊处理与中文乱码。
         // 参数用 ArgumentList 逐项添加，由运行时负责转义，无需手工拼引号。
@@ -219,18 +233,14 @@ public sealed class ClaudeCodeRunner
         try
         {
             if (!p.Start())
-            {
-                await FailAsync(project, job, null, "无法启动 claude 进程。");
-                return null;
-            }
+                return (null, "无法启动 claude 进程。");
         }
         catch (Exception ex)
         {
-            await FailAsync(project, job, null,
+            return (null,
                 $"无法启动 claude：{ex.Message}。请确认已安装 Claude Code，且 appsettings.json 的 Presales:ClaudeExecutable 指向正确的可执行文件(如 C:\\Users\\<用户>\\.local\\bin\\claude.exe)。");
-            return null;
         }
-        job.ProcessId = p.Id;
+        setPid(p.Id);
         p.BeginOutputReadLine();
         p.BeginErrorReadLine();
 
@@ -250,11 +260,10 @@ public sealed class ClaudeCodeRunner
         if (!p.WaitForExit((int)timeout.TotalMilliseconds))
         {
             try { p.Kill(true); } catch { }
-            await FailAsync(project, job, null, $"生成超时（>{_paths.GenerationTimeoutMinutes} 分钟），已终止。");
-            return null;
+            return (null, $"执行超时（>{_paths.GenerationTimeoutMinutes} 分钟），已终止。");
         }
         p.WaitForExit(); // 确保异步日志读取收尾
-        return p.ExitCode;
+        return (p.ExitCode, null);
     }
 
     private async Task FailAsync(PresalesProject project, GenJob job, int? exit, string message)
@@ -266,6 +275,158 @@ public sealed class ClaudeCodeRunner
         job.FinishedAt = DateTime.Now;
         await _repo.FinishGenerationAsync(job.GenerationId, "failed", exit, job.OutputFiles, Tail(job.LogBuilder));
         await _repo.SetGenStatusAsync(project.Id, "failed");
+    }
+
+    // ---------------- 模块选定（自动推理） ----------------
+
+    /// <summary>
+    /// 启动一次「模块选定」自动推理（不阻塞）：调用 headless claude，依据国标与客户需求，
+    /// 从 references/01-modules 的97个模块中选出实现前处理流程所需的模块，写入
+    /// 「模块选定-推荐.json」。完成后解析该文件得到推荐模块ID，落库(confirmed=false)。
+    /// </summary>
+    public Task StartModuleSelectionAsync(PresalesProject project)
+    {
+        Directory.CreateDirectory(project.ProjectDir!);
+
+        var job = new ModuleSelectJob
+        {
+            ProjectId = project.Id,
+            Status = "running",
+            StartedAt = DateTime.Now,
+        };
+        _selectJobs[project.Id] = job;
+
+        var jsonOut = Path.Combine(project.ProjectDir!, "模块选定-推荐.json");
+        // 删除上一轮残留，确保读到本次新结果
+        try { if (File.Exists(jsonOut)) File.Delete(jsonOut); } catch { /* ignore */ }
+
+        var command = BuildModuleSelectionCommand(project, jsonOut);
+        _ = Task.Run(() => RunModuleSelectionAsync(project, command, jsonOut, job));
+        return Task.CompletedTask;
+    }
+
+    private async Task RunModuleSelectionAsync(PresalesProject project, string command, string jsonOut, ModuleSelectJob job)
+    {
+        var sb = job.LogBuilder;
+        try
+        {
+            AppendLog(sb, "==== 模块选定：依据国标 + 客户需求，从 references/01-modules 推理推荐模块 ====");
+            var prompt =
+                $"请严格按照以下指令完成 SmartLabOS「模块选定」。只能从 references/01-modules 目录下真实存在的模块中选择，" +
+                $"严禁编造模块编号。只需产出一个 JSON 结果文件，不要生成其它文件。指令内容如下：\n\n{command}";
+
+            var (exit, fatal) = await RunHeadlessWithRetryAsync(
+                project, prompt, sb, "模块选定", pid => job.ProcessId = pid);
+            if (fatal is not null) { FailSelect(job, fatal); return; }
+            if (exit != 0) { FailSelect(job, $"模块选定失败：claude 退出码 {exit}"); return; }
+
+            var ids = ReadRecommendedModules(jsonOut, sb);
+            await _repo.SetModulesAsync(project.Id, ids, confirmed: false);
+
+            job.Recommended = ids;
+            job.Status = "succeeded";
+            job.FinishedAt = DateTime.Now;
+            AppendLog(sb, ids.Count == 0
+                ? "[警告] 未能从结果中解析出任何有效模块ID，请改用手动「添加模块」。"
+                : $"模块选定完成：推荐 {ids.Count} 个模块 —— {string.Join("、", ids)}");
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "模块选定失败 project={Project}", project.ProjectName);
+            FailSelect(job, ex.Message);
+        }
+    }
+
+    private void FailSelect(ModuleSelectJob job, string message)
+    {
+        AppendLog(job.LogBuilder, "[失败] " + message);
+        job.Status = "failed";
+        job.Error = message;
+        job.FinishedAt = DateTime.Now;
+    }
+
+    /// <summary>解析「模块选定-推荐.json」得到推荐模块ID；文件缺失/不规范时回退到运行日志中按规则抽取。</summary>
+    private List<string> ReadRecommendedModules(string jsonOut, StringBuilder sb)
+    {
+        string content = "";
+        try { if (File.Exists(jsonOut)) content = File.ReadAllText(jsonOut); }
+        catch (Exception ex) { AppendLog(sb, "[警告] 读取模块选定结果文件失败：" + ex.Message); }
+
+        var ids = _catalog.ExtractFromText(content);
+        if (ids.Count == 0)
+        {
+            // 回退：claude 可能未落盘文件，但在日志中列出了模块ID
+            ids = _catalog.ExtractFromText(Tail(sb));
+            if (ids.Count > 0)
+                AppendLog(sb, "[提示] 结果文件缺失/为空，已从运行日志回退解析模块ID。");
+        }
+        return ids;
+    }
+
+    /// <summary>「模块选定」指令文档：令 claude 读取国标与需求，从97个模块中选型并输出 JSON 结果文件。</summary>
+    public string BuildModuleSelectionCommand(PresalesProject p, string jsonOutPath)
+    {
+        var sb = new StringBuilder();
+        var protocolDir = _paths.ProtocolDir;
+
+        sb.AppendLine($"# SmartLabOS 模块选定指令 —— 项目：{p.ProjectName}");
+        sb.AppendLine($"# 生成时间：{DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine();
+        sb.AppendLine("目标：依据下述检验/检测国标的「提取 & 净化」前处理流程，结合客户需求，");
+        sb.AppendLine("从模块知识库中选出**实现该前处理流程所必需的最小充分模块集合**。");
+        sb.AppendLine();
+
+        sb.AppendLine($"1. 模块知识库目录（候选模块仅限于此，模块ID = 文件名去扩展名，如 MOD-CC-001）：");
+        sb.AppendLine($"   {_paths.ModulesDir}");
+        sb.AppendLine("   - 必须先浏览该目录下的模块卡片，依据每个模块的功能描述/功能码/分类判断是否匹配；");
+        sb.AppendLine("   - 严禁编造目录中不存在的模块编号；只能引用真实存在的卡片文件名作为模块ID。");
+        sb.AppendLine();
+
+        sb.AppendLine("2. 需实现的检验/检测流程标准：");
+        if (p.Protocols.Count == 0)
+        {
+            sb.AppendLine("   （未选择任何流程标准——请结合下方客户需求与流程范围进行选型）");
+        }
+        else
+        {
+            for (int i = 0; i < p.Protocols.Count; i++)
+                sb.AppendLine($"   2.{i + 1} {Path.Combine(protocolDir, p.Protocols[i])}");
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("3. 客户需求信息（用于约束选型）：");
+        sb.AppendLine("------------------------------------------------------------------");
+        sb.AppendLine("3.1 客户项目现状：");
+        sb.AppendLine(string.IsNullOrWhiteSpace(p.CurrentStatus) ? "（未填写）" : p.CurrentStatus!.Trim());
+        sb.AppendLine();
+        sb.AppendLine("3.2 客户挑战：");
+        AppendNumbered(sb, p.Challenges, "挑战");
+        sb.AppendLine();
+        sb.AppendLine("3.3 客户期望：");
+        AppendNumbered(sb, p.Expectations, "期望");
+        sb.AppendLine();
+        sb.AppendLine($"3.4 流程范围：{Join(p.ProcessScope)}");
+        sb.AppendLine($"3.5 上下料方式：{Or(p.LoadingMethod)}");
+        sb.AppendLine($"3.6 软件功能：{Or(p.SoftwareType)}");
+        sb.AppendLine("------------------------------------------------------------------");
+        sb.AppendLine();
+
+        sb.AppendLine("4. 选型原则：");
+        sb.AppendLine("   (1) 覆盖前处理流程的每一道工序（如加液/涡旋/离心/浓缩/SPE净化/定容等），不遗漏关键步骤；");
+        sb.AppendLine("   (2) 在满足工艺前提下尽量精简，避免功能重复的冗余模块；");
+        sb.AppendLine("   (3) 若某工序在97个模块中确无匹配模块，可在结果 notes 中说明（不要编造模块ID）。");
+        sb.AppendLine();
+
+        sb.AppendLine("5. 输出要求（务必只产出以下一个 JSON 文件，不要生成 HTML/Word/Markdown 等其它文件）：");
+        sb.AppendLine($"   文件路径：{jsonOutPath}");
+        sb.AppendLine("   文件内容为 UTF-8 的 JSON 对象，格式如下：");
+        sb.AppendLine("   {");
+        sb.AppendLine("     \"modules\": [\"MOD-XX-001\", \"MOD-YY-002\"],   // 推荐模块ID数组，按前处理流程顺序排列");
+        sb.AppendLine("     \"notes\": \"选型理由与未覆盖工序说明（可选）\"");
+        sb.AppendLine("   }");
+        sb.AppendLine("6. 完成后，请在运行日志中明确列出最终推荐的模块ID清单，便于核对。");
+
+        return sb.ToString();
     }
 
     // ---------------- 指令文档生成 ----------------
@@ -293,6 +454,8 @@ public sealed class ClaudeCodeRunner
 
         sb.AppendLine($"2. 本项目提案输出目录：{p.ProjectDir}");
         sb.AppendLine();
+
+        AppendConfirmedModules(sb, p);
 
         sb.AppendLine("3. 客户需求信息：");
         sb.AppendLine("------------------------------------------------------------------");
@@ -328,7 +491,7 @@ public sealed class ClaudeCodeRunner
                 var idx = i + 1;
                 sb.AppendLine($"4.{idx} 标准文档：{full}");
                 sb.AppendLine($"    (a) 实现该文档中记述的「提取 & 净化」前处理流程；");
-                sb.AppendLine($"    (b) 从97个模组中选型，选定3种平台中适合的型号，在平台上搭载模组组成工作站，");
+                sb.AppendLine($"    (b) 仅从上文「模块选型范围 — 强制」清单中的已确认模块选型，选定3种平台中适合的型号，在平台上搭载模组组成工作站，");
                 sb.AppendLine($"        再由工作站按前处理流程顺序串联成样品制备解决方案；用 HTML 格式给出方案，");
                 sb.AppendLine($"        必要时加入 SVG、Mermaid 图示。HTML 文件保存为：{Path.Combine(p.ProjectDir!, $"{idx}.html")}");
                 sb.AppendLine();
@@ -389,6 +552,8 @@ public sealed class ClaudeCodeRunner
         sb.AppendLine($"   (3) 客户需求信息：见下方第 5 节。");
         sb.AppendLine();
 
+        AppendConfirmedModules(sb, p);
+
         sb.AppendLine("3. 客户需求信息（用于撰写第1章项目概述、第2章标准适配等）：");
         sb.AppendLine("------------------------------------------------------------------");
         sb.AppendLine("3.1 客户项目现状：");
@@ -422,6 +587,36 @@ public sealed class ClaudeCodeRunner
         sb.AppendLine("6. 完成后，在运行日志中明确输出该 .docx 的最终保存绝对路径，便于核对。");
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// 渲染「已确认模块（强制选型范围）」区块：方案生成只能从该清单中选型组装平台/工作站，
+    /// 不得引入清单外的模块。模块经「模块选定 → 模块确认」流程确定。
+    /// </summary>
+    private void AppendConfirmedModules(StringBuilder sb, PresalesProject p)
+    {
+        sb.AppendLine("【模块选型范围 — 强制】");
+        sb.AppendLine("本方案已经过「模块选定 → 模块确认」，最终确认的模块清单如下；");
+        sb.AppendLine("方案生成**只能从以下已确认模块中选型**，组装平台/工作站与解决方案，");
+        sb.AppendLine("严禁引入清单之外的任何模块（如确有缺口，请在文中明确说明，不得自行替换）。");
+        if (p.Modules.Count == 0)
+        {
+            sb.AppendLine("  （未确认任何模块——请联系业务确认模块清单后再生成）");
+        }
+        else
+        {
+            for (int i = 0; i < p.Modules.Count; i++)
+            {
+                var id = p.Modules[i];
+                var info = _catalog.Find(id);
+                var label = info is null
+                    ? id
+                    : $"{info.Id}  {info.Name}{(string.IsNullOrWhiteSpace(info.Category) ? "" : $"（{info.Category}）")}";
+                sb.AppendLine($"  {i + 1}. {label}");
+            }
+            sb.AppendLine($"  模块卡片目录：{_paths.ModulesDir}（按上述ID取对应 .md 卡片读取参数）");
+        }
+        sb.AppendLine();
     }
 
     private static void AppendNumbered(StringBuilder sb, List<string> items, string label)
@@ -517,6 +712,29 @@ public sealed class GenJob
     public List<string> OutputFiles { get; set; } = new();
     /// <summary>本次生成的 WORD 提案文件名（若已成功生成）。</summary>
     public string? DocxFile { get; set; }
+    public DateTime StartedAt { get; set; }
+    public DateTime? FinishedAt { get; set; }
+    public StringBuilder LogBuilder { get; } = new();
+
+    public string LogTail(int n = 4000)
+    {
+        lock (LogBuilder)
+        {
+            var s = LogBuilder.ToString();
+            return s.Length <= n ? s : s[^n..];
+        }
+    }
+}
+
+/// <summary>单个项目最近一次「模块选定」自动推理任务的实时状态（内存）。</summary>
+public sealed class ModuleSelectJob
+{
+    public long ProjectId { get; set; }
+    public string Status { get; set; } = "queued";   // queued/running/succeeded/failed
+    public int? ProcessId { get; set; }
+    public string? Error { get; set; }
+    /// <summary>本次推理推荐的模块ID清单（已按知识库校验、保持顺序）。</summary>
+    public List<string> Recommended { get; set; } = new();
     public DateTime StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
     public StringBuilder LogBuilder { get; } = new();
