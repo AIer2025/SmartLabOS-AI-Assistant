@@ -97,6 +97,7 @@ public sealed class ClaudeCodeRunner
         try
         {
             // ===== 阶段一：生成解决方案 HTML 提案 与 xxx-模块-URS.html =====
+            job.Phase = 1;
             AppendLog(sb, "==== 阶段一：生成解决方案 HTML 提案与 URS 文档 ====");
             var htmlPrompt =
                 $"请严格按照以下指令文档完成 SmartLabOS 售前技术方案的生成。所有技术参数必须引用自 references/ 知识库，" +
@@ -121,6 +122,7 @@ public sealed class ClaudeCodeRunner
             await File.WriteAllTextAsync(
                 Path.Combine(project.ProjectDir!, wordCmdFileName), wordCommand, new UTF8Encoding(true));
 
+            job.Phase = 2;
             AppendLog(sb, "==== 阶段二：生成 WORD(.docx) 提案文档 ====");
             var wordPrompt =
                 $"请严格按照以下指令文档，基于已生成的 HTML 提案与 URS 文档，产出一份 WORD(.docx) 详细设计方案提案。" +
@@ -706,6 +708,8 @@ public sealed class GenJob
     public long GenerationId { get; set; }
     public string CommandFile { get; set; } = "";
     public string Status { get; set; } = "queued";   // queued/running/succeeded/failed
+    /// <summary>当前阶段：0=准备中, 1=生成 HTML/URS, 2=生成 WORD。共 2 个实质阶段。</summary>
+    public int Phase { get; set; }
     public int? ExitCode { get; set; }
     public int? ProcessId { get; set; }
     public string? Error { get; set; }

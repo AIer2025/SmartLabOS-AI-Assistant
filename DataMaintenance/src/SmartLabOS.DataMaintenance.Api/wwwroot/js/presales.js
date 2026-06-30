@@ -16,7 +16,144 @@
     workingModules: [],   // 当前编辑中的模块ID列表
     modulesConfirmed: false,
     modPollTimer: null,
+    // 长任务进度（每秒刷新用时与进度条）
+    genProg: { start: 0, phase: 0, timer: null },
+    modProg: { start: 0, timer: null },
   };
+
+  // ---------- 进度条工具 ----------
+  function fmtElapsed(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  }
+  // 解析后端 "yyyy-MM-dd HH:mm:ss"（本地时间）为毫秒；失败返回 null
+  function parseStarted(str) {
+    if (!str) return null;
+    const t = Date.parse(str.replace(" ", "T"));
+    return isNaN(t) ? null : t;
+  }
+  // 取日志中最后一条非空行，作为"当前活动"提示
+  function lastActivity(log) {
+    if (!log) return "";
+    const lines = log.split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+    return lines.length ? lines[lines.length - 1] : "";
+  }
+  // 随时间渐进逼近(0→1)，越久越慢，营造"持续推进但不虚报完成"的观感
+  function easeUp(ms, tau) {
+    return 1 - Math.exp(-Math.max(0, ms) / (tau || 120000));
+  }
+
+  function setBar(barEl, pct, klass) {
+    barEl.style.width = Math.max(0, Math.min(100, pct)) + "%";
+    barEl.className = "ps-pbar-fill" + (klass ? " " + klass : "");
+  }
+
+  // —— 方案生成进度（两阶段：HTML/URS → WORD）——
+  function genPhaseFromLog(log) {
+    if (!log) return 0;
+    if (log.includes("阶段二")) return 2;
+    if (log.includes("阶段一")) return 1;
+    return 0;
+  }
+  function genPercent(phase, elapsed) {
+    const e = easeUp(elapsed);
+    if (phase >= 2) return Math.min(96, 55 + e * 41);
+    if (phase === 1) return Math.min(48, 10 + e * 38);
+    return Math.min(12, 4 + e * 8);   // 排队/准备
+  }
+  function genPhaseText(phase) {
+    if (phase >= 2) return "阶段 2/2：生成 WORD(.docx) 提案";
+    if (phase === 1) return "阶段 1/2：生成解决方案 HTML 与 URS";
+    return "准备中：组织指令并启动 Claude Code…";
+  }
+  // s = 生成状态响应；据其更新进度块
+  function updateGenProgress(s) {
+    const box = $("psGenProgress");
+    if (s.running) {
+      box.hidden = false;
+      // 优先用服务端权威的已用秒数与阶段；缺省时退回原有推断
+      state.genProg.start = (typeof s.elapsedSeconds === "number")
+        ? Date.now() - s.elapsedSeconds * 1000
+        : (state.genProg.start || parseStarted(s.startedAt) || Date.now());
+      state.genProg.phase = (typeof s.phase === "number") ? s.phase : genPhaseFromLog(s.log);
+      $("psGenActivity").textContent = lastActivity(s.log);
+      if (!state.genProg.timer) state.genProg.timer = setInterval(tickGen, 1000);
+      tickGen();
+      return;
+    }
+    stopGenTicker();
+    const wasTracking = state.genProg.start !== 0;   // 本次会话内确实跑过才展示终态
+    state.genProg.start = 0;
+    if (!wasTracking) { box.hidden = true; return; } // 旧项目重开，不展示历史进度
+    if (s.status === "succeeded") {
+      box.hidden = false;
+      setBar($("psGenBar"), 100, "done");
+      $("psGenPhase").textContent = "已完成";
+    } else if (s.status === "failed") {
+      box.hidden = false;
+      $("psGenBar").className = "ps-pbar-fill failed";
+      $("psGenPhase").textContent = "生成失败（见运行日志）";
+    } else {
+      box.hidden = true;
+    }
+  }
+  function tickGen() {
+    const elapsed = Date.now() - (state.genProg.start || Date.now());
+    $("psGenElapsed").textContent = "用时 " + fmtElapsed(elapsed);
+    $("psGenPhase").textContent = genPhaseText(state.genProg.phase);
+    setBar($("psGenBar"), genPercent(state.genProg.phase, elapsed), "busy");
+  }
+  function stopGenTicker() {
+    if (state.genProg.timer) { clearInterval(state.genProg.timer); state.genProg.timer = null; }
+  }
+
+  // —— 模块选定进度（单阶段推理）——
+  function updateModProgress(s) {
+    const box = $("psModProgress");
+    if (s.running) {
+      box.hidden = false;
+      state.modProg.start = (typeof s.elapsedSeconds === "number")
+        ? Date.now() - s.elapsedSeconds * 1000
+        : (state.modProg.start || parseStarted(s.startedAt) || Date.now());
+      $("psModActivity").textContent = lastActivity(s.log);
+      if (!state.modProg.timer) state.modProg.timer = setInterval(tickMod, 1000);
+      tickMod();
+      return;
+    }
+    stopModTicker();
+    const wasTracking = state.modProg.start !== 0;
+    state.modProg.start = 0;
+    if (!wasTracking) { box.hidden = true; return; }
+    if (s.status === "succeeded") {
+      box.hidden = false;
+      setBar($("psModBar"), 100, "done");
+      $("psModPhase").textContent = "已完成，请确认模块";
+      $("psModElapsed").textContent = "";
+      $("psModActivity").textContent = "";
+    } else if (s.status === "failed") {
+      box.hidden = false;
+      $("psModBar").className = "ps-pbar-fill failed";
+      $("psModPhase").textContent = "推理失败（见推理日志）";
+    } else {
+      box.hidden = true;
+    }
+  }
+  function tickMod() {
+    const elapsed = Date.now() - (state.modProg.start || Date.now());
+    $("psModElapsed").textContent = "用时 " + fmtElapsed(elapsed);
+    $("psModPhase").textContent = "推理选型中：读取国标/需求并匹配模块…";
+    setBar($("psModBar"), Math.min(92, 8 + easeUp(elapsed) * 84), "busy");
+  }
+  function stopModTicker() {
+    if (state.modProg.timer) { clearInterval(state.modProg.timer); state.modProg.timer = null; }
+  }
+  // 任务刚启动时立即点亮进度块（在首次轮询返回前给出反馈）
+  function seedProgress(prog, boxId, tickFn) {
+    prog.start = Date.now();
+    $(boxId).hidden = false;
+    if (!prog.timer) prog.timer = setInterval(tickFn, 1000);
+    tickFn();
+  }
 
   // ---------- 视图切换 ----------
   function bindTabs() {
@@ -93,6 +230,7 @@
   async function selectProject(id) {
     stopPoll();
     stopModPoll();
+    resetProgress();
     let p;
     try { p = await api(`/api/presales/projects/${id}`); }
     catch (e) { toast("读取项目失败：" + e.message, "bad"); return; }
@@ -100,6 +238,18 @@
     renderProjectList();
     renderForm(p);
     refreshStatus(true);
+    refreshModStatus(true);   // 若该项目模块选定正在进行，则恢复进度展示与轮询
+  }
+
+  // 切换项目时清空两条长任务的进度（停计时器、归零起点、隐藏进度块）
+  function resetProgress() {
+    stopGenTicker();
+    stopModTicker();
+    state.genProg.start = 0; state.genProg.phase = 0;
+    state.modProg.start = 0;
+    const g = $("psGenProgress"), m = $("psModProgress");
+    if (g) g.hidden = true;
+    if (m) m.hidden = true;
   }
 
   function renderForm(p) {
@@ -208,6 +358,7 @@
       toast("已开始模块选定（自动推理）", "ok");
       setModBadge("running");
       $("psModLogWrap").hidden = false;
+      seedProgress(state.modProg, "psModProgress", tickMod);   // 立即显示进度，不等首次轮询
       startModPoll();
     } catch (e) { toast("启动模块选定失败：" + e.message, "bad"); }
   }
@@ -221,12 +372,14 @@
     if (state.modPollTimer) { clearInterval(state.modPollTimer); state.modPollTimer = null; }
   }
 
-  async function refreshModStatus() {
+  async function refreshModStatus(silent) {
     if (!state.current) return;
     let s;
     try { s = await api(`/api/presales/projects/${state.current.id}/modules/select/status`); }
     catch (e) { return; }
+    const tracking = state.modProg.start !== 0;   // 本次会话内是否在跟踪一次推理
     if (s.log != null) { $("psModLog").textContent = s.log; $("psModLogWrap").hidden = false; }
+    updateModProgress(s);
 
     if (s.running) {
       setModBadge("running");
@@ -236,15 +389,15 @@
     stopModPoll();
     if (s.status === "failed") {
       setModBadge("failed");
-      toast("模块选定失败：" + (s.error || "见日志"), "bad");
+      if (tracking && !silent) toast("模块选定失败：" + (s.error || "见日志"), "bad");
       return;
     }
-    if (s.status === "succeeded" || (s.recommended && s.recommended.length)) {
-      // 用推荐结果替换当前选定，待用户增删后确认
+    // 仅在本次会话确实跑过推理时，才用结果覆盖当前选定并提示（避免重开旧项目误触发）
+    if (tracking && (s.status === "succeeded" || (s.recommended && s.recommended.length))) {
       state.workingModules = (s.recommended || []).map((m) => (typeof m === "string" ? m : m.id));
       state.modulesConfirmed = !!s.modulesConfirmed;
       renderModChips();
-      toast(`模块选定完成，推荐 ${state.workingModules.length} 个模块，请确认`, "ok");
+      if (!silent) toast(`模块选定完成，推荐 ${state.workingModules.length} 个模块，请确认`, "ok");
     }
   }
 
@@ -519,6 +672,8 @@
       await api(`/api/presales/projects/${state.current.id}/generate`, { method: "POST", body: "{}" });
       toast("已开始生成方案", "ok");
       setStatusBadge($("psGenStatus"), "running");
+      state.genProg.phase = 0;
+      seedProgress(state.genProg, "psGenProgress", tickGen);   // 立即显示进度，不等首次轮询
       startPoll();
     } catch (e) { toast("启动生成失败：" + e.message, "bad"); }
   }
@@ -541,6 +696,7 @@
     setStatusBadge($("psStatusBadge"), s.status);
     renderFiles(s.outputFiles || []);
     if (s.log != null) $("psLog").textContent = s.log;
+    updateGenProgress(s);
 
     if (s.running) {
       if (!state.pollTimer) startPoll();

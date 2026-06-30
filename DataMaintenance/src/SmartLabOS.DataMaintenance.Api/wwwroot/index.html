@@ -160,6 +160,14 @@
               </div>
             </div>
             <p class="hint" id="psModHint">点击「模块选定 ⚙」或「自动推理选定」，系统将依据国标与需求自动推荐模块；可删除/添加后点击「模块确认」。也可直接「添加模块」手工选定。</p>
+            <div id="psModProgress" class="ps-progress" hidden>
+              <div class="ps-pbar"><div id="psModBar" class="ps-pbar-fill"></div></div>
+              <div class="ps-progress-meta">
+                <span id="psModPhase" class="ps-progress-phase">准备中…</span>
+                <span id="psModElapsed" class="ps-progress-elapsed">用时 00:00</span>
+              </div>
+              <div id="psModActivity" class="ps-progress-activity"></div>
+            </div>
             <div id="psModChips" class="ps-mod-chips"></div>
             <details id="psModLogWrap" class="ps-log-wrap" hidden>
               <summary>推理日志</summary>
@@ -172,6 +180,14 @@
             <div class="ps-gen-head">
               <span class="ps-label">方案生成</span>
               <span id="psGenStatus" class="ps-badge">—</span>
+            </div>
+            <div id="psGenProgress" class="ps-progress" hidden>
+              <div class="ps-pbar"><div id="psGenBar" class="ps-pbar-fill"></div></div>
+              <div class="ps-progress-meta">
+                <span id="psGenPhase" class="ps-progress-phase">准备中…</span>
+                <span id="psGenElapsed" class="ps-progress-elapsed">用时 00:00</span>
+              </div>
+              <div id="psGenActivity" class="ps-progress-activity"></div>
             </div>
             <div id="psFiles" class="ps-files"></div>
             <details id="psLogWrap" class="ps-log-wrap">

@@ -196,6 +196,8 @@ public sealed class PresalesController : ControllerBase
             running = job.Status is "queued" or "running",
             recommended = Decorate(job.Recommended),
             error = job.Error,
+            // 单阶段推理：只需已用秒数（服务端权威计时）
+            elapsedSeconds = ElapsedSeconds(job.StartedAt, job.FinishedAt),
             startedAt = job.StartedAt.ToString("yyyy-MM-dd HH:mm:ss"),
             finishedAt = job.FinishedAt?.ToString("yyyy-MM-dd HH:mm:ss"),
             log = job.LogTail(),
@@ -291,6 +293,11 @@ public sealed class PresalesController : ControllerBase
             outputFiles = ListOutputs(p),
             docxFile = job.DocxFile,
             commandFile = job.CommandFile,
+            // 由服务端权威给出阶段与已用秒数，前端无需再从日志推断、也不受客户端时钟影响
+            phase = job.Phase,
+            phaseCount = 2,
+            phaseLabel = GenPhaseLabel(job.Phase),
+            elapsedSeconds = ElapsedSeconds(job.StartedAt, job.FinishedAt),
             startedAt = job.StartedAt.ToString("yyyy-MM-dd HH:mm:ss"),
             finishedAt = job.FinishedAt?.ToString("yyyy-MM-dd HH:mm:ss"),
             log = job.LogTail(),
@@ -337,6 +344,18 @@ public sealed class PresalesController : ControllerBase
     }
 
     // ----------------------- helpers -----------------------
+
+    /// <summary>服务端权威计时：开始到结束(未结束则到当前)的整数秒。</summary>
+    private static int ElapsedSeconds(DateTime start, DateTime? end) =>
+        (int)Math.Max(0, ((end ?? DateTime.Now) - start).TotalSeconds);
+
+    /// <summary>方案生成阶段文案（与前端进度条阶段一致）。</summary>
+    private static string GenPhaseLabel(int phase) => phase switch
+    {
+        2 => "阶段 2/2：生成 WORD(.docx) 提案",
+        1 => "阶段 1/2：生成解决方案 HTML 与 URS",
+        _ => "准备中：组织指令并启动 Claude Code…",
+    };
 
     private void EnsureDir(PresalesProject p)
     {

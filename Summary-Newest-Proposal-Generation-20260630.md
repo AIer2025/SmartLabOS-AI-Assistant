@@ -355,3 +355,28 @@ word/document.xml : 617,727 字节
 
 **重要边界**
 - 换项目 / 换模块清单时，**不要改这个旧脚本**——应走系统「方案生成」重新生成（会产出与新数据匹配的新脚本与新 docx）。该保留脚本仅用于**不依赖数据库/服务、对本项目本次成果做手工小修后重出 Word**。
+
+### B9. 长任务进度条 + 服务端权威进度字段
+
+> 需求：「模块选定」与「方案生成」调用后端 Claude Code 耗时较长，需在画面显示进度，让用户安心。
+> 分两轮实现：先纯前端进度条，再补一个轻量接口字段把"阶段/已用秒数"由服务端权威给出。
+
+**第一轮：前端进度条（模块选定 / 方案生成 两面板）**
+- 运行时显示进度块，含四要素：**动态进度条**（条纹流动 + 渐进填充）、**阶段文字**、**用时计时**（每秒跳）、**当前活动行**（取运行日志最后一条）。
+- 进度算法"诚实但安心"：随时间渐进逼近（`1 - e^(-t/τ)`，越久越慢、封顶 ~92%/96%），**仅在真正完成时到 100%**，不虚报。
+- 方案生成**阶段感知**：阶段一（HTML+URS）→ 阶段二（WORD），进度条分段推进。
+- 点击即用 `seedProgress` 立即点亮（不等首次 3s 轮询）；重开旧项目用 `wasTracking` 闸门**不误显**历史进度；重开时若任务在跑则**自动恢复**展示与轮询。
+- 成功→绿色满格「已完成」；失败→红色「见日志」。
+- 涉及：`wwwroot/css/style.css`（进度条样式 + `ps-stripes` 动画）、`wwwroot/index.html`（两面板各加进度块）、`wwwroot/js/presales.js`（进度渲染/计时/阶段/恢复）。
+
+**第二轮：服务端权威进度字段（轻量接口扩展）**
+- `GenJob` 新增 `Phase`（0 准备 / 1 HTML+URS / 2 WORD），在阶段切换处显式标记。
+- `GET /projects/{id}/generate/status` 新增：`phase`、`phaseCount`(=2)、`phaseLabel`、`elapsedSeconds`。
+- `GET /projects/{id}/modules/select/status` 新增：`elapsedSeconds`。
+- `elapsedSeconds` 由服务端按 `StartedAt→(FinishedAt 或 now)` 计算（辅助方法 `ElapsedSeconds`），阶段文案由 `GenPhaseLabel` 统一。
+- 前端改为**优先消费**这些字段：每次轮询用 `elapsedSeconds` 校准计时起点（`start = now - elapsedSeconds*1000`），1 秒滴答负责轮询间平滑——**既准又流畅，不受客户端时钟/时区影响**；阶段直接取 `s.phase`，旧的日志推断作为缺省回退保留（向后兼容）。
+- 涉及：`Services/ClaudeCodeRunner.cs`、`Controllers/PresalesController.cs`、`wwwroot/js/presales.js`。
+
+**验证**
+- `node --check presales.js` 通过、括号配平、HTML 与 JS 的 10 个进度元素 ID 全部对应；`dotnet build` 0 警告 0 错误。
+- **未触发计费实跑**：进度条实时动画与新字段序列化需一次真实 Claude 长任务才完整展现；新字段为匿名对象成员，运行时随 job 必然序列化，逻辑以静态检查 + 构建验证。
