@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SmartLabOS 售前提案 AI Agent（API Key 方式）· 项目总结 20260805</title>
+<style>
+  :root{
+    --brand:#0C5C8F; --brand2:#0A7A72; --ink:#1F2A38; --muted:#64748b;
+    --line:#e2e8f0; --bg:#f8fafc; --card:#ffffff; --warn:#b42318; --ok:#0a7a72;
+    --code-bg:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:15px/1.75 "Microsoft YaHei","PingFang SC",-apple-system,"Segoe UI",sans-serif;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px 80px}
+  header.hero{
+    background:linear-gradient(135deg,var(--brand) 0%,#0a4a73 60%,var(--brand2) 100%);
+    color:#fff; padding:44px 0 38px; margin-bottom:32px;
+  }
+  header.hero .wrap{padding-bottom:0}
+  header.hero h1{margin:0 0 8px; font-size:28px; letter-spacing:.5px}
+  header.hero p{margin:0; opacity:.9; font-size:14px}
+  .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
+  .meta span{
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+    border-radius:999px; padding:4px 12px; font-size:12.5px;
+  }
+  h2{
+    font-size:20px; margin:44px 0 14px; padding-left:12px;
+    border-left:4px solid var(--brand); color:var(--brand);
+  }
+  h3{font-size:16px; margin:26px 0 10px; color:var(--ink)}
+  p{margin:10px 0}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:20px 22px; margin:14px 0; box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  .grid{display:grid; gap:14px}
+  .grid.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .grid.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px}
+  th,td{border:1px solid var(--line); padding:8px 11px; text-align:left; vertical-align:top}
+  th{background:#eef4fa; color:var(--brand); font-weight:600}
+  tbody tr:nth-child(even){background:#fafbfc}
+  code{background:var(--code-bg); padding:1px 6px; border-radius:4px; font-size:13px;
+       font-family:Consolas,"Cascadia Mono",monospace}
+  pre{background:#0f172a; color:#e2e8f0; padding:14px 16px; border-radius:8px;
+      overflow-x:auto; font-size:13px; line-height:1.6}
+  pre code{background:none; color:inherit; padding:0}
+  .fig{background:var(--card); border:1px solid var(--line); border-radius:10px;
+       padding:18px; margin:16px 0; overflow-x:auto}
+  .fig figcaption{color:var(--muted); font-size:13px; margin-top:10px; text-align:center}
+  .tag{display:inline-block; font-size:12px; padding:2px 9px; border-radius:999px;
+       border:1px solid var(--line); background:#f8fafc; color:var(--muted)}
+  .tag.p0{background:#fef3f2; color:var(--warn); border-color:#f3c6c1}
+  .tag.p1{background:#fff8ec; color:#b7791f; border-color:#f0e0c0}
+  .tag.p2{background:#eef4fa; color:var(--brand); border-color:#c7d7f5}
+  .tag.done{background:#ecfdf5; color:var(--ok); border-color:#a7f3d0}
+  .kpi{font-size:26px; font-weight:700; color:var(--brand); line-height:1.2}
+  .kpi small{display:block; font-size:12.5px; font-weight:400; color:var(--muted); margin-top:4px}
+  ul,ol{margin:8px 0; padding-left:22px}
+  li{margin:5px 0}
+  .note{border-left:3px solid var(--brand2); background:#f0fdfa; padding:10px 14px;
+        border-radius:0 6px 6px 0; font-size:14px; margin:12px 0}
+  .warn{border-left:3px solid var(--warn); background:#fef3f2; padding:10px 14px;
+        border-radius:0 6px 6px 0; font-size:14px; margin:12px 0}
+  footer{color:var(--muted); font-size:13px; border-top:1px solid var(--line);
+         margin-top:50px; padding-top:18px}
+  @media print{body{background:#fff} .card,.fig{break-inside:avoid} header.hero{color:#fff}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>SmartLabOS 售前提案 AI Agent · API Key 方式</h1>
+    <p>项目结构 / 处理逻辑 / 技术特点 / 优势 / 改进方向 —— 总结于 2026-08-05</p>
+    <div class="meta">
+      <span>路径：Claude-API-Key-Presales-AI-Agent</span>
+      <span>.NET 10 · ASP.NET Core</span>
+      <span>Anthropic C# SDK 12.34.1</span>
+      <span>模型 claude-opus-4-8 · effort xhigh</span>
+      <span>C# 4,248 行 + 前端 1,961 行</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ══════════════ 1. 项目定位 ══════════════ -->
+<h2>1. 项目定位：从「会话方式」到「服务化 API 调用」</h2>
+
+<div class="card">
+<p>本项目是 SmartLabOS 售前技术方案生成的<strong>第二代实现</strong>。第一代（<code>DataMaintenance</code> + Claude Code 会话方式）依赖人工在 CLI 里投喂指令文件、以
+<code>--permission-mode bypassPermissions</code> 越权访问磁盘；本项目改为<strong>用 Anthropic 官方 C# SDK 直接调用 Messages API</strong>，把整条链路收敛进一个可部署、可审计、可并发的 Web 服务。</p>
+
+<table>
+  <thead><tr><th style="width:16%">维度</th><th style="width:42%">会话方式（第一代）</th><th>API Key 方式（本项目）</th></tr></thead>
+  <tbody>
+    <tr><td>触发</td><td>人工拼指令 txt，粘进 CLI</td><td>Web 表单 → REST 端点 → 后台队列</td></tr>
+    <tr><td>文件权限</td><td>bypassPermissions 全盘可写</td><td>C# 代码亲自执行读写，白名单目录 + 扩展名</td></tr>
+    <tr><td>状态</td><td>散落在文件系统</td><td>MySQL 两张表 + 进程内任务登记表</td></tr>
+    <tr><td>并发</td><td>单人单任务</td><td>队列 + 信号量，默认 2 并发</td></tr>
+    <tr><td>成本可见性</td><td>无</td><td>每轮记录 in/out/cacheRead/cacheWrite</td></tr>
+    <tr><td>WORD 产出</td><td>模型现写 docx 脚本再执行</td><td>Markdown → Pandoc + 参考样式文档</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="grid g3">
+  <div class="card"><div class="kpi">18<small>REST 端点</small></div></div>
+  <div class="card"><div class="kpi">4<small>受控工具（读目录/读文件/写/追加）</small></div></div>
+  <div class="card"><div class="kpi">≈18.6K<small>系统前缀 tokens（走缓存）</small></div></div>
+</div>
+<div class="grid g3">
+  <div class="card"><div class="kpi">30′16″<small>首次成功运行耗时</small></div></div>
+  <div class="card"><div class="kpi">46<small>工具循环轮次</small></div></div>
+  <div class="card"><div class="kpi">$8.08<small>单国标实测成本</small></div></div>
+</div>
+
+<!-- ══════════════ 2. 结构 ══════════════ -->
+<h2>2. 项目结构</h2>
+
+<figure class="fig">
+<svg viewBox="0 0 1040 470" width="100%" role="img" aria-label="分层架构图">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .b{fill:#fff;stroke:#c7d7f5;stroke-width:1.5;rx:8}
+      .lbl{font:13px "Microsoft YaHei",sans-serif;fill:#1F2A38}
+      .sub{font:11px "Microsoft YaHei",sans-serif;fill:#64748b}
+      .zone{fill:#f8fafc;stroke:#e2e8f0;stroke-width:1;rx:10}
+      .zt{font:12px "Microsoft YaHei",sans-serif;fill:#0C5C8F;font-weight:600}
+      .ln{stroke:#94a3b8;stroke-width:1.4;fill:none;marker-end:url(#ar)}
+    </style>
+  </defs>
+
+  <!-- 表现层 -->
+  <rect class="zone" x="10" y="10" width="1020" height="76"/>
+  <text class="zt" x="24" y="30">表现层 · wwwroot（1,961 行）</text>
+  <rect class="b" x="30" y="40" width="180" height="34"/><text class="lbl" x="46" y="62">index.html</text>
+  <rect class="b" x="225" y="40" width="200" height="34"/><text class="lbl" x="241" y="62">presales.js（842）</text>
+  <rect class="b" x="440" y="40" width="180" height="34"/><text class="lbl" x="456" y="62">app.js（768）</text>
+  <rect class="b" x="635" y="40" width="200" height="34"/><text class="lbl" x="651" y="62">style.css</text>
+
+  <!-- 接口层 -->
+  <rect class="zone" x="10" y="98" width="1020" height="76"/>
+  <text class="zt" x="24" y="118">接口层 · Controllers</text>
+  <rect class="b" x="30" y="128" width="230" height="34"/><text class="lbl" x="46" y="150">PresalesController（394）</text>
+  <rect class="b" x="275" y="128" width="180" height="34"/><text class="lbl" x="291" y="150">RecordsController</text>
+  <rect class="b" x="470" y="128" width="180" height="34"/><text class="lbl" x="486" y="150">TransferController</text>
+  <rect class="b" x="665" y="128" width="170" height="34"/><text class="lbl" x="681" y="150">Meta / Picker</text>
+
+  <!-- 编排层 -->
+  <rect class="zone" x="10" y="186" width="1020" height="88"/>
+  <text class="zt" x="24" y="206">编排层 · Agent（后台队列与任务）</text>
+  <rect class="b" x="30" y="216" width="185" height="44"/>
+  <text class="lbl" x="46" y="234">GenerationQueue</text><text class="sub" x="46" y="250">Channel 无界队列</text>
+  <rect class="b" x="230" y="216" width="195" height="44"/>
+  <text class="lbl" x="246" y="234">GenerationWorker</text><text class="sub" x="246" y="250">BackgroundService · 信号量</text>
+  <rect class="b" x="440" y="216" width="185" height="44"/>
+  <text class="lbl" x="456" y="234">JobRegistry</text><text class="sub" x="456" y="250">内存任务态 · 轮询源</text>
+  <rect class="b" x="640" y="216" width="195" height="44"/>
+  <text class="lbl" x="656" y="234">RunLogFile</text><text class="sub" x="656" y="250">运行日志实时落盘</text>
+
+  <!-- 核心层 -->
+  <rect class="zone" x="10" y="286" width="1020" height="88"/>
+  <text class="zt" x="24" y="306">核心层 · Agent（大模型与文档）</text>
+  <rect class="b" x="30" y="316" width="215" height="44" style="stroke:#0C5C8F;stroke-width:2"/>
+  <text class="lbl" x="46" y="334">ClaudeAgentService（582）</text><text class="sub" x="46" y="350">提示词组装 · 工具循环</text>
+  <rect class="b" x="260" y="316" width="185" height="44"/>
+  <text class="lbl" x="276" y="334">StreamedTurn（241）</text><text class="sub" x="276" y="350">流式累积 · 退避重试</text>
+  <rect class="b" x="460" y="316" width="175" height="44"/>
+  <text class="lbl" x="476" y="334">FileTools（182）</text><text class="sub" x="476" y="350">读写白名单边界</text>
+  <rect class="b" x="650" y="316" width="185" height="44"/>
+  <text class="lbl" x="666" y="334">DocxExporter（366）</text><text class="sub" x="666" y="350">+ ReferenceDocxBuilder</text>
+  <rect class="b" x="850" y="316" width="160" height="44"/>
+  <text class="lbl" x="866" y="334">ModuleCatalog</text><text class="sub" x="866" y="350">97 卡片索引/校验</text>
+
+  <!-- 外部依赖 -->
+  <rect class="zone" x="10" y="386" width="1020" height="74"/>
+  <text class="zt" x="24" y="406">外部依赖</text>
+  <rect class="b" x="30" y="416" width="200" height="34" style="stroke:#0A7A72"/>
+  <text class="lbl" x="46" y="438">Anthropic Messages API</text>
+  <rect class="b" x="245" y="416" width="185" height="34"/><text class="lbl" x="261" y="438">MySQL（2 张表）</text>
+  <rect class="b" x="445" y="416" width="230" height="34"/><text class="lbl" x="461" y="438">references/ · potocol/ 知识库</text>
+  <rect class="b" x="690" y="416" width="160" height="34"/><text class="lbl" x="706" y="438">Pandoc 3.10</text>
+  <rect class="b" x="865" y="416" width="145" height="34"/><text class="lbl" x="881" y="438">projects/ 输出</text>
+
+  <path class="ln" d="M140,78 L140,124"/>
+  <path class="ln" d="M140,166 L140,212"/>
+  <path class="ln" d="M225,238 L256,238"/>
+  <path class="ln" d="M137,262 L137,312"/>
+  <path class="ln" d="M137,362 L130,412"/>
+  <path class="ln" d="M240,362 L300,412"/>
+  <path class="ln" d="M545,362 L560,412"/>
+  <path class="ln" d="M740,362 L760,412"/>
+</svg>
+<figcaption>图 1 · 五层结构：表现 → 接口 → 编排 → 核心 → 外部依赖。括号内为代码行数。</figcaption>
+</figure>
+
+<div class="card">
+<h3>目录职责</h3>
+<table>
+  <thead><tr><th style="width:26%">目录 / 文件</th><th>职责</th></tr></thead>
+  <tbody>
+    <tr><td><code>Program.cs</code></td><td>DI 注册、静态文件、Swagger、<strong>启动自检</strong>（MySQL 连通性 + API Key 来源/长度/掩码）</td></tr>
+    <tr><td><code>Configuration/</code></td><td><code>PresalesPaths</code>（知识库与模板路径）、<code>AgentSettings</code>（模型/档位/超时/重试）、API Key 解析与清洗</td></tr>
+    <tr><td><code>Agent/</code></td><td>大模型编排的全部代码：提示词、工具循环、流式累积、受控文件工具、docx 导出、任务队列与日志</td></tr>
+    <tr><td><code>Controllers/</code></td><td>REST 端点；售前 16 个 + 健康检查 + docx 自检</td></tr>
+    <tr><td><code>Data/</code></td><td>Dapper 仓储：售前项目/生成记录，以及移植自 DataMaintenance 的主数据仓储</td></tr>
+    <tr><td><code>Services/</code></td><td>卡片模板导入、xlsx 解析、YAML 输出（主数据维护侧，与提案生成解耦）</td></tr>
+    <tr><td><code>wwwroot/</code></td><td>单页前端：项目表单、模块选定/确认、生成进度、产物分类展示</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ══════════════ 3. 处理逻辑 ══════════════ -->
+<h2>3. 主要处理逻辑</h2>
+
+<h3>3.1 业务主线：五阶段</h3>
+<figure class="fig">
+<svg viewBox="0 0 1040 150" width="100%" role="img" aria-label="五阶段流程">
+  <defs><style>
+    .st{fill:#eef4fa;stroke:#0C5C8F;stroke-width:1.5;rx:8}
+    .stx{font:13px "Microsoft YaHei",sans-serif;fill:#0C5C8F;font-weight:600}
+    .sty{font:11px "Microsoft YaHei",sans-serif;fill:#64748b}
+    .arw{stroke:#0C5C8F;stroke-width:2;fill:none;marker-end:url(#ar2)}
+  </style>
+  <marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#0C5C8F"/></marker></defs>
+
+  <rect class="st" x="12" y="34" width="176" height="60"/>
+  <text class="stx" x="30" y="58">① 创建项目</text><text class="sty" x="30" y="78">落库 + 建输出目录</text>
+  <rect class="st" x="220" y="34" width="176" height="60"/>
+  <text class="stx" x="238" y="58">② 需求采集</text><text class="sty" x="238" y="78">现状/挑战/期望/国标</text>
+  <rect class="st" x="428" y="34" width="176" height="60" style="fill:#e8f5f3;stroke:#0A7A72"/>
+  <text class="stx" x="446" y="58" style="fill:#0A7A72">③ 模块选定</text><text class="sty" x="446" y="78">结构化输出 + 人工确认</text>
+  <rect class="st" x="636" y="34" width="176" height="60" style="fill:#e8f5f3;stroke:#0A7A72"/>
+  <text class="stx" x="654" y="58" style="fill:#0A7A72">④ 方案生成</text><text class="sty" x="654" y="78">两阶段工具循环</text>
+  <rect class="st" x="844" y="34" width="184" height="60"/>
+  <text class="stx" x="862" y="58">⑤ 交付</text><text class="sty" x="862" y="78">HTML/URS/MD/DOCX</text>
+
+  <path class="arw" d="M188,64 L216,64"/><path class="arw" d="M396,64 L424,64"/>
+  <path class="arw" d="M604,64 L632,64"/><path class="arw" d="M812,64 L840,64"/>
+  <text class="sty" x="430" y="122">↑ 灰底=纯 CRUD　绿框=调用大模型（③ 一次调用；④ 多轮工具循环）</text>
+</svg>
+<figcaption>图 2 · 业务五阶段。只有 ③④ 消耗 token，且 ③ 的结果必须经人工「模块确认」才能进入 ④。</figcaption>
+</figure>
+
+<h3>3.2 模块选定：结构化输出 + 幻觉过滤</h3>
+<div class="card">
+<p>用 <code>OutputConfig.Format</code> 下发 JSON Schema，直接拿到机器可读结果，免去解析自然语言：</p>
+<pre><code>OutputConfig = new OutputConfig {
+    Effort = ParseEffort(_s.Effort),                    // xhigh
+    Format = new JsonOutputFormat { Schema = schema }   // { modules: string[], notes?: string }
+}</code></pre>
+<p>拿到结果后<strong>不直接采信</strong>：交由 <code>ModuleCatalog.Normalize()</code> 按 <code>references/01-modules</code> 的真实文件名逐个校验，
+去空白、统一大写、去重保序，<strong>清单外的编号一律丢弃</strong>。这是防模型编造模块 ID 的最后一道闸。</p>
+</div>
+
+<h3>3.3 方案生成：两阶段手写工具循环</h3>
+<figure class="fig">
+<svg viewBox="0 0 1040 430" width="100%" role="img" aria-label="工具循环状态机">
+  <defs><style>
+    .nd{fill:#fff;stroke:#c7d7f5;stroke-width:1.5;rx:8}
+    .nt{font:12.5px "Microsoft YaHei",sans-serif;fill:#1F2A38}
+    .ns{font:11px "Microsoft YaHei",sans-serif;fill:#64748b}
+    .fl{stroke:#94a3b8;stroke-width:1.4;fill:none;marker-end:url(#ar3)}
+    .fl2{stroke:#b42318;stroke-width:1.4;fill:none;marker-end:url(#ar4);stroke-dasharray:4 3}
+    .fl3{stroke:#0A7A72;stroke-width:1.6;fill:none;marker-end:url(#ar5)}
+    .el{font:11px "Microsoft YaHei",sans-serif;fill:#64748b}
+    .er{font:11px "Microsoft YaHei",sans-serif;fill:#b42318}
+  </style>
+  <marker id="ar3" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
+  <marker id="ar4" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#b42318"/></marker>
+  <marker id="ar5" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0A7A72"/></marker>
+  </defs>
+
+  <rect class="nd" x="20" y="20" width="215" height="56" style="stroke:#0C5C8F;stroke-width:2"/>
+  <text class="nt" x="38" y="44">组装请求</text>
+  <text class="ns" x="38" y="62">系统前缀(缓存) + 历史 + 4 工具</text>
+
+  <rect class="nd" x="285" y="20" width="200" height="56"/>
+  <text class="nt" x="303" y="44">流式调用</text>
+  <text class="ns" x="303" y="62">CreateStreaming → 累积</text>
+
+  <rect class="nd" x="535" y="20" width="215" height="56"/>
+  <text class="nt" x="553" y="44">拼装回合</text>
+  <text class="ns" x="553" y="62">文本 / thinking+签名 / tool_use</text>
+
+  <rect class="nd" x="800" y="20" width="215" height="56"/>
+  <text class="nt" x="818" y="44">执行工具</text>
+  <text class="ns" x="818" y="62">C# 亲自读写，回喂 tool_result</text>
+
+  <rect class="nd" x="285" y="150" width="200" height="56" style="stroke:#b42318"/>
+  <text class="nt" x="303" y="174" style="fill:#b42318">退避重试</text>
+  <text class="ns" x="303" y="192">2/4/8/16s + 抖动，≤5 次</text>
+
+  <rect class="nd" x="535" y="150" width="215" height="56" style="stroke:#b42318"/>
+  <text class="nt" x="553" y="174" style="fill:#b42318">截断续写</text>
+  <text class="ns" x="553" y="192">stop=max_tokens → 要求分片续写</text>
+
+  <rect class="nd" x="800" y="150" width="215" height="56" style="stroke:#0A7A72"/>
+  <text class="nt" x="818" y="174" style="fill:#0A7A72">阶段完成</text>
+  <text class="ns" x="818" y="192">无工具调用 → 退出循环</text>
+
+  <rect class="nd" x="285" y="270" width="465" height="60" style="stroke:#0A7A72;stroke-width:2"/>
+  <text class="nt" x="303" y="294" style="fill:#0A7A72">产物校验（本项目的关键防线）</text>
+  <text class="ns" x="303" y="314">每个国标应有 N.html；缺失即抛异常 → 任务判 failed，杜绝「零文件却报成功」</text>
+
+  <rect class="nd" x="800" y="270" width="215" height="60"/>
+  <text class="nt" x="818" y="294">导出 WORD</text>
+  <text class="ns" x="818" y="314">Pandoc + 参考样式文档</text>
+
+  <path class="fl" d="M235,48 L281,48"/>
+  <path class="fl" d="M485,48 L531,48"/>
+  <path class="fl" d="M750,48 L796,48"/>
+  <path class="fl" d="M905,76 C905,110 640,100 128,110 L128,76" style="marker-end:url(#ar3)"/>
+  <text class="el" x="470" y="122">下一轮（≤40 轮）</text>
+
+  <path class="fl2" d="M385,80 L385,146"/><text class="er" x="392" y="118">过载/限流/网络</text>
+  <path class="fl2" d="M385,150 C420,120 400,80 420,78" />
+  <path class="fl2" d="M642,80 L642,146"/><text class="er" x="650" y="118">输出超上限</text>
+  <path class="fl3" d="M905,80 L905,146"/>
+  <path class="fl3" d="M900,206 L760,270"/>
+  <path class="fl3" d="M750,300 L796,300"/>
+</svg>
+<figcaption>图 3 · 工具循环。红色虚线为两条自愈路径（重试 / 截断续写），绿色为正常收口路径。</figcaption>
+</figure>
+
+<div class="card">
+<table>
+  <thead><tr><th style="width:14%">阶段</th><th style="width:30%">输入</th><th style="width:28%">产物</th><th>约束</th></tr></thead>
+  <tbody>
+    <tr><td><strong>阶段一</strong></td><td>已确认模块 + 国标 MD + 客户需求</td><td><code>1.html</code>、<code>2.html</code>…<br><code>xxx-模块-URS.html</code></td>
+        <td>遵循 99 号 HTML 模版；单平台 ≤6 模组 ≤8 托盘；各平台耗时尽量相等且接近 600 秒</td></tr>
+    <tr><td><strong>阶段二</strong></td><td>阶段一 HTML/URS + 知识库卡片</td><td><code>&lt;项目&gt;-详细设计方案.md</code><br><code>Summary-输出总结.md</code></td>
+        <td>严格对齐 02 号章节标准：★必备缺项即不合格，○按需裁剪须写明理由</td></tr>
+    <tr><td><strong>收尾</strong></td><td>详细设计方案 Markdown</td><td><code>&lt;项目&gt;-详细设计方案.docx</code></td>
+        <td>Pandoc + 参考样式文档；失败回退内置 OpenXML 转换器</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>3.4 安全边界：受控文件工具</h3>
+<figure class="fig">
+<svg viewBox="0 0 1040 260" width="100%" role="img" aria-label="文件访问边界">
+  <defs><style>
+    .rd{fill:#f0fdfa;stroke:#0A7A72;stroke-width:1.5;rx:8}
+    .wr{fill:#eef4fa;stroke:#0C5C8F;stroke-width:1.5;rx:8}
+    .no{fill:#fef3f2;stroke:#b42318;stroke-width:1.5;rx:8;stroke-dasharray:5 3}
+    .t1{font:13px "Microsoft YaHei",sans-serif;fill:#1F2A38}
+    .t2{font:11px "Microsoft YaHei",sans-serif;fill:#64748b}
+  </style></defs>
+
+  <rect x="360" y="96" width="300" height="66" rx="10" fill="#0C5C8F"/>
+  <text x="510" y="126" text-anchor="middle" font-size="14" fill="#fff" font-family="Microsoft YaHei">FileTools</text>
+  <text x="510" y="146" text-anchor="middle" font-size="11" fill="#cfe3f4" font-family="Microsoft YaHei">路径规范化 + 根目录校验 + 扩展名白名单</text>
+
+  <rect class="rd" x="30" y="30" width="270" height="52"/>
+  <text class="t1" x="46" y="52">✅ 可读：references/</text><text class="t2" x="46" y="70">模块卡片 / 平台 / 托盘 / 解决方案 / 项目范例</text>
+  <rect class="rd" x="30" y="96" width="270" height="52"/>
+  <text class="t1" x="46" y="118">✅ 可读：potocol/MD</text><text class="t2" x="46" y="136">检验检测国标（单文件上限 512KB）</text>
+  <rect class="rd" x="30" y="162" width="270" height="52"/>
+  <text class="t1" x="46" y="184">✅ 可读：本项目输出目录</text><text class="t2" x="46" y="202">阶段二回读阶段一产出的 HTML</text>
+
+  <rect class="wr" x="720" y="52" width="290" height="52"/>
+  <text class="t1" x="736" y="74">✍ 仅可写：本项目输出目录</text><text class="t2" x="736" y="92">且仅 .html / .htm / .md</text>
+  <rect class="no" x="720" y="130" width="290" height="76"/>
+  <text class="t1" x="736" y="152" style="fill:#b42318">⛔ 一律拒绝</text>
+  <text class="t2" x="736" y="172">含路径分隔符或非法字符的文件名</text>
+  <text class="t2" x="736" y="190">目录穿越 · 其它项目目录 · 其它扩展名</text>
+
+  <path d="M300,56 L356,110" stroke="#0A7A72" stroke-width="1.4" fill="none"/>
+  <path d="M300,122 L356,124" stroke="#0A7A72" stroke-width="1.4" fill="none"/>
+  <path d="M300,188 L356,140" stroke="#0A7A72" stroke-width="1.4" fill="none"/>
+  <path d="M664,116 L716,86" stroke="#0C5C8F" stroke-width="1.4" fill="none"/>
+  <path d="M664,136 L716,158" stroke="#b42318" stroke-width="1.4" fill="none" stroke-dasharray="4 3"/>
+</svg>
+<figcaption>图 4 · 所有读写都由 C# 代码亲自执行——模型只能通过工具「请求」，无法直接触碰文件系统。</figcaption>
+</figure>
+
+<!-- ══════════════ 4. 处理特点 ══════════════ -->
+<h2>4. 处理特点</h2>
+
+<div class="grid g2">
+  <div class="card">
+    <h3>① 知识库接地，不允许编造</h3>
+    <p>技术参数一律要求 <code>read_kb_file</code> 实读卡片；系统前缀只给<strong>索引</strong>（97 个模块的 ID/名称/分类），
+    参数必须现读。模块 ID 再经目录校验过滤。价格类问题固定回复「请联系销售团队获取报价」。
+    阶段二用 <code>project/</code> 前缀回读阶段一产物，并有溯源校验兜底。</p>
+  </div>
+  <div class="card">
+    <h3>② 人工闸门卡在关键处</h3>
+    <p>模块选定的结果<strong>必须人工确认</strong>才能进入生成；生成阶段的提示词把已确认清单标为「强制选型范围」，
+    确有缺口只允许在文中说明，不得自行替换。</p>
+  </div>
+  <div class="card">
+    <h3>③ 长文档靠分片写，不赌单次输出</h3>
+    <p>一份提案 HTML 约 17K tokens，超过任何单次输出的舒适区。工具集提供 <code>write_output</code> + <code>append_output</code>，
+    提示词明确要求「先写开头再分次追加，<strong>每次 4000–5000 字</strong>」，并说明理由——每多一轮就要重读一遍全部上下文。
+    实测 <code>1.html</code> 首写 10,255 字符 + 追加 9 次 = 70,169 字节，全程未触发截断。</p>
+  </div>
+  <div class="card">
+    <h3>④ 先自检，再自愈</h3>
+    <p><strong>自检</strong>：发请求前校验请求体（当前覆盖 cache_control 的 TTL 一致性），拼错的请求根本发不出去。<br>
+    <strong>截断</strong>：<code>stop=max_tokens</code> 不再当作完成，回喂续写指令。<br>
+    <strong>故障</strong>：过载/限流/网络/SSE 中途错误 → 指数退避重试；鉴权与 400 类错误立即失败不空等。</p>
+  </div>
+  <div class="card">
+    <h3>⑤ 产物即验收</h3>
+    <p>阶段结束逐一核对预期文件是否落盘，缺失即判 <code>failed</code> 并指名缺哪几份。
+    前端产物区按类分组，解决方案 HTML 少于流程标准数时红色高亮「缺 N 份」。</p>
+  </div>
+  <div class="card">
+    <h3>⑥ 全过程可观测</h3>
+    <p>每轮记录 <code>in / out / cacheRead / cacheWrite / stop</code>；运行日志实时落盘到项目目录，
+    文件头记录本次模型、档位、MaxTokens、轮数上限，事后可完整复盘。</p>
+  </div>
+</div>
+
+<!-- ══════════════ 5. 技术优势 ══════════════ -->
+<h2>5. 技术优势</h2>
+
+<div class="card">
+<table>
+  <thead><tr><th style="width:22%">优势</th><th style="width:38%">实现手段</th><th>价值</th></tr></thead>
+  <tbody>
+    <tr><td><strong>安全边界明确</strong></td><td>FileTools 白名单 + 路径规范化；不再需要 bypassPermissions</td><td>可在服务器上长期运行，模型无法越权触碰磁盘</td></tr>
+    <tr><td><strong>结构化输出</strong></td><td>JSON Schema 约束模块选定结果</td><td>免解析、免正则、免「模型今天换了个说法」的脆弱性</td></tr>
+    <tr><td><strong>提示词缓存</strong></td><td>系统前缀 <code>CacheControlEphemeral</code>；工具循环整体缓存对话历史</td><td>长循环输入成本从平方增长压回近线性，实测省一半以上</td></tr>
+    <tr><td><strong>流式调用</strong></td><td>自建 <code>StreamedTurn</code> 累积器（SDK 未提供）</td><td>64K 输出不再吊死 HTTP 连接；日志可实时看到进展</td></tr>
+    <tr><td><strong>版式与内容解耦</strong></td><td>模型只产出 Markdown；版式由 <code>98-…WORD参考样式.docx</code> 承载</td><td>改字体/配色/页眉只需用 Word 编辑模板，不动一行代码、不重跑一次生成</td></tr>
+    <tr><td><strong>标准即提示词</strong></td><td>99 号 HTML 模版与 02 号章节标准全文注入系统前缀</td><td>提案标准由业务侧维护，改模板即改行为</td></tr>
+    <tr><td><strong>任务化编排</strong></td><td>Channel 队列 + BackgroundService + 信号量 + 独立超时</td><td>Web 请求秒回，长任务后台跑，可并发、可判重、可轮询</td></tr>
+    <tr><td><strong>成本可核算</strong></td><td>逐轮用量日志 + 缓存命中可见</td><td>单次生成成本可预估（下表），异常消耗当场可见</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>成本：首次成功运行的<strong>实测</strong>数据（非估算）</h3>
+<div class="card">
+<p>数据取自 2026-08-05 12:11:22–12:41:38 的完整运行日志（GB 31658.28—2025，1 个国标，16 个已确认模块，claude-opus-4-8 · xhigh）：</p>
+<table>
+  <thead><tr><th style="width:14%">阶段</th><th style="width:9%">轮次</th><th style="width:19%">缓存读</th><th style="width:17%">缓存写</th><th style="width:17%">输出</th><th>成本</th></tr></thead>
+  <tbody>
+    <tr><td>阶段一</td><td>19</td><td>2,098,781</td><td>279,694</td><td>81,208</td><td>$4.83</td></tr>
+    <tr><td>阶段二</td><td>27</td><td>2,561,257</td><td>125,418</td><td>47,306</td><td>$3.25</td></tr>
+    <tr><td><strong>合计</strong></td><td><strong>46</strong></td><td><strong>4,660,038</strong></td><td><strong>405,112</strong></td><td><strong>128,514</strong></td><td><strong>$8.08</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="warn"><strong>估算修正：</strong>本文档初版按 $3.0–3.5 预估，<strong>实测 $8.08，低估 2.4 倍</strong>。
+两处估偏：一是 xhigh 下 thinking 远比预期重（输出 128,514 tokens vs 估算 61K）；
+二是 46 轮工具循环每轮都要重读全部上下文，缓存读累计 466 万 tokens（估算 112 万）。</div>
+
+<h3>成本构成与可下手的杠杆</h3>
+<table>
+  <thead><tr><th style="width:20%">构成</th><th style="width:14%">金额</th><th style="width:10%">占比</th><th>降本手段</th></tr></thead>
+  <tbody>
+    <tr><td>输出（含 thinking）</td><td>$3.21</td><td>40%</td><td><code>Effort</code> 降到 high/medium —— 单项最大杠杆</td></tr>
+    <tr><td>缓存写</td><td>$2.53</td><td>31%</td><td>减少轮次 —— <span class="tag done">已做</span> 分片从 2–3 千字放大到 4–5 千字</td></tr>
+    <tr><td>缓存读</td><td>$2.33</td><td>29%</td><td>接入 context editing 清理已消费的卡片正文</td></tr>
+    <tr><td>新增输入</td><td>≈ $0.00</td><td>0%</td><td>90 tokens —— 缓存机制生效的直接证据</td></tr>
+  </tbody>
+</table>
+<p class="note"><strong>轮次是被低估的成本项：</strong>46 轮里每一轮都要按 0.1× 重读约 10–17 万 tokens 的上下文。
+阶段二的 27 轮中有 8 轮浪费在「找不到阶段一产物」的试错上（已修复），其余多为 append 分片。
+把分片粒度放大一倍，预计可省 15–20%。</p>
+</div>
+
+<!-- ══════════════ 6. 首次运行实测 ══════════════ -->
+<h2>6. 首次成功运行实测（2026-08-05）</h2>
+
+<figure class="fig">
+<svg viewBox="0 0 1040 210" width="100%" role="img" aria-label="首次运行时间线">
+  <defs><style>
+    .ax{stroke:#cbd5e1;stroke-width:1.5}
+    .bar1{fill:#0C5C8F}.bar2{fill:#0A7A72}.bar3{fill:#b7791f}
+    .tk{font:11px "Microsoft YaHei",sans-serif;fill:#64748b}
+    .tt{font:12px "Microsoft YaHei",sans-serif;fill:#1F2A38}
+    .tn{font:11.5px "Microsoft YaHei",sans-serif;fill:#fff}
+  </style></defs>
+
+  <text class="tt" x="14" y="24">总耗时 30 分 16 秒 · 46 轮工具循环 · 6 份产物</text>
+
+  <line class="ax" x1="60" y1="150" x2="1010" y2="150"/>
+  <text class="tk" x="60" y="168">12:11</text>
+  <text class="tk" x="290" y="168">12:19</text>
+  <text class="tk" x="520" y="168">12:29</text>
+  <text class="tk" x="760" y="168">12:35</text>
+  <text class="tk" x="965" y="168">12:41</text>
+
+  <rect class="bar1" x="60" y="52" width="230" height="26" rx="4"/>
+  <text class="tn" x="72" y="70">读知识库 · 21 张卡片（6 轮）</text>
+  <rect class="bar3" x="292" y="52" width="80" height="26" rx="4"/>
+  <text class="tn" x="298" y="70">思考 7.5′</text>
+  <rect class="bar1" x="374" y="52" width="146" height="26" rx="4"/>
+  <text class="tn" x="384" y="70">写 1.html（10 轮）</text>
+  <rect class="bar1" x="522" y="52" width="98" height="26" rx="4"/>
+  <text class="tn" x="530" y="70">2 份 URS</text>
+
+  <rect class="bar2" x="622" y="88" width="120" height="26" rx="4"/>
+  <text class="tn" x="628" y="106">试错 8 轮 ⚠</text>
+  <rect class="bar2" x="744" y="88" width="120" height="26" rx="4"/>
+  <text class="tn" x="752" y="106">重读知识库</text>
+  <rect class="bar2" x="866" y="88" width="144" height="26" rx="4"/>
+  <text class="tn" x="876" y="106">写 MD（12 轮）</text>
+
+  <text class="tk" x="60" y="44">阶段一 · $4.83</text>
+  <text class="tk" x="622" y="80">阶段二 · $3.25</text>
+
+  <line x1="292" y1="46" x2="292" y2="84" stroke="#b7791f" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <text class="tk" x="300" y="132" style="fill:#b7791f">↑ 单轮 7.5 分钟击穿 5 分钟缓存 TTL，13.4 万 tokens 前缀重写（约 $0.84）</text>
+  <text class="tk" x="622" y="132" style="fill:#b42318">↑ 找不到阶段一产物，白跑 8 轮</text>
+</svg>
+<figcaption>图 5 · 首次成功运行时间线。两处黄/红标注即本次暴露的两个缺陷，均已修复。</figcaption>
+</figure>
+
+<div class="grid g2">
+<div class="card">
+<h3>✅ 得到验证的机制</h3>
+<ul>
+  <li><strong>流式累积器</strong>：thinking 签名回传、tool_use 的 JSON 分片拼装全部正确，46 轮无一出错</li>
+  <li><strong>分片写</strong>：<code>1.html</code> 首写 10,255 字符 + 追加 9 次 = 70,169 字节，未再触发截断</li>
+  <li><strong>产物校验</strong>：<code>解决方案 HTML：1/1</code> 通过</li>
+  <li><strong>缺口识别</strong>：模型主动判定 16 个已确认模块中 14 个可用，并为 2 处工艺缺口（100 µL 微量加酶、−18 ℃ 冷冻沉淀）产出 URS</li>
+  <li><strong>WORD 导出</strong>：Pandoc + 参考样式文档一次成功</li>
+</ul>
+</div>
+<div class="card">
+<h3>🔧 暴露并已修复的缺陷</h3>
+<table>
+  <thead><tr><th style="width:30%">缺陷</th><th>后果与修法</th></tr></thead>
+  <tbody>
+    <tr><td><strong>阶段二无法寻址产物</strong><br><span class="tag done">已修复</span></td>
+        <td>输出目录在可读根内却<strong>没有寻址方式</strong>，模型试 8 轮后放弃，《详细设计方案》脱离 1.html 独立成文——<strong>任务报成功但内容降级</strong>。<br>
+            修法：新增 <code>project/</code> 前缀寻址 + 裸文件名回退 + 错误信息带路径指引 + 阶段二提示词直接注入产物清单 + 溯源校验告警。</td></tr>
+    <tr><td><strong>缓存 TTL 被击穿</strong><br><span class="tag done">已修复</span></td>
+        <td>xhigh 下单轮思考 7.5 分钟 &gt; 默认 5 分钟 TTL，13.4 万 tokens 前缀整体重写。<br>
+            修法：改用 1 小时 TTL；用量日志加 <code>⚠缓存未命中</code> 标记。</td></tr>
+    <tr><td><strong>TTL 只改了一半 → 全线 400</strong><br><span class="tag done">已修复</span>
+            <br><span class="tag">2026-08-06 04:14</span></td>
+        <td>上一条的修复只改了工具循环的顶层 <code>CacheControl</code>，漏掉系统前缀那处（仍是默认 5m）。
+            API 按 <code>tools → system → messages</code> 处理并禁止长 TTL 出现在短 TTL 之后，<strong>第 1 轮请求即 400</strong>，整个任务失败。<br>
+            修法（三层防线）：<strong>①结构层</strong>两处收敛为唯一出口 <code>Cache()</code>，物理上不可能再不一致；
+            <strong>②自检层</strong>发请求前校验全部 <code>cache_control</code> 的 TTL 一致，绕过唯一出口也会被本地拦下；
+            <strong>③日志层</strong>运行日志头记录实际生效的 <code>缓存TTL</code>。另加 <code>Agent:CacheTtl</code> 配置项，回退无需重新编译。</td></tr>
+  </tbody>
+</table>
+<p class="note"><strong>这次事故的教训已列入 P2「配置项散落多处」</strong>：同一参数在多处出现时，改一处就是埋雷。</p>
+</div>
+</div>
+
+<div class="card">
+<h3>产物清单</h3>
+<table>
+  <thead><tr><th style="width:34%">文件</th><th style="width:14%">大小</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td><code>1.html</code></td><td>70,169 B</td><td>解决方案提案（含 SVG 工站布局、耗时测算）</td></tr>
+    <tr><td><code>微量酶试剂加注-模块-URS.html</code></td><td>13,962 B</td><td>新建模块需求说明书 URS-EZ-100</td></tr>
+    <tr><td><code>低温冷冻沉淀-模块-URS.html</code></td><td>14,078 B</td><td>新建模块需求说明书 URS-FRZ-50</td></tr>
+    <tr><td><code>测试项目-详细设计方案.md</code></td><td>48,454 B</td><td>对齐 02 号章节标准的详细设计方案</td></tr>
+    <tr><td><code>测试项目-详细设计方案.docx</code></td><td>43,027 B</td><td>Pandoc + 参考样式文档转出</td></tr>
+    <tr><td><code>Summary-输出总结.md</code></td><td>4,205 B</td><td>产物清单与待确认信息</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>下次运行的对比基线</h3>
+<div class="card">
+<p>本次运行后已落地三项改动（产物寻址修复、缓存 TTL 改 1 小时、分片粒度放大到 4–5 千字）。
+下次跑<strong>同一个项目</strong>（GB 31658.28—2025，16 模块）时按下表对比，可量化其效果：</p>
+<table>
+  <thead><tr><th style="width:26%">指标</th><th style="width:20%">本次基线</th><th style="width:20%">预期</th><th>主要来源</th></tr></thead>
+  <tbody>
+    <tr><td>总轮次</td><td>46</td><td><strong>30–36</strong></td><td>写文件轮次腰斩 + 阶段二省掉 8 轮寻址试错</td></tr>
+    <tr><td>写文件轮次</td><td>22</td><td><strong>11–13</strong></td><td>分片 2–3 千字 → 4–5 千字</td></tr>
+    <tr><td>缓存读累计</td><td>4,660,038</td><td>明显下降</td><td>轮次减少 → 全上下文重读次数减少</td></tr>
+    <tr><td>缓存未命中</td><td>1 次（$0.84）</td><td><strong>0 次</strong></td><td>TTL 5 分钟 → 1 小时</td></tr>
+    <tr><td>单次成本</td><td>$8.08</td><td><strong>$6.0–6.8</strong></td><td>上述三项合计</td></tr>
+  </tbody>
+</table>
+<p class="note"><strong>两个必看的日志标志：</strong>阶段二开头应直接出现 <code>read_kb_file project/1.html</code>（不再有试错轮）；
+收尾应有 <code>[阶段二溯源] 已回读阶段一产物：1.html…</code>。若出现 <code>[警告][阶段二溯源] 未检测到…</code>，说明寻址修复未生效。</p>
+<p class="note"><strong>一个反向风险：</strong>分片放大后单轮输出变长，若日志中 <code>stop="max_tokens"</code> 明显增多，
+说明 4–5 千字对部分段落偏激进，回调到 3.5–4 千字即可（距 64K 上限仍有大量余量，但 thinking 会占去一部分）。</p>
+</div>
+
+<!-- ══════════════ 7. 改进方向 ══════════════ -->
+<h2>7. 今后需要改进提高的地方</h2>
+
+<div class="card">
+<h3>P0 · 当前必须闭环</h3>
+<table>
+  <thead><tr><th style="width:26%">事项</th><th style="width:38%">现状</th><th>建议</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tag done">已完成</span> 流式累积器实测</td>
+        <td>2026-08-05 首次成功运行，46 轮工具循环全部正确</td>
+        <td>—— 已验证，见第 6 节</td></tr>
+    <tr><td><span class="tag done">已完成</span> 阶段二产物寻址</td>
+        <td>模型无法访问阶段一 HTML，导致内容静默降级</td>
+        <td>—— 已修复：<code>project/</code> 前缀寻址 + 提示词注入清单 + 溯源校验</td></tr>
+    <tr><td><span class="tag p0">P0</span> 单次成本超预期</td>
+        <td>实测 $8.08/国标，为初版估算的 2.4 倍；无任何硬性预算上限</td>
+        <td>接入 <code>task_budget</code>；先做一次 <code>Effort</code> 档位 A/B（high vs xhigh）量化质量差距，再定默认档</td></tr>
+    <tr><td><span class="tag p0">P0</span> 模板缓存不失效</td>
+        <td><code>_templateCache</code> / <code>_detailTemplateCache</code> 是进程级永久缓存，改了 99/02 号模板<strong>必须重启服务</strong>才生效</td>
+        <td>比照 <code>ModuleCatalog</code> 的做法，按文件修改时间签名失效</td></tr>
+    <tr><td><span class="tag p0">P0</span> 重试粒度太粗</td>
+        <td>过载重试会丢弃整个回合重跑，已产出的 token 白付</td>
+        <td>对已完整落盘的文件做断点记录，重跑时提示模型跳过已完成部分</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>P1 · 质量与成本</h3>
+<table>
+  <thead><tr><th style="width:26%">事项</th><th style="width:38%">现状</th><th>建议</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tag p1">P1</span> 长循环上下文膨胀</td>
+        <td>实测 46 轮累计重读 <strong>466 万</strong> tokens，占总成本 29%</td>
+        <td>接入 context editing（<code>clear_tool_uses</code>）清掉已消费的卡片正文</td></tr>
+    <tr><td><span class="tag done">已调整</span> 分片粒度</td>
+        <td>原每次追加 2–3 千字，导致阶段一 10 轮、阶段二 12 轮写文件，每轮都要重读全上下文</td>
+        <td>—— 已改为 4–5 千字，5 处指令同步对齐（系统前缀 / 工具描述 / 两阶段提示词 / 截断续写）；效果待下次运行验证</td></tr>
+    <tr><td><span class="tag p1">P1</span> 缓存 TTL 权衡待验证</td>
+        <td>已改 1 小时 TTL；但写入单价从 1.25× 升到 2×，在本次数据上仅约打平</td>
+        <td>下次运行对比「缓存写总量 × 单价」，若长思考轮减少则改回 5 分钟——
+            现已可通过 <code>Agent:CacheTtl</code> 直接切换，无需改代码</td></tr>
+    <tr><td><span class="tag p1">P1</span> 章节合规靠模型自觉</td>
+        <td>★必备项是否齐全，全凭模型遵循提示词</td>
+        <td>程序侧对产出 Markdown 做标题正则扫描，缺★必备章节直接判不合格并列出缺项</td></tr>
+    <tr><td><span class="tag p1">P1</span> 耗时计算无校验</td>
+        <td>平台耗时、总节拍由模型算，无人复核</td>
+        <td>把模块功能码耗时结构化，程序独立算一遍与模型结果比对，偏差超阈值告警</td></tr>
+    <tr><td><span class="tag p1">P1</span> 图示进不了 WORD</td>
+        <td>HTML 里的 SVG/Mermaid 图转 docx 时丢失</td>
+        <td>阶段二让模型输出图的数据描述，程序侧渲染成 PNG 再由 Pandoc 嵌入</td></tr>
+    <tr><td><span class="tag p1">P1</span> 过载无降级</td>
+        <td>Opus 过载时只能等或失败</td>
+        <td>重试 N 次仍过载则降级 <code>claude-sonnet-5</code> 续跑，并在产物中标注</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>P2 · 工程化</h3>
+<table>
+  <thead><tr><th style="width:26%">事项</th><th style="width:38%">现状</th><th>建议</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tag p1">P1</span> 配置项散落多处</td>
+        <td><strong>已造成一次全线失败</strong>：缓存 TTL 在系统前缀与工具循环两处各写一份，改一处漏一处 → 首轮请求 400。
+            同类隐患仍在：分片字数「4000–5000」目前散落在 <strong>5 处</strong>提示词里，模型名/档位也同时出现在配置与日志头</td>
+        <td>凡是「同一语义、多处出现」的参数，一律收敛为单一出口（常量 / 方法 / 配置项）后由各处引用；
+            已按此改造 <code>Cache()</code>，分片字数应同样抽成常量注入提示词</td></tr>
+    <tr><td><span class="tag done">已做</span> 请求体自检</td>
+        <td>400 类错误只有真正发出去才暴露，白等一次调用还要读英文报错</td>
+        <td>—— 已实现 <code>StreamedTurn.ValidateCacheControl()</code>：发请求前序列化请求体、扫描全部
+            <code>cache_control</code> 块，TTL 不一致即本地抛错并指明是哪几种混用。
+            在重试循环之外调用（每回合只查一次）；自检自身异常一律吞掉，绝不成为新的故障源。
+            四种 TTL 组合已实测：两种一致组合放行、两种漏改组合拦截</td></tr>
+    <tr><td><span class="tag p2">P2</span> 零自动化测试</td><td>三次事故都是在真实运行中才暴露；目前的验证靠临时探针，用完即弃</td>
+        <td>把探针沉淀为正式测试：<code>StreamedTurn</code> 累积、<code>FileTools</code> 边界、
+            <code>ValidateCacheControl</code>、Markdown→docx；用录制的 SSE 流做回放测试，不烧 token</td></tr>
+    <tr><td><span class="tag p2">P2</span> 多国标串行</td><td>阶段一按顺序逐个国标生成</td>
+        <td>国标之间相互独立，可并行；注意共享 FileTools 的写入序</td></tr>
+    <tr><td><span class="tag p2">P2</span> 日志未入库</td><td>模块选定日志只在内存与文件；生成日志入库仅末尾 2 万字符</td>
+        <td>运行日志统一入库或归档，配任务历史检索页</td></tr>
+    <tr><td><span class="tag p2">P2</span> 单实例假设</td><td>判重与任务态在进程内存，多副本部署会重复执行</td>
+        <td>任务态入库 + 数据库行锁/租约</td></tr>
+    <tr><td><span class="tag p2">P2</span> 前端能力有限</td><td>产物只能下载/新窗口打开</td>
+        <td>HTML 提案内嵌预览、两次生成 diff、失败一键重跑</td></tr>
+    <tr><td><span class="tag p2">P2</span> 密钥治理</td><td>单 Key，靠环境变量/user-secrets</td>
+        <td>接入密钥管理，支持轮换与按项目分账</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="warn">
+<strong>一处设计权衡值得记录：</strong>目前「模型只写 Markdown、版式交给 Pandoc 参考样式」牺牲了逐表配色这类精细控制，
+换来的是版式可被业务人员用 Word 直接维护、且不占用 token。若将来对版式精度要求升级到「每张表独立设计」，
+需要回到「模型生成 docx 脚本 + 受控执行」路线，届时要重新设计脚本执行的安全沙箱。
+</div>
+
+<footer>
+  <p><strong>Sammry-API-Key-Method-20260805.html</strong> · 生成于 2026-08-05 ·
+  <strong>更新于 2026-08-06</strong>（补入首次成功运行实测数据，修正成本估算，记录三项已落地改动、
+  一次 TTL 配置不一致事故与下次运行对比基线）·
+  统计口径：C# 4,248 行（不含 obj/）、前端 1,961 行、18 个 REST 端点、MySQL 2 张表。</p>
+  <p>成本数据来源：<code>projects/测试项目/运行日志-方案生成-20260805-121122.log</code>，
+  按 claude-opus-4-8 定价（输入 $5 / 输出 $25 / 缓存写 1.25× / 缓存读 0.1×，每百万 tokens）逐轮累加。</p>
+  <p>本文图示全部采用内联 SVG，不依赖任何外部脚本或网络，离线打开即可完整呈现。</p>
+</footer>
+
+</div>
+</body>
+</html>

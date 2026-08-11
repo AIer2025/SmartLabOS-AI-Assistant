@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URS · 50ml 离心管微量加液涡旋模块（加酶/加内标）· URS-JY-μ01</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{--ink:#0f1b2d;--ink2:#33455c;--muted:#6b7c93;--line:#dfe6ef;--bg:#f4f7fb;--card:#fff;
+    --brand:#b0184a;--brand2:#0a9396;--accent:#ee9b00;--danger:#c1121f;--ok:#1f9d6b;
+    --chip:#fdeef3;--radius:14px;--shadow:0 6px 22px rgba(15,27,45,.08);}
+  *{box-sizing:border-box}html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#3a0820 0%,#b0184a 60%,#ee9b00 140%);color:#fff;padding:44px 0 38px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:320px;height:320px;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#ffd8e6;border:1px solid rgba(255,216,230,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:26px;font-weight:700}
+  header.hero .sub{font-size:15px;color:#ffe3ef;margin-bottom:20px;max-width:820px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 13px;font-size:13px}
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav.toc ul{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0 auto;padding:8px 22px;max-width:1080px}
+  nav.toc a{text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 11px;border-radius:8px}
+  nav.toc a:hover{background:var(--chip);color:var(--brand)}
+  section{padding:34px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 20px;font-size:14.5px}
+  h3{font-size:16px;margin:22px 0 10px}
+  p{margin:10px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--chip);color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  tfoot td{background:#fdf1f5;font-weight:700}
+  code,.mod{font-family:Consolas,monospace;background:var(--chip);color:var(--brand);padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}
+  .note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#eaf2fb;border-color:#0c5c8f}
+  .note.bad{background:#fdecec;border-color:var(--danger)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .pri{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600}
+  .p-must{background:#fde8ef;color:#b0184a}.p-should{background:#fff0e6;color:#c9760f}.p-may{background:#eaf2fb;color:#0c5c8f}
+  footer{background:#3a0820;color:#e6bccb;padding:24px 0;font-size:13px}
+  .slotgrid text{font-family:"Microsoft YaHei",sans-serif}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">用户需求说明书 URS · 新建模组 · 成都食检院兽残专项</span>
+    <h1>50 ml 离心管微量加液涡旋模块（加酶 / 加内标）<br>URS-JY-μ01 · User Requirement Specification</h1>
+    <div class="sub">用于 GB 31658.22—2022 β-受体激动剂残留检测中 <b>酶 40 µL</b>、<b>内标工作液 100 µL</b> 的 µL 级精密加注与涡旋混匀。现有确认模组（WX-006 ≥1 mL、YY-002 0.5–1 mL、YY-003 1–10 mL）量程不足，本 URS 定义补足该缺口的新建模组需求。</div>
+    <div class="hmeta">
+      <span>🔖 模组编号（拟）：URS-JY-μ01</span>
+      <span>📦 分类：加液 / 涡旋</span>
+      <span>🎯 量程：10–1000 µL</span>
+      <span>🧩 平台：PLT-1200 / 800 / 1400</span>
+      <span>⏱ 拟定节拍：200 s + 上下料 60 s</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><ul>
+  <li><a href="#bg">① 背景与目的</a></li>
+  <li><a href="#scope">② 适用范围</a></li>
+  <li><a href="#func">③ 功能需求</a></li>
+  <li><a href="#perf">④ 性能指标</a></li>
+  <li><a href="#flow">⑤ 操作流程</a></li>
+  <li><a href="#intf">⑥ 接口/公用工程</a></li>
+  <li><a href="#safe">⑦ 安全/合规</a></li>
+  <li><a href="#accept">⑧ 验收与耗时</a></li>
+</ul></nav>
+
+<div class="wrap">
+
+<!-- 1 背景 -->
+<section id="bg">
+  <h2><span class="num">1</span>背景与目的</h2>
+  <p class="lead">本 URS 由 SmartLabOS 售前技术方案（GB 31658.22—2022 β-受体激动剂前处理方案，成都食检院）派生，用于定义一款补足「µL 级微量加注」缺口的新建模组需求。</p>
+  <table>
+    <tr><th>项目</th><th>内容</th></tr>
+    <tr><td>需求来源</td><td>GB 31658.22—2022 §8.1「加 β-葡萄糖醛酸酶/芳基硫酸酯酶 <b>40 µL</b>」、§8.2「加 100 ng/mL 内标工作液 <b>100 µL</b>」</td></tr>
+    <tr><td>现状缺口</td><td>已确认模组 <code>MOD-WX-006</code>（正压加液 1–50 mL）、<code>MOD-YY-002</code>（0.5–1 mL）、<code>MOD-YY-003</code>（1–10 mL）最小量程均 ≥ 0.5 mL，<b>无法在 µL 级保证 ±1% 精度</b></td></tr>
+    <tr><td>目的</td><td>提供 10–1000 µL 精密微量加注 + 涡旋混匀一体化模组，实现加酶、加内标的自动化、高重复性、防交叉污染</td></tr>
+    <tr><td>价值</td><td>消除人工微量加样个体差异，保障内标法定量准确度与批内/批间 RSD ≤ 20%</td></tr>
+  </table>
+  <div class="note info"><b>与现有模组的关系</b>本模组为 <code>MOD-WX-006</code>「50ml 离心管正压加液涡旋模块」的<b>微量量程衍生型</b>，沿用其离心管拆/合盖 + 涡旋机构与平台接口，仅将加液单元替换为高精度微量注射泵/微量分液通道，最大化复用成熟结构、缩短开发周期。</div>
+</section>
+
+<!-- 2 范围 -->
+<section id="scope">
+  <h2><span class="num">2</span>适用范围与对象</h2>
+  <table>
+    <tr><th>要素</th><th>要求</th></tr>
+    <tr><td>操作对象容器</td><td>50 ml 离心管（Φ34.6 mm，与 WX-006/YJ-004/LX-001 同容器体系，兼容平台 EPG40/ERG32 夹爪间距 16）</td></tr>
+    <tr><td>加注试剂</td><td>①β-葡萄糖醛酸酶/芳基硫酸酯酶（生物酶，40 µL，粘度低-中）；②同位素内标工作液（甲醇基质，100 µL，易挥发）</td></tr>
+    <tr><td>加注体积范围</td><td>10–1000 µL（覆盖 40 µL、100 µL 及余量）</td></tr>
+    <tr><td>混匀方式</td><td>加注后离心管拆盖/合盖 + 涡旋混匀（沿用 WX-006 涡旋机构，1–3000 rpm 可设）</td></tr>
+    <tr><td>兼容平台</td><td>PLT-1200（主）/ PLT-800 / PLT-1400；占 1 个标准模块位；双工位（2 样/循环）</td></tr>
+  </table>
+</section>
+
+<!-- 3 功能需求 -->
+<section id="func">
+  <h2><span class="num">3</span>功能需求（★必备 / ○可选）</h2>
+  <table>
+    <tr><th>编号</th><th>功能需求</th><th>优先级</th></tr>
+    <tr><td>F-01</td><td>自动拆盖：夹紧 50 ml 离心管，旋转拆下管盖并保持夹持</td><td><span class="pri p-must">★必备</span></td></tr>
+    <tr><td>F-02</td><td>微量加注：从试剂瓶/微孔源精密吸取 10–1000 µL 并加注入离心管，支持多试剂通道（≥2：酶 + 内标）</td><td><span class="pri p-must">★必备</span></td></tr>
+    <tr><td>F-03</td><td>枪头/针防污：一次性枪头或加注针自动更换/清洗，杜绝酶与内标交叉污染</td><td><span class="pri p-must">★必备</span></td></tr>
+    <tr><td>F-04</td><td>涡旋混匀：加注后合盖并涡旋，转速 1–3000 rpm、时长可设</td><td><span class="pri p-must">★必备</span></td></tr>
+    <tr><td>F-05</td><td>自动合盖 + 上下料：与 XYZ 机械臂对接，双工位并行</td><td><span class="pri p-must">★必备</span></td></tr>
+    <tr><td>F-06</td><td>液位/吸空检测：吸液异常（吸空、堵塞、气泡）报警并暂停</td><td><span class="pri p-should">○应有</span></td></tr>
+    <tr><td>F-07</td><td>内标挥发抑制：内标通道加注针低死体积、快速加注，减少甲醇挥发损失</td><td><span class="pri p-should">○应有</span></td></tr>
+    <tr><td>F-08</td><td>加注量在线记录：每管加注体积上传中控，支持追溯</td><td><span class="pri p-may">○可选</span></td></tr>
+  </table>
+</section>
+
+<!-- 4 性能指标 -->
+<section id="perf">
+  <h2><span class="num">4</span>关键性能指标（量化 · 待确认项以现场 URS 为准）</h2>
+  <table>
+    <tr><th>指标</th><th>目标值</th><th>说明</th></tr>
+    <tr><td>加注体积范围</td><td>10–1000 µL</td><td>覆盖酶 40 µL、内标 100 µL</td></tr>
+    <tr><td>加注绝对准确度</td><td>≤ ±1%（≥100 µL）；≤ ±2%（10–100 µL）</td><td>关键指标，需以称量法验证</td></tr>
+    <tr><td>加注重复精度（RSD）</td><td>≤ 0.5%（≥100 µL）；≤ 1%（10–100 µL）</td><td>保障内标法定量</td></tr>
+    <tr><td>试剂通道数</td><td>≥ 2（酶 / 内标独立通道）</td><td>物理隔离防交叉污染</td></tr>
+    <tr><td>涡旋转速 / 时长</td><td>1–3000 rpm / 可设</td><td>沿用 WX-006 涡旋机构</td></tr>
+    <tr><td>工位数</td><td>双工位（2 样/循环）</td><td>与平台节拍口径一致</td></tr>
+    <tr><td>单循环处理时间</td><td><b>200 s（拟定）</b></td><td>拆盖+微量加注+合盖+涡旋；加上下料 60 s = <b>260 s</b> 计入平台耗时</td></tr>
+    <tr><td>占用模块位</td><td>1 个标准模块位（180×450×600 mm 包络）</td><td>与 WX-006 同尺寸族</td></tr>
+    <tr><td>供电 / 气源</td><td>DC 24 V；压缩空气 0.4–0.6 MPa</td><td>与平台一致</td></tr>
+    <tr><td>通讯协议</td><td>MODBUS TCP（与 SmartLabOS 中控一致）</td><td>★必备</td></tr>
+  </table>
+  <div class="note warn"><b>待确认项</b>①酶溶液粘度/起泡性对 µL 级精度的影响，需以实际酶液做加注验证；②内标甲醇基质挥发对体积漂移的影响，建议加注针低死体积 + 快速加注 + 通道密封；③10–40 µL 极小体积的准确度目标需方法学确认。以上以现场 URS/URD 最终冻结为准。</div>
+</section>
+
+<!-- 5 操作流程 -->
+<section id="flow">
+  <h2><span class="num">5</span>操作流程（工作流）</h2>
+  <p class="lead">沿用 WX-006「拆盖-加液-合盖-涡旋」骨架，加液单元替换为微量注射泵 + 多试剂通道 + 枪头/针防污。</p>
+  <div class="mermaid">
+flowchart LR
+  A([机械臂放入50ml离心管]):::s --> B[载台移至拆合盖位<br/>夹紧·拆盖]:::x
+  B --> C[取一次性枪头/清洗加注针]:::x
+  C --> D[微量吸取试剂<br/>酶40µL 或 内标100µL]:::x
+  D --> E[加注入离心管<br/>液位/吸空检测]:::x
+  E --> F[退枪头/洗针]:::x
+  F --> G[合盖]:::x
+  G --> H[涡旋混匀<br/>1–3000rpm 可设]:::x
+  H --> I([机械臂取出离心管]):::s
+  classDef s fill:#3a0820,color:#fff,stroke:none;
+  classDef x fill:#fde8ef,stroke:#b0184a,color:#7a0f33;
+  </div>
+  <div class="card">
+    <h3>平台内布局示意（占 1 模块位）</h3>
+    <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+      <rect x="2" y="2" width="356" height="146" rx="10" fill="#fff" stroke="#b0184a"/>
+      <rect x="16" y="26" width="70" height="100" rx="7" fill="#fde8ef" stroke="#b0184a"/>
+      <text x="51" y="72" text-anchor="middle" font-size="10" fill="#7a0f33">拆合盖位</text>
+      <rect x="94" y="26" width="80" height="100" rx="7" fill="#fde8ef" stroke="#b0184a"/>
+      <text x="134" y="66" text-anchor="middle" font-size="10" fill="#7a0f33">微量加注</text>
+      <text x="134" y="82" text-anchor="middle" font-size="8.5" fill="#7a0f33">酶/内标双通道</text>
+      <rect x="182" y="26" width="80" height="100" rx="7" fill="#fde8ef" stroke="#b0184a"/>
+      <text x="222" y="72" text-anchor="middle" font-size="10" fill="#7a0f33">涡旋位</text>
+      <rect x="270" y="26" width="74" height="100" rx="7" fill="#fdf1f5" stroke="#b0184a" stroke-dasharray="4 3"/>
+      <text x="307" y="66" text-anchor="middle" font-size="9.5" fill="#7a0f33">枪头/洗针</text>
+      <text x="307" y="82" text-anchor="middle" font-size="8.5" fill="#7a0f33">防交叉污染</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 6 接口 -->
+<section id="intf">
+  <h2><span class="num">6</span>接口与公用工程需求</h2>
+  <table>
+    <tr><th>类别</th><th>需求</th></tr>
+    <tr><td>机械接口</td><td>标准模块位（180×450×600 mm）；与 PLT-1200 XYZ 机械臂对接，兼容 ERG32-150T/EPG40-50 夹爪（间距 16，Φ34.6 mm 50ml 离心管）</td></tr>
+    <tr><td>电气</td><td>DC 24 V 供电；功率 ≤ 0.4 kVA（拟）</td></tr>
+    <tr><td>气源</td><td>洁净干燥压缩空气 0.4–0.6 MPa（拆合盖/涡旋压板/正压）</td></tr>
+    <tr><td>试剂供给</td><td>酶试剂瓶（可选低温位）+ 内标工作液瓶，独立管路/枪头，低死体积</td></tr>
+    <tr><td>耗材</td><td>一次性枪头（微量）或可清洗加注针 + 洗针池（纯水/清洗剂）</td></tr>
+    <tr><td>通讯</td><td>MODBUS TCP，接入 SmartLabOS 中控调度与追溯</td></tr>
+    <tr><td>上下水</td><td>若采用洗针方案：需纯水上水 + 排废下水</td></tr>
+  </table>
+</section>
+
+<!-- 7 安全 -->
+<section id="safe">
+  <h2><span class="num">7</span>安全与合规要求</h2>
+  <ul class="clean">
+    <li>运行中严禁伸手进入拆合盖/涡旋运动区；每工位配急停，异常先断电断气再排查。</li>
+    <li>酶试剂建议低温存放通道，避免活性下降；内标甲醇基质通道需密封防挥发、防燃。</li>
+    <li>加注针/枪头一用一换或彻底洗针，杜绝酶与内标交叉污染、样品间携带污染。</li>
+    <li>设备可靠接地；❌ 潮湿环境使用；维护需断电断气。</li>
+    <li>加注量、报警、耗材更换记录纳入中控日志，支持正/反向追溯（GLP/CNAS 可追溯要求）。</li>
+  </ul>
+</section>
+
+<!-- 8 验收 -->
+<section id="accept">
+  <h2><span class="num">8</span>验收标准与耗时归集</h2>
+  <table>
+    <tr><th>验收项</th><th>判定标准</th></tr>
+    <tr><td>加注准确度</td><td>称量法：100 µL / 40 µL 各 ≥ 10 次，准确度 ≤ ±1%（≥100 µL）/ ±2%（&lt;100 µL）</td></tr>
+    <tr><td>重复精度</td><td>RSD ≤ 0.5%（≥100 µL）/ ≤ 1%（&lt;100 µL）</td></tr>
+    <tr><td>交叉污染</td><td>空白携带 &lt; 定量限，酶/内标通道互不干扰</td></tr>
+    <tr><td>节拍</td><td>双工位单循环 ≤ 200 s（不含上下料）</td></tr>
+    <tr><td>通讯联调</td><td>MODBUS TCP 与中控指令/状态/追溯数据交互正常</td></tr>
+  </table>
+  <div class="note ok"><b>耗时归集（计入本方案平台总耗时）</b>本模组处理时间 = URS 拟定 <b>200 s（功能循环）+ 60 s（自动上下料）= 260 s / 2 样循环</b>；分别计入 WS-01（加酶）与 WS-03（加内标）两座工站节拍，已在解决方案 <code>1.html</code> §7 耗时测算中体现。</div>
+  <div class="note info"><b>商务</b>本 URS 为售前技术定义，模组为新建开发项，<b>开发/交付周期与价格请联系销售团队获取报价</b>。最终技术规格以双方冻结的 URS/URD 为准。</div>
+  <p style="font-size:12.5px;color:var(--muted);margin-top:16px">编制：百泉聚兴（北京）科技有限公司 · SmartLabOS 售前技术方案 Agent　|　关联方案：project/1.html（GB 31658.22—2022）　|　数据源：potocol/MD/07-GB31658.22-2022.md、references/01-modules（MOD-WX-006 衍生）</p>
+</section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    新建模组用户需求说明书 · URS-JY-μ01 · 50ml 离心管微量加液涡旋模块（加酶/加内标）· 量程 10–1000 µL · 节拍 260 s/2 样<br>
+    <span style="color:#c98aa0">本 URS 为补足 GB 31658.22—2022 前处理方案微量加注缺口而定义，技术规格以现场 URS/URD 冻结为准。</span>
+  </div>
+</footer>
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#fde8ef',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#b0184a',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

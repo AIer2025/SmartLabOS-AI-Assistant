@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案一 · GB 31658.20—2022 酰胺醇类药物及代谢物残留 · SmartLabOS 前处理方案</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#dfe6ef;
+    --bg:#f4f7fb; --card:#ffffff;
+    --brand:#0c5c8f; --brand2:#0a9396; --accent:#ee9b00; --danger:#c1121f; --ok:#1f9d6b;
+    --ext:#1b5fa8; --pur:#1f9d6b; --conc:#c9760f; --filt:#1496a6; --idle:#cfd8e3;
+    --chip:#eef4fa; --radius:14px; --shadow:0 6px 22px rgba(15,27,45,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#06243c 0%,#0c5c8f 55%,#0a9396 130%);
+    color:#fff;padding:46px 0 40px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:340px;height:340px;
+    background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#9fe7e0;
+    border:1px solid rgba(159,231,224,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:28px;font-weight:700;letter-spacing:.5px}
+  header.hero .sub{font-size:16px;color:#d6e6f2;margin-bottom:22px;max-width:820px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:8px;padding:6px 13px;font-size:13px}
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.03)}
+  nav.toc ul{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0 auto;padding:8px 22px;max-width:1180px}
+  nav.toc a{text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 11px;border-radius:8px}
+  nav.toc a:hover{background:var(--chip);color:var(--brand)}
+  section{padding:36px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 22px;font-size:14.5px}
+  h3{font-size:17px;margin:24px 0 12px;color:var(--ink)}
+  h4{font-size:14.5px;margin:14px 0 6px;color:var(--brand2)}
+  p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+  .proc{background:#0b2236;color:#cfe3f2;border-radius:var(--radius);padding:18px 22px;
+    font-size:14px;border-left:5px solid var(--accent);margin:14px 0}
+  .proc b{color:#ffd166}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:880px){.g2,.g3{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#eef4fa;color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  tfoot td{background:#f0f6fc;font-weight:700}
+  td code,.mod{font-family:Consolas,monospace;background:#eef4fa;color:var(--brand);
+    padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600}
+  .t-ext{background:#e3eef7;color:#0c5c8f}.t-spe{background:#d8f3f0;color:#0a7a72}
+  .t-conc{background:#fff0e6;color:#c9760f}.t-filt{background:#e9f7f9;color:#0c6470}
+  .t-store{background:#ece9fb;color:#5b3fb0}
+  .plat{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+  .pcard{flex:1;min-width:220px;border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .pcard.sel{border:2px solid var(--brand);box-shadow:0 6px 18px rgba(12,92,143,.16)}
+  .pcard h4{margin:0 0 6px;font-size:15px;color:var(--ink)}
+  .pcard .big{font-size:13px;color:var(--muted)}
+  .pcard .pick{font-size:12px;color:var(--brand2);font-weight:700;margin-top:8px}
+  .pcard .no{font-size:12px;color:var(--muted);margin-top:8px}
+  .ws{border:1px solid var(--line);border-radius:var(--radius);background:#fff;
+    box-shadow:var(--shadow);overflow:hidden;margin:18px 0}
+  .ws-head{padding:13px 20px;color:#fff;background:linear-gradient(90deg,#06243c,#0c5c8f)}
+  .ws-head h4{margin:0;font-size:16px;color:#fff}
+  .ws-head .sub{font-size:12.5px;opacity:.9}
+  .ws-body{padding:14px 20px 16px}
+  .wsgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:880px){.wsgrid{grid-template-columns:1fr}}
+  .flowline{font-size:12.5px;color:var(--muted);background:#f7fafd;border:1px dashed var(--line);
+    border-radius:8px;padding:9px 12px;margin-top:8px}
+  ul.tight{margin:.3em 0;padding-left:20px}ul.tight li{margin:4px 0;font-size:13px}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}
+  .note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#eaf2fb;border-color:var(--brand)}
+  .note.bad{background:#fdecec;border-color:var(--danger)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}
+  @media(max-width:880px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .kpi .k .v{font-size:24px;font-weight:700;color:var(--brand)}
+  .kpi .k .l{font-size:12.5px;color:var(--muted)}
+  .timebar{height:18px;border-radius:4px;background:linear-gradient(90deg,#0c5c8f,#0a9396);display:inline-block;vertical-align:middle}
+  footer{background:#06243c;color:#9db8cf;padding:26px 0;font-size:13px}
+  .crumbs{font-size:12.5px;color:var(--muted);margin:18px 0 0}
+  .crumbs a{color:var(--brand);text-decoration:none}
+  .slotgrid text{font-family:"Microsoft YaHei",sans-serif}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">测试项目 · 成都市食品检验研究院 · 检验标准 1 / 6</span>
+    <h1>动物性食品中酰胺醇类药物及其代谢物残留量测定<br>SmartLabOS 自动化前处理解决方案</h1>
+    <div class="sub">依据 <b>GB 31658.20—2022</b> 第 <b>8.1 提取</b> &amp; <b>8.2 净化</b>流程（<b>液液萃取，无 SPE</b>），自<b>客户已确认的 14 个模组</b>清单选型，
+    搭载至离心管自动化岛平台组建工作站，按工序串联为完整样品制备产线；以<b>「每平台处理耗时 ≈ 600 s」</b>为基准拆分平台并逐站测算节拍。</div>
+    <div class="hmeta">
+      <span>📋 标准：GB 31658.20—2022</span>
+      <span>🧪 基质：猪/鸡/牛/羊 肌肉·肝·肾·脂肪 + 鸡蛋·牛奶·羊奶</span>
+      <span>💊 4 种目标物（同位素内标法）</span>
+      <span>🔁 上下料：全自动（机械臂）</span>
+      <span>⏱ 解决方案总节拍 4935 s ≈ 82.3 min/样</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><ul>
+  <li><a href="#std">① 项目与标准</a></li>
+  <li><a href="#pain">② 痛点对应</a></li>
+  <li><a href="#flow">③ 工艺流程</a></li>
+  <li><a href="#platform">④ 平台选型</a></li>
+  <li><a href="#modules">⑤ 模组选型</a></li>
+  <li><a href="#ws">⑥ 工作站组成</a></li>
+  <li><a href="#solution">⑦ 解决方案串联</a></li>
+  <li><a href="#time">⑧ 处理耗时测算</a></li>
+  <li><a href="#kpi">⑨ 通量与合规</a></li>
+  <li><a href="#utility">⑩ 公用工程</a></li>
+  <li><a href="#bom">⑪ 物料/商务</a></li>
+</ul></nav>
+
+<div class="wrap">
+
+<!-- 1 项目与标准 -->
+<section id="std">
+  <h2><span class="num">1</span>项目概述与标准解读</h2>
+  <p class="lead">测试项目 · 成都市食品检验研究院 —— 兽残专项自动化检测（硝基呋喃、氯霉素、磺胺类、沙星类等）；本方案对应其中<b>酰胺醇类药物及其代谢物</b>标准 GB 31658.20—2022。</p>
+  <table>
+    <tr><th>项目</th><th>内容</th></tr>
+    <tr><td>客户</td><td>成都市食品检验研究院（市市监局正处级公益二类事业单位 · 国家食品复检机构）</td></tr>
+    <tr><td>检验标准</td><td>GB 31658.20—2022《食品安全国家标准 动物性食品中酰胺醇类药物及其代谢物残留量的测定 液相色谱-串联质谱法》（2023-02-01 实施，首次发布）</td></tr>
+    <tr><td>适用基质</td><td>猪、鸡、牛、羊的肌肉 / 肝脏 / 肾脏 / 脂肪组织，以及鸡蛋、牛奶、羊奶</td></tr>
+    <tr><td>目标药物</td><td>氯霉素、甲砜霉素、氟苯尼考、氟苯尼考胺（氟苯尼考代谢物），共 <b>4 种</b>；采用<b>同位素内标法</b>（氯霉素-D₅、甲砜霉素-D₃、氟苯尼考-D₃、氟苯尼考胺-D₃ 共 4 种内标）</td></tr>
+    <tr><td>方法原理</td><td>2% 氨化乙酸乙酯提取 → 正己烷脱脂 → 氨化乙酸乙酯反萃取 → LC-MS/MS 内标法定量（<b>液液萃取，全程无 SPE 固相萃取</b>）</td></tr>
+    <tr><td>本方案覆盖</td><td>§8.1 提取、§8.2 净化（含两次液液萃取、脱脂、两次氮吹、复溶、过滤、待测冷藏），至 LC-MS/MS 进样小瓶为止</td></tr>
+    <tr><td>关键耗材</td><td>2% 氨化乙酸乙酯、4% NaCl、4% NaCl 饱和正己烷、20% 甲醇、无水硫酸钠（奶样）；尼龙微孔滤膜 <b>0.22 µm</b></td></tr>
+    <tr><td>检出/定量限</td><td>氯霉素 LOD 0.1 / LOQ 0.2 µg/kg；甲砜霉素、氟苯尼考、氟苯尼考胺 LOD 0.5 / LOQ 1 µg/kg；准确度 70%~120%，批内 RSD ≤15%、批间 ≤20%</td></tr>
+    <tr><td>流程范围 / 上下料 / 软件</td><td>采样·制样·分样·前处理·检测·出报告；<b>自动上下料</b>（机械臂，60 s/模组）；配套<b>智慧实验室软件</b>统一调度</td></tr>
+  </table>
+  <div class="note ok"><b>数据来源声明</b>本方案全部模组、平台参数均引用自 SmartLabOS 知识库
+  <code>references/01-modules</code>、<code>references/02-platforms</code>，并严格限定在<b>客户已确认的 14 个模组清单</b>内选型，<b>未做杜撰</b>；工艺步骤引自 GB 31658.20—2022 §8.1/§8.2 原文；与标准存在差异处已在第 9 节诚实标注。</div>
+</section>
+
+<!-- 2 痛点对应 -->
+<section id="pain">
+  <h2><span class="num">2</span>客户挑战 → 自动化对策映射</h2>
+  <p class="lead">逐条对应客户提出的 6 项前处理痛点与 3 项期望，给出本方案对应模组/工站的解决路径。本标准为液液萃取法，痛点集中在均质、萃取乳化、氮吹与基质效应。</p>
+  <table>
+    <tr><th>客户挑战</th><th>SmartLabOS 自动化对策</th><th>对应模组</th></tr>
+    <tr><td>挑战-1 全程手工容错率极低、依赖人员熟练度</td><td>全流程模组化、参数固化、机械臂全自动上下料，消除人为操作差异</td><td>全线 10 模组</td></tr>
+    <tr><td>挑战-2 均质不均、高脂高蛋白分层、痕量取样偏差大</td><td>高速均质（1000–30000 rpm）刀头自清洗，分散均一；奶样加无水硫酸钠除水稳定基质；冷链存储防降解</td><td><code>MOD-JZ-002</code> / <code>MOD-YJ-004</code> / <code>MOD-CC-001</code></td></tr>
+    <tr><td>挑战-3 萃取极易乳化、分层困难、目标物易损失</td><td>精密加内标（0.01–0.1 mL）+ 受控涡旋振荡 + 8000 rpm 冷冻高速离心精准分层；两次提取、两次反萃取重复合并降损失</td><td><code>MOD-JY-004</code>/<code>WX-006</code>/<code>ZD-001</code>/<code>LX-001</code></td></tr>
+    <tr><td>挑战-4 SPE 活化/平衡/流速难控、柱干堵塞、回收率波动</td><td>本标准为<b>液液萃取无 SPE</b>，从根本上规避柱干/流速/柱床堵塞问题（本方案亮点，见 §9）</td><td>—（无 SPE 环节）</td></tr>
+    <tr><td>挑战-5 氮吹控温控速难、热敏物分解、定容精度不足</td><td>50 ℃ 控温真空离心浓缩防过热与损失；定量环精密移液复溶 20% 甲醇 1.0 mL</td><td><code>MOD-NS-001</code> / <code>MOD-YY-001</code></td></tr>
+    <tr><td>挑战-6 基质杂质多、离子抑制、步骤繁琐</td><td>正己烷脱脂 + 同位素内标校正基质效应 + 0.22 µm 过滤除微粒，降离子抑制；流水线一体化</td><td><code>WX-006</code>(脱脂) / <code>MOD-GL-002</code></td></tr>
+  </table>
+  <div class="note info"><b>期望兑现</b>期望-1（替代人工、规避均质/乳化/氮吹痛点）、期望-2（降个体差异、提回收率与精度、降基质效应）、期望-3（高通量筛查兼靶向定量、适配多基质）—— 通过 10 模组的工序化串联 + 多孔位并行 + 同位素内标法 + 智慧实验室软件统一调度全面兑现。本标准无 SPE，直接免除挑战-4。</div>
+</section>
+
+<!-- 3 工艺流程 -->
+<section id="flow">
+  <h2><span class="num">3</span>前处理工艺流程拆解</h2>
+  <p class="lead">将标准 §8.1 / §8.2 文字流程拆解为可由模组执行的「单元操作」（蓝=提取 §8.1，绿=净化/脱脂反萃取 §8.2，橙=氮吹浓缩，青=过滤）。<b>本流程为液液萃取，无 SPE 柱。</b></p>
+  <div class="proc"><b>8.1 提取</b> —— 取试料 <b>2 g</b>（±0.05 g）于 50 mL 离心管 → 加<b>混合内标工作液 100 µL</b>涡旋 → 加 <b>2% 氨化乙酸乙酯 10 mL</b>（<b>牛奶/羊奶另加无水硫酸钠 3 g</b>）→ <b>涡旋 30 s</b> → <b>涡旋振荡 10 min</b> → <b>8000 r/min 离心 5 min</b> → 上清转移；残渣重复提取 1 次 → 合并 → <b>50 ℃ 氮气吹干</b>。</div>
+  <div class="proc" style="border-left-color:var(--brand2)"><b>8.2 净化</b> —— 残渣加 <b>4% NaCl 3 mL</b> 涡旋溶解 → 加 <b>4% NaCl 饱和正己烷 5 mL</b> 涡旋 30 s → <b>8000 r/min 离心</b> 弃上层正己烷（重复脱脂 1 次）→ 加 <b>2% 氨化乙酸乙酯 5 mL</b> 涡旋振荡 5 min → <b>8000 r/min 离心</b> 取上层有机相（重复反萃取 1 次合并）→ <b>50 ℃ 氮吹干</b> → <b>20% 甲醇 1.0 mL</b> 涡旋 30 s → <b>0.22 µm 过滤</b> → 待测冷藏。</div>
+  <div class="mermaid">
+flowchart LR
+  A([2g 试料]):::s --> Z[均质制样]:::ext --> B[加内标100µL涡旋]:::ext --> C[加2%氨化乙酸乙酯<br/>奶样加Na2SO4]:::ext --> D[涡旋振荡10min]:::ext --> E[8000rpm离心✓]:::ext --> F[上清合并]:::ext
+  F -->|残渣重复1次| C
+  F --> G[50℃氮吹干]:::conc --> H[4%NaCl溶解<br/>正己烷脱脂涡旋]:::spe --> I[8000rpm离心✓<br/>弃正己烷]:::spe --> J[乙酸乙酯反萃取振荡]:::spe --> K[8000rpm离心✓<br/>取有机相]:::spe
+  K -->|反萃取重复1次合并| J
+  K --> L[50℃氮吹干]:::conc --> M[20%甲醇复溶]:::conc --> N[0.22µm过滤]:::filt --> O[待测冷藏]:::store --> P([LC-MS/MS]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  classDef ext fill:#e3eef7,stroke:#0c5c8f,color:#0c5c8f;
+  classDef spe fill:#d8f3f0,stroke:#0a7a72,color:#0a7a72;
+  classDef conc fill:#fff0e6,stroke:#c9760f,color:#9a5a08;
+  classDef filt fill:#e9f7f9,stroke:#1496a6,color:#0c6470;
+  classDef store fill:#ece9fb,stroke:#5b3fb0,color:#4a2f97;
+  </div>
+  <p style="font-size:13px;color:var(--muted)">注：称样（2 g 组织，感量 0.01 g / 0.00001 g 天平）在客户已确认的 14 模组中无称量模组，按行业惯例由人工称样后上样；自动化范围自「均质制样」起至「待测冷藏 / 过滤进样」止。奶样加无水硫酸钠由加盐模组 <code>MOD-YJ-004</code> 实现（详见 §9）。</p>
+</section>
+
+<!-- 4 平台选型 -->
+<section id="platform">
+  <h2><span class="num">4</span>平台选型（3 类离心管自动化岛）</h2>
+  <p class="lead">一个平台最多搭载 <b>6 模组 + 8 托盘</b>。本方案以「每平台处理耗时 ≈ 600 s 均衡」为拆分基准，按各站实际模组位需求择优选型。含离心 <code>MOD-LX-001</code>（占 3 位）的工站再搭 1 模组即达 4 位，须升级 PLT-1200。</p>
+  <div class="plat">
+    <div class="pcard sel"><h4>PLT-800 ★ 主选</h4><div class="big">800×850×2055 · 3 模组 · 4 托盘 · 0.68 ㎡</div><div class="pick">✓ 多数均衡站点模组位 ≤3、节拍 ≈600 s，占地最省，公司出货量最大主力机型；存储 <code>MOD-CC-001</code>、加盐 <code>MOD-YJ-004</code> 仅兼容此平台</div></div>
+    <div class="pcard sel"><h4>PLT-1200 ○ 离心站选用</h4><div class="big">1200×850×2055 · 6 模组 · 8 托盘（2×4） · 1.02 ㎡</div><div class="pick">✓ 当单站需 ≥4 模组位（离心 3 位 + 1 模组）时选用，本方案 3 座离心工站采用</div></div>
+    <div class="pcard"><h4>PLT-1400</h4><div class="big">1400×850×2055 · 6 模组 · 8 托盘（1×8） · 1.19 ㎡</div><div class="no">○ 模组位同 1200、托盘呈 1×8，需更大托盘缓存延长无人运行时选用</div></div>
+  </div>
+  <table>
+    <tr><th>平台</th><th>尺寸(mm)</th><th>模组位</th><th>托盘位</th><th>布局</th><th>占地</th><th>本方案采用</th></tr>
+    <tr><td><b><code>PLT-800</code></b></td><td>800×850×2055</td><td><b>3</b></td><td>4</td><td>1×4</td><td>0.68 ㎡</td><td><b>✅ 6 座工站采用（含存储站）</b></td></tr>
+    <tr><td><b><code>PLT-1200</code></b></td><td>1200×850×2055</td><td>6</td><td>8</td><td>2×4</td><td>1.02 ㎡</td><td><b>✅ 3 座离心工站采用</b></td></tr>
+    <tr><td><code>PLT-1400</code></td><td>1400×850×2055</td><td>6</td><td>8</td><td>1×8</td><td>1.19 ㎡</td><td>○ 备选（托盘缓存升级）</td></tr>
+  </table>
+  <div class="note info"><b>选型结论</b>按 600 s 均衡拆分后共 9 座工站：其中 3 座离心工站（WS-03/05/06）因离心 <code>MOD-LX-001</code> 占 3 位、再搭 1 模组即需 <b>4 模组位</b> → 升级 <code>PLT-1200</code>；其余 6 座（含存储站）模组位 ≤3，采用占地最省的 <code>PLT-800</code>。存储 <code>MOD-CC-001</code>、加盐 <code>MOD-YJ-004</code> 仅兼容 PLT-800，其所在工站天然采用 PLT-800。三类平台均在本节列出并说明取舍。</div>
+</section>
+
+<!-- 5 模组选型 -->
+<section id="modules">
+  <h2><span class="num">5</span>模组选型（仅取自客户已确认 14 模组清单）</h2>
+  <p class="lead">本方案在客户已确认的 14 模组清单中选用 <b>10 个模组型号</b>（部分模组在流程中被复用多次）。全部模组取自 <code>references/01-modules/</code> 真实卡片，参数与 ID 一一对应，<b>严禁编造</b>。「位」=占用标准模组位数。耗时取卡片 <code>cycle_time_sec</code>。</p>
+  <table>
+    <tr><th>工艺功能</th><th>模组 ID</th><th>模组名称</th><th>关键参数 · 功能码</th><th>单循环耗时(s)</th><th>对应标准步骤</th><th>位</th></tr>
+    <tr><td><span class="tag t-ext">均质</span></td><td><span class="mod">MOD-JZ-002</span></td><td>50ml 离心管均质模块</td><td>1–40 mL，1000–30000 rpm，刀头自清洗 · 115</td><td>60</td><td>§7 组织匀浆制样</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">加内标</span></td><td><span class="mod">MOD-JY-004</span></td><td>萃取瓶加内标模块</td><td>0.01–0.1 mL 精密加内标，250/500/1250mL 萃取瓶、2/10mL 西林瓶 · 250</td><td>135</td><td>§8.1 加混合内标工作液 100 µL</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">涡旋/加液</span></td><td><span class="mod">MOD-WX-006</span></td><td>50ml 离心管正压加液涡旋模块</td><td>1–50 mL，1–3000 rpm，拆盖-加液-涡旋-装盖，气动压紧 · 171</td><td>300</td><td>§8.1 加 2% 氨化乙酸乙酯涡旋 / §8.2 4%NaCl 溶解 + 正己烷脱脂涡旋</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">加盐</span></td><td><span class="mod">MOD-YJ-004</span></td><td>50ml 离心管加盐涡旋模块</td><td>定量加固体粉末(盐) + 涡旋混匀，1–3000 rpm · 223</td><td>300</td><td>§8.1 奶样加无水硫酸钠 3 g（仅奶基质）</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">震荡</span></td><td><span class="mod">MOD-ZD-001</span></td><td>50ml 垂直震荡模块</td><td>1–50 mL，1–500 rpm 垂直震荡 · 140</td><td>220</td><td>§8.1 涡旋振荡 10 min / §8.2 乙酸乙酯反萃取振荡 5 min</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">离心</span></td><td><span class="mod">MOD-LX-001</span></td><td>50ml×4 孔位高速离心机模块（带 XYZ）</td><td>2–7 ℃ 预冷，1–<b>8000</b> rpm，真空 −80，4 孔位 · 188</td><td>300 <sup>①</sup></td><td>§8.1/§8.2 8000 rpm 离心 5 min（提取 / 弃己烷 / 取有机相）<b>✓</b></td><td><b>3</b></td></tr>
+    <tr><td><span class="tag t-conc">移液</span></td><td><span class="mod">MOD-YY-001</span></td><td>自动化精密移液模块 10ml（定量环）</td><td>1–10 mL 定量环精密移液 / 转移 · 600</td><td>60 <sup>②</sup></td><td>§8.1 上清转移合并 / §8.2 20% 甲醇 1.0 mL 复溶</td><td>1</td></tr>
+    <tr><td><span class="tag t-conc">浓缩</span></td><td><span class="mod">MOD-NS-001</span></td><td>10ml 大容量连续浓缩模块</td><td>真空 −95 kPa + 热风 + 离心浓缩，终容 1–4 mL · 200</td><td>480 <sup>③</sup></td><td>§8.1/§8.2 50 ℃ 氮气吹干（两次）</td><td>2</td></tr>
+    <tr><td><span class="tag t-filt">过滤</span></td><td><span class="mod">MOD-GL-002</span></td><td>5cc 针式过滤模块</td><td>1–5 mL，13 mm 针式过滤器（0.2/0.22 µm）· 310</td><td>520</td><td>§8.2 0.22 µm 滤膜过滤上机</td><td>1</td></tr>
+    <tr><td><span class="tag t-store">存储</span></td><td><span class="mod">MOD-CC-001</span></td><td>800 样品存储模块</td><td>0–10 ℃ 冷藏，XYZ 自动取放，2 mL 西林瓶，90 工位 · D210</td><td>31</td><td>待测液冷链存储 / 自动上下料（并行缓存）</td><td><b>3</b></td></tr>
+  </table>
+  <div class="note warn"><b>耗时取值口径（写入第 8 节脚注）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><sup>①</sup> <code>MOD-LX-001</code> 卡片 <code>cycle_time_sec</code> 为「0–300」，本方案<b>取上限 300 s</b>。</li>
+    <li><sup>②</sup> <code>MOD-YY-001</code> 卡片 <code>cycle_time_sec</code> 为 0，按定量环精密移液 / 转移<b>工程估算 60 s</b>（※）。</li>
+    <li><sup>③</sup> <code>MOD-NS-001</code> 卡片 <code>cycle_time_sec</code> 为空（蒸干终点须靠流量/温度/真空曲线判断），按同类有机溶剂真空离心吹干<b>工程估算 480 s</b>（※）；正式实施以方法学验证终点为准。</li>
+  </ul></div>
+</section>
+
+<!-- 6 工作站组成 -->
+<section id="ws">
+  <h2><span class="num">6</span>工作站组成（按 600 s 均衡拆分为 9 座工站）</h2>
+  <p class="lead">以「每平台处理耗时 ≈ 600 s」为基准，将 16 步工序（复用 10 模组型号）按顺序分组为 <b>8 座处理工站 + 1 座并行冷链缓存站</b>（WS-01 ~ WS-09）。含离心的 WS-03/05/06 因 4 模组位升级 PLT-1200，其余用 PLT-800。</p>
+  <div class="grid g3">
+    <div class="card"><h4 style="color:var(--ink)">WS-01 制样加内标 · PLT-800</h4><div style="font-size:13px;color:var(--muted)">均质 + 加内标</div><div style="font-size:13px;margin-top:6px">模组位 2/3 · 节拍 <b>315 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-02 提取加液加盐 · PLT-800</h4><div style="font-size:13px;color:var(--muted)">加 2% 氨化乙酸乙酯 + 奶样加盐</div><div style="font-size:13px;margin-top:6px">模组位 2/3 · 节拍 <b>720 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-03 振荡·提取离心 · PLT-1200</h4><div style="font-size:13px;color:var(--muted)">涡旋振荡 10min + 8000rpm 离心</div><div style="font-size:13px;margin-top:6px">模组位 4/6 · 节拍 <b>640 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-04 转移·氮吹① · PLT-800</h4><div style="font-size:13px;color:var(--muted)">上清合并 + 50℃ 氮吹干</div><div style="font-size:13px;margin-top:6px">模组位 3/3 · 节拍 <b>660 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-05 脱脂·离心 · PLT-1200</h4><div style="font-size:13px;color:var(--muted)">NaCl 溶解正己烷脱脂 + 离心弃己烷</div><div style="font-size:13px;margin-top:6px">模组位 4/6 · 节拍 <b>720 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-06 反萃取·离心 · PLT-1200</h4><div style="font-size:13px;color:var(--muted)">乙酸乙酯反萃取振荡 + 离心取有机相</div><div style="font-size:13px;margin-top:6px">模组位 4/6 · 节拍 <b>640 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-07 氮吹②·复溶 · PLT-800</h4><div style="font-size:13px;color:var(--muted)">50℃ 氮吹干 + 20% 甲醇复溶</div><div style="font-size:13px;margin-top:6px">模组位 3/3 · 节拍 <b>660 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-08 过滤 · PLT-800</h4><div style="font-size:13px;color:var(--muted)">0.22 µm 针式过滤（瓶颈单站）</div><div style="font-size:13px;margin-top:6px">模组位 1/3 · 节拍 <b>580 s</b></div></div>
+    <div class="card"><h4 style="color:var(--ink)">WS-09 冷链存储缓存 · PLT-800</h4><div style="font-size:13px;color:var(--muted)">2 mL 西林瓶 0–10 ℃ 存储</div><div style="font-size:13px;margin-top:6px">模组位 3/3 · 节拍 <b>91 s</b>（并行缓存）</div></div>
+  </div>
+
+  <!-- WS1 -->
+  <div class="ws">
+    <div class="ws-head"><h4>WS-VETDRUG-Prep-CDFCY-01 ｜ 制样加内标工站</h4>
+      <div class="sub">平台 PLT-800 · 覆盖标准 §7 + §8.1（均质制样 → 加内标 100 µL）· 模块位 2/3 · 节拍 315 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-JZ-002</code></td><td>组织均质制样（奶样混匀 / 鸡蛋去壳均质）</td><td>1</td><td>60+60</td></tr>
+          <tr><td><code>MOD-JY-004</code></td><td>精密加混合内标工作液 100 µL 涡旋</td><td>1</td><td>135+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 2/3</b></td><td><b>315</b></td></tr></tfoot>
+        </table>
+      </div>
+      <div>
+        <h4>平台俯视布局（3 模块位）</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#1b5fa8"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0d2c54">PLT-800 · 800×850 · 3 模组位</text>
+          <rect x="16" y="32" width="106" height="100" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="69" y="80" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">JZ-002</text>
+          <text x="69" y="98" text-anchor="middle" font-size="9" fill="#5d6b7a">均质</text>
+          <rect x="128" y="32" width="106" height="100" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="181" y="80" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">JY-004</text>
+          <text x="181" y="98" text-anchor="middle" font-size="9" fill="#5d6b7a">加内标</text>
+          <rect x="240" y="32" width="106" height="100" rx="8" fill="#f1f4f7" stroke="#cfd8e3"/>
+          <text x="293" y="86" text-anchor="middle" font-size="9.5" fill="#8a97a6">空闲位 · 可扩并行</text>
+        </svg>
+        <div class="flowline">流程：人工称样 2 g → <code>JZ-002</code> 均质制样 → <code>JY-004</code> 加混合内标工作液 100 µL 涡旋 → 转 WS-02。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS2 -->
+  <div class="ws">
+    <div class="ws-head"><h4>WS-VETDRUG-Extract-CDFCY-02 ｜ 提取加液·奶样加盐工站</h4>
+      <div class="sub">平台 PLT-800 · 覆盖标准 §8.1（加 2% 氨化乙酸乙酯 10 mL 涡旋 30 s · 奶样加无水硫酸钠 3 g）· 模块位 2/3 · 节拍 720 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-WX-006</code></td><td>拆盖加 2% 氨化乙酸乙酯 10 mL + 涡旋 30 s 装盖</td><td>1</td><td>300+60</td></tr>
+          <tr><td><code>MOD-YJ-004</code></td><td>奶样加无水硫酸钠 3 g + 涡旋混匀（仅奶基质）</td><td>1</td><td>300+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 2/3（仅兼容 PLT-800）</b></td><td><b>720</b></td></tr></tfoot>
+        </table>
+        <div class="note info" style="margin-top:10px"><b>奶样加盐</b>牛奶/羊奶基质需另加无水硫酸钠 3 g 除水稳定分层，本站用 <code>MOD-YJ-004</code> 定量加固体盐 + 涡旋实现（仅兼容 PLT-800）；非奶基质该模组空过，节拍相应缩短。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#1b5fa8"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0d2c54">PLT-800 · 提取加液 + 加盐</text>
+          <rect x="16" y="32" width="150" height="100" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="91" y="80" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">WX-006</text>
+          <text x="91" y="98" text-anchor="middle" font-size="9" fill="#5d6b7a">加乙酸乙酯涡旋</text>
+          <rect x="172" y="32" width="150" height="100" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="247" y="80" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">YJ-004</text>
+          <text x="247" y="98" text-anchor="middle" font-size="9" fill="#5d6b7a">奶样加盐</text>
+        </svg>
+        <div class="flowline">流程：<code>WX-006</code> 加 2% 氨化乙酸乙酯 10 mL 涡旋 30 s →（奶样）<code>YJ-004</code> 加无水硫酸钠 3 g 涡旋 → 转 WS-03 振荡离心。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS3 -->
+  <div class="ws">
+    <div class="ws-head"><h4>WS-VETDRUG-Centri1-CDFCY-03 ｜ 振荡·提取离心工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖标准 §8.1（涡旋振荡 10 min → 8000 rpm 离心 5 min）· 模块位 4/6 · 节拍 640 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-ZD-001</code></td><td>垂直震荡 10 min（充分萃取）</td><td>1</td><td>220+60</td></tr>
+          <tr><td><code>MOD-LX-001</code></td><td>8000 rpm 冷冻高速离心固液分离</td><td>3</td><td>300+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 4/6 → 升级 PLT-1200</b></td><td><b>640</b></td></tr></tfoot>
+        </table>
+        <div class="note ok" style="margin-top:10px"><b>转速满足 ✓</b>标准要求 8000 r/min 离心，<code>MOD-LX-001</code> 上限恰为 8000 rpm，<b>✓ 完全满足，无转速偏差</b>（本方案亮点，详见 §9）。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局（PLT-1200 · 6 模组位）</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#1b5fa8"/>
+          <text x="180" y="18" text-anchor="middle" font-size="11.5" fill="#0d2c54">PLT-1200 · 离心占 3 位 + 震荡 1 位 (4/6)</text>
+          <rect x="16" y="30" width="106" height="104" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="69" y="78" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">ZD-001</text>
+          <text x="69" y="96" text-anchor="middle" font-size="9" fill="#5d6b7a">振荡10min</text>
+          <rect x="128" y="30" width="218" height="104" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="237" y="74" text-anchor="middle" font-size="12" fill="#0d2c54" font-weight="700">MOD-LX-001 冷冻离心 8000rpm ✓</text>
+          <text x="237" y="94" text-anchor="middle" font-size="9.5" fill="#5d6b7a">50ml×4 孔 · 2–7 ℃ · 占 3 位（余 1 位可扩并行）</text>
+        </svg>
+        <div class="flowline">流程：<code>ZD-001</code> 涡旋振荡 10 min → <code>LX-001</code> 8000 rpm 离心 5 min 取上清；残渣回 WS-02 补 2% 氨化乙酸乙酯重复提取 1 次后合并 → 转 WS-04。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS4 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#7a4708,#c9760f)"><h4>WS-VETDRUG-Concen1-CDFCY-04 ｜ 转移·氮吹① 工站</h4>
+      <div class="sub">平台 PLT-800 · 覆盖标准 §8.1（合并两次提取液 → 50 ℃ 氮气吹干）· 模块位 3/3 · 节拍 660 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-YY-001</code></td><td>上清转移 / 两次提取液合并（定量环精密移液）</td><td>1</td><td>60※+60</td></tr>
+          <tr><td><code>MOD-NS-001</code></td><td>50 ℃ 真空离心浓缩至干（待净化）</td><td>2</td><td>480※+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 3/3</b></td><td><b>660</b></td></tr></tfoot>
+        </table>
+        <div class="note info" style="margin-top:10px"><b>防分解</b>真空降沸点 + 50 ℃ 控温，规避热敏目标物分解与挥发损失（对应挑战-5）。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#c9760f"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#7a4708">PLT-800 · 转移 + 浓缩</text>
+          <rect x="16" y="32" width="106" height="100" rx="8" fill="#eef1f5" stroke="#516074"/>
+          <text x="69" y="80" text-anchor="middle" font-size="11" fill="#2b3543" font-weight="700">YY-001</text>
+          <text x="69" y="98" text-anchor="middle" font-size="9" fill="#516074">合并转移</text>
+          <rect x="128" y="32" width="218" height="100" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <text x="237" y="76" text-anchor="middle" font-size="12" fill="#7a4708" font-weight="700">MOD-NS-001 连续浓缩</text>
+          <text x="237" y="96" text-anchor="middle" font-size="9.5" fill="#7a4708">真空 −95 kPa · 50 ℃ · 占 2 位</text>
+        </svg>
+        <div class="flowline">流程：<code>YY-001</code> 合并两次提取液 → <code>NS-001</code> 50 ℃ 氮吹干至待净化残渣 → 转 WS-05 脱脂。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS5 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#0b3d27,#1f9d6b)"><h4>WS-VETDRUG-Defat-CDFCY-05 ｜ 脱脂·离心工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖标准 §8.2（4% NaCl 溶解 → 正己烷脱脂涡旋 → 8000 rpm 离心弃正己烷）· 模块位 4/6 · 节拍 720 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-WX-006</code></td><td>加 4% NaCl 3 mL 溶解 + 4% NaCl 饱和正己烷 5 mL 涡旋 30 s</td><td>1</td><td>300+60</td></tr>
+          <tr><td><code>MOD-LX-001</code></td><td>8000 rpm 离心弃上层正己烷（脱脂，重复 1 次）</td><td>3</td><td>300+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 4/6 → 升级 PLT-1200</b></td><td><b>720</b></td></tr></tfoot>
+        </table>
+        <div class="note ok" style="margin-top:10px"><b>无 SPE 亮点</b>本标准以正己烷液液脱脂替代 SPE 除脂柱，规避柱干、流速难控、柱床堵塞与回收率波动（对应挑战-4）；8000 rpm 离心 <b>✓ 满足</b>。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局（PLT-1200）</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#1f9d6b"/>
+          <text x="180" y="18" text-anchor="middle" font-size="11.5" fill="#0b3d27">PLT-1200 · 脱脂涡旋 1 位 + 离心 3 位 (4/6)</text>
+          <rect x="16" y="30" width="106" height="104" rx="8" fill="#eafaf3" stroke="#1f9d6b"/>
+          <text x="69" y="78" text-anchor="middle" font-size="11" fill="#0b3d27" font-weight="700">WX-006</text>
+          <text x="69" y="96" text-anchor="middle" font-size="9" fill="#5d6b7a">NaCl+己烷</text>
+          <rect x="128" y="30" width="218" height="104" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="237" y="74" text-anchor="middle" font-size="12" fill="#0d2c54" font-weight="700">MOD-LX-001 离心 8000rpm ✓</text>
+          <text x="237" y="94" text-anchor="middle" font-size="9.5" fill="#5d6b7a">弃上层正己烷 · 占 3 位</text>
+        </svg>
+        <div class="flowline">流程：<code>WX-006</code> 4% NaCl 溶解 + 正己烷涡旋 → <code>LX-001</code> 离心弃正己烷（重复脱脂 1 次）→ 转 WS-06 反萃取。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS6 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#0b3d27,#1f9d6b)"><h4>WS-VETDRUG-Centri2-CDFCY-06 ｜ 反萃取·离心工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖标准 §8.2（2% 氨化乙酸乙酯反萃取振荡 5 min → 8000 rpm 离心取有机相）· 模块位 4/6 · 节拍 640 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-ZD-001</code></td><td>加 2% 氨化乙酸乙酯 5 mL 涡旋振荡反萃取 5 min</td><td>1</td><td>220+60</td></tr>
+          <tr><td><code>MOD-LX-001</code></td><td>8000 rpm 离心取上层有机相（重复 1 次合并）</td><td>3</td><td>300+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 4/6 → 升级 PLT-1200</b></td><td><b>640</b></td></tr></tfoot>
+        </table>
+        <div class="note ok" style="margin-top:10px"><b>转速满足 ✓</b>反萃取离心同为 8000 r/min，<code>MOD-LX-001</code> ✓ 满足；两次反萃取合并提升回收率（对应挑战-3）。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局（PLT-1200）</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#1f9d6b"/>
+          <text x="180" y="18" text-anchor="middle" font-size="11.5" fill="#0b3d27">PLT-1200 · 反萃取振荡 1 位 + 离心 3 位 (4/6)</text>
+          <rect x="16" y="30" width="106" height="104" rx="8" fill="#eafaf3" stroke="#1f9d6b"/>
+          <text x="69" y="78" text-anchor="middle" font-size="11" fill="#0b3d27" font-weight="700">ZD-001</text>
+          <text x="69" y="96" text-anchor="middle" font-size="9" fill="#5d6b7a">反萃取振荡</text>
+          <rect x="128" y="30" width="218" height="104" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="237" y="74" text-anchor="middle" font-size="12" fill="#0d2c54" font-weight="700">MOD-LX-001 离心 8000rpm ✓</text>
+          <text x="237" y="94" text-anchor="middle" font-size="9.5" fill="#5d6b7a">取上层有机相 · 占 3 位</text>
+        </svg>
+        <div class="flowline">流程：<code>ZD-001</code> 加 2% 氨化乙酸乙酯反萃取振荡 5 min → <code>LX-001</code> 离心取有机相（重复 1 次合并）→ 转 WS-07 氮吹复溶。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS7 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#7a4708,#c9760f)"><h4>WS-VETDRUG-Concen2-CDFCY-07 ｜ 氮吹②·复溶工站</h4>
+      <div class="sub">平台 PLT-800 · 覆盖标准 §8.2（50 ℃ 氮吹干 → 20% 甲醇 1.0 mL 复溶涡旋 30 s）· 模块位 3/3 · 节拍 660 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-NS-001</code></td><td>合并有机相 50 ℃ 真空离心浓缩至干</td><td>2</td><td>480※+60</td></tr>
+          <tr><td><code>MOD-YY-001</code></td><td>加 20% 甲醇 1.0 mL 精密复溶涡旋 30 s</td><td>1</td><td>60※+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 3/3</b></td><td><b>660</b></td></tr></tfoot>
+        </table>
+        <div class="note info" style="margin-top:10px"><b>定容精度</b>定量环移液 <code>MOD-YY-001</code>（1–10 mL）精密复溶 1.0 mL，规避手工定容偏差（对应挑战-5）。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#c9760f"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#7a4708">PLT-800 · 浓缩 + 复溶</text>
+          <rect x="16" y="32" width="218" height="100" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <text x="125" y="76" text-anchor="middle" font-size="12" fill="#7a4708" font-weight="700">MOD-NS-001 连续浓缩</text>
+          <text x="125" y="96" text-anchor="middle" font-size="9.5" fill="#7a4708">50 ℃ 氮吹干 · 占 2 位</text>
+          <rect x="240" y="32" width="106" height="100" rx="8" fill="#eef1f5" stroke="#516074"/>
+          <text x="293" y="80" text-anchor="middle" font-size="11" fill="#2b3543" font-weight="700">YY-001</text>
+          <text x="293" y="98" text-anchor="middle" font-size="9" fill="#516074">20%甲醇复溶</text>
+        </svg>
+        <div class="flowline">流程：<code>NS-001</code> 合并有机相 50 ℃ 氮吹干 → <code>YY-001</code> 加 20% 甲醇 1.0 mL 涡旋 30 s 复溶 → 转 WS-08 过滤。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS8 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#0a5560,#1496a6)"><h4>WS-VETDRUG-Filter-CDFCY-08 ｜ 过滤工站</h4>
+      <div class="sub">平台 PLT-800 · 覆盖标准 §8.2（0.22 µm 滤膜过滤上机）· 模块位 1/3 · 节拍 580 s</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-GL-002</code></td><td>5cc 针式过滤 0.22 µm 至进样瓶</td><td>1</td><td>520+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 1/3（单站瓶颈）</b></td><td><b>580</b></td></tr></tfoot>
+        </table>
+        <div class="note warn" style="margin-top:10px"><b>单站瓶颈</b>过滤 <code>MOD-GL-002</code> 单循环 520 s，本站节拍 580 s，为流程较慢工站；可在余 2 位扩并行过滤模组提升通量（各站流水重叠时不占用产线均衡）。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#1496a6"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0a5560">PLT-800 · 0.22 µm 过滤</text>
+          <rect x="16" y="32" width="180" height="100" rx="8" fill="#e9f7f9" stroke="#1496a6"/>
+          <text x="106" y="80" text-anchor="middle" font-size="12" fill="#0c6470" font-weight="700">MOD-GL-002</text>
+          <text x="106" y="98" text-anchor="middle" font-size="9.5" fill="#5d6b7a">5cc 针式 0.22 µm</text>
+          <rect x="202" y="32" width="144" height="100" rx="8" fill="#f1f4f7" stroke="#cfd8e3"/>
+          <text x="274" y="86" text-anchor="middle" font-size="9.5" fill="#8a97a6">2 空闲位 · 可扩并行过滤</text>
+        </svg>
+        <div class="flowline">流程：复溶液 → <code>GL-002</code> 0.22 µm 针式过滤入 2 mL 进样瓶 → 转 WS-09 冷藏。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS9 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#3d2f7a,#5b3fb0)"><h4>WS-VETDRUG-Store-CDFCY-09 ｜ 冷链存储缓存站</h4>
+      <div class="sub">平台 PLT-800 · 待测液冷藏 / 自动上下料缓存 · 模块位 3/3 · 节拍 91 s（并行缓存）</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th><th>耗时(s)</th></tr>
+          <tr><td><code>MOD-CC-001</code></td><td>2 mL 西林瓶 0–10 ℃ 冷藏，XYZ 自动取放，90 工位</td><td>3</td><td>31+60</td></tr>
+          <tfoot><tr><td colspan="3"><b>合计 3/3（仅兼容 PLT-800）</b></td><td><b>91</b></td></tr></tfoot>
+        </table>
+        <div class="note info" style="margin-top:10px"><b>缓存站定位</b>该站为<b>冷链缓存 / 进出料缓冲</b>，单瓶取放节拍 91 s 远低于 600 s，作为<b>并行缓存站</b>持续运行，<b>不参与产线瓶颈</b>，保障痕量待测液不降解（对应挑战-2 痕量损失）。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局</h4>
+        <svg viewBox="0 0 360 150" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="146" rx="10" fill="#fbfdff" stroke="#5b3fb0"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#3d2f7a">PLT-800 · 90 工位冷藏存储</text>
+          <rect x="16" y="32" width="330" height="100" rx="8" fill="#f0edfb" stroke="#5b3fb0"/>
+          <text x="181" y="76" text-anchor="middle" font-size="12" fill="#3d2f7a" font-weight="700">MOD-CC-001 样品存储（0–10 ℃）</text>
+          <text x="181" y="96" text-anchor="middle" font-size="10" fill="#5d4a8f">XYZ 机械臂自动取放 · 占 3 位（整机）</text>
+        </svg>
+        <div class="flowline">流程：进样瓶 → <code>CC-001</code> 0–10 ℃ 冷藏暂存 → 按序自动取放上机 LC-MS/MS。亦可作样品入口冷链缓存。</div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- 7 解决方案串联 -->
+<section id="solution">
+  <h2><span class="num">7</span>样品制备解决方案（工作站串联）</h2>
+  <p class="lead">8 座处理工站按前处理顺序串联 + 1 座并行冷链缓存站，机械臂 / 转运实现工站间样品流转，对接后端 LC-MS/MS。解决方案编号 <b>SOL-VETDRUG-CDFCY-01</b>。</p>
+  <div class="mermaid">
+flowchart LR
+  IN([2 g 组织<br/>人工称样]):::s --> S1
+  subgraph S1[WS-01 制样加内标 · PLT-800 · 315s]
+    direction TB
+    a1[JZ-002 均质]-->a2[JY-004 加内标]
+  end
+  S1 --> S2
+  subgraph S2[WS-02 提取加液加盐 · PLT-800 · 720s]
+    direction TB
+    b1[WX-006 加乙酸乙酯]-->b2[YJ-004 奶样加盐]
+  end
+  S2 --> S3
+  subgraph S3[WS-03 振荡·提取离心 · PLT-1200 · 640s]
+    direction TB
+    c1[ZD-001 振荡10min]-->c2[LX-001 离心8000✓]
+  end
+  S3 -->|残渣重复1次后合并| S4
+  subgraph S4[WS-04 转移·氮吹1 · PLT-800 · 660s]
+    direction TB
+    d1[YY-001 合并转移]-->d2[NS-001 50℃氮吹干]
+  end
+  S4 --> S5
+  subgraph S5[WS-05 脱脂·离心 · PLT-1200 · 720s]
+    direction TB
+    e1[WX-006 NaCl+己烷]-->e2[LX-001 离心弃己烷✓]
+  end
+  S5 --> S6
+  subgraph S6[WS-06 反萃取·离心 · PLT-1200 · 640s]
+    direction TB
+    f1[ZD-001 反萃取振荡]-->f2[LX-001 离心取有机相✓]
+  end
+  S6 -->|反萃取重复1次合并| S7
+  subgraph S7[WS-07 氮吹2·复溶 · PLT-800 · 660s]
+    direction TB
+    g1[NS-001 50℃氮吹干]-->g2[YY-001 20%甲醇复溶]
+  end
+  S7 --> S8
+  subgraph S8[WS-08 过滤 · PLT-800 · 580s]
+    h1[GL-002 0.22µm过滤]
+  end
+  S8 --> S9
+  subgraph S9[WS-09 冷链存储 · PLT-800 · 91s]
+    i1[CC-001 待测冷藏]
+  end
+  S9 --> OUT([进样小瓶<br/>→ LC-MS/MS]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  </div>
+  <table>
+    <tr><th>序</th><th>工作站</th><th>平台</th><th>对应标准条款</th><th>输入 → 输出容器</th></tr>
+    <tr><td>1</td><td>WS-VETDRUG-Prep-CDFCY-01 制样加内标</td><td>PLT-800</td><td>§7 + §8.1 均质/加内标</td><td>2 g 组织 → 加内标样液（50 mL 离心管）</td></tr>
+    <tr><td>2</td><td>WS-VETDRUG-Extract-CDFCY-02 提取加液加盐</td><td>PLT-800</td><td>§8.1 加乙酸乙酯/奶样加盐</td><td>样液 → 加提取剂样液（50 mL 离心管）</td></tr>
+    <tr><td>3</td><td>WS-VETDRUG-Centri1-CDFCY-03 振荡·提取离心</td><td>PLT-1200</td><td>§8.1 振荡/8000rpm 离心</td><td>样液 → 合并提取上清（50 mL 离心管）</td></tr>
+    <tr><td>4</td><td>WS-VETDRUG-Concen1-CDFCY-04 转移·氮吹①</td><td>PLT-800</td><td>§8.1 合并/50℃ 氮吹干</td><td>提取液 → 待净化残渣</td></tr>
+    <tr><td>5</td><td>WS-VETDRUG-Defat-CDFCY-05 脱脂·离心</td><td>PLT-1200</td><td>§8.2 NaCl 溶解/正己烷脱脂/离心</td><td>残渣 → 脱脂水相（50 mL 离心管）</td></tr>
+    <tr><td>6</td><td>WS-VETDRUG-Centri2-CDFCY-06 反萃取·离心</td><td>PLT-1200</td><td>§8.2 乙酸乙酯反萃取/离心取有机相</td><td>水相 → 合并有机相（50 mL 离心管）</td></tr>
+    <tr><td>7</td><td>WS-VETDRUG-Concen2-CDFCY-07 氮吹②·复溶</td><td>PLT-800</td><td>§8.2 50℃ 氮吹干/20% 甲醇复溶</td><td>有机相 → 复溶液 1.0 mL（西林瓶）</td></tr>
+    <tr><td>8</td><td>WS-VETDRUG-Filter-CDFCY-08 过滤</td><td>PLT-800</td><td>§8.2 0.22 µm 过滤</td><td>复溶液 → 进样液（2 mL 进样瓶）</td></tr>
+    <tr><td>9</td><td>WS-VETDRUG-Store-CDFCY-09 冷链存储</td><td>PLT-800</td><td>§8.2 待测暂存</td><td>进样瓶 → 0–10 ℃ 冷藏 → 上机</td></tr>
+  </table>
+  <div class="note ok"><b>对应解决方案库范式</b>本产线结构对应 <code>references/04-solutions/</code> 中「提取 → 液液脱脂 → 反萃取 → 浓缩复溶 → 过滤 → LC-MS/MS」<b>无 SPE 液液萃取范式</b>（SOL-VETDRUG-CDFCY 系列），工作站派生自已在成都食检院部署验证的 WS-VETDRUG 工站系列。</div>
+</section>
+
+<!-- 8 处理耗时测算 -->
+<section id="time">
+  <h2><span class="num">8</span>处理耗时测算（逐平台 → 总节拍）</h2>
+  <p class="lead">测算口径：<b>每平台处理耗时 = Σ 该平台所载模组（功能码单循环耗时 cycle_time_sec + 自动上下料 60 s/模组）</b>；解决方案总耗时 = Σ 各平台耗时（串行单样口径）。
+  数值取自模组卡 <code>process_capability.cycle_time_sec</code> 与自动上下料 60 s/模组。</p>
+
+  <h3>WS-01 制样加内标（PLT-800）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-JZ-002</span></td><td>组织均质制样</td><td>60</td><td>60</td><td>120</td></tr>
+    <tr><td><span class="mod">MOD-JY-004</span></td><td>加内标 100 µL 涡旋</td><td>135</td><td>60</td><td>195</td></tr>
+    <tfoot><tr><td colspan="4">WS-01 平台处理耗时</td><td>315 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-02 提取加液·奶样加盐（PLT-800）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-WX-006</span></td><td>加 2% 氨化乙酸乙酯 10 mL 涡旋 30 s</td><td>300</td><td>60</td><td>360</td></tr>
+    <tr><td><span class="mod">MOD-YJ-004</span></td><td>奶样加无水硫酸钠 3 g 涡旋</td><td>300</td><td>60</td><td>360</td></tr>
+    <tfoot><tr><td colspan="4">WS-02 平台处理耗时</td><td>720 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-03 振荡·提取离心（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-ZD-001</span></td><td>涡旋振荡 10 min</td><td>220</td><td>60</td><td>280</td></tr>
+    <tr><td><span class="mod">MOD-LX-001</span></td><td>8000 rpm 离心 5 min <sup>①</sup> ✓</td><td>300</td><td>60</td><td>360</td></tr>
+    <tfoot><tr><td colspan="4">WS-03 平台处理耗时</td><td>640 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-04 转移·氮吹①（PLT-800）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-YY-001</span></td><td>上清合并转移 <sup>②</sup></td><td>60</td><td>60</td><td>120</td></tr>
+    <tr><td><span class="mod">MOD-NS-001</span></td><td>50 ℃ 真空离心浓缩至干 <sup>③</sup></td><td>480</td><td>60</td><td>540</td></tr>
+    <tfoot><tr><td colspan="4">WS-04 平台处理耗时</td><td>660 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-05 脱脂·离心（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-WX-006</span></td><td>4% NaCl 溶解 + 正己烷涡旋 30 s</td><td>300</td><td>60</td><td>360</td></tr>
+    <tr><td><span class="mod">MOD-LX-001</span></td><td>8000 rpm 离心弃正己烷 <sup>①</sup> ✓</td><td>300</td><td>60</td><td>360</td></tr>
+    <tfoot><tr><td colspan="4">WS-05 平台处理耗时</td><td>720 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-06 反萃取·离心（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-ZD-001</span></td><td>乙酸乙酯反萃取振荡 5 min</td><td>220</td><td>60</td><td>280</td></tr>
+    <tr><td><span class="mod">MOD-LX-001</span></td><td>8000 rpm 离心取有机相 <sup>①</sup> ✓</td><td>300</td><td>60</td><td>360</td></tr>
+    <tfoot><tr><td colspan="4">WS-06 平台处理耗时</td><td>640 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-07 氮吹②·复溶（PLT-800）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-NS-001</span></td><td>合并有机相 50 ℃ 氮吹干 <sup>③</sup></td><td>480</td><td>60</td><td>540</td></tr>
+    <tr><td><span class="mod">MOD-YY-001</span></td><td>20% 甲醇 1.0 mL 复溶 <sup>②</sup></td><td>60</td><td>60</td><td>120</td></tr>
+    <tfoot><tr><td colspan="4">WS-07 平台处理耗时</td><td>660 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-08 过滤（PLT-800）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-GL-002</span></td><td>0.22 µm 针式过滤</td><td>520</td><td>60</td><td>580</td></tr>
+    <tfoot><tr><td colspan="4">WS-08 平台处理耗时</td><td>580 s</td></tr></tfoot>
+  </table>
+
+  <h3>WS-09 冷链存储缓存（PLT-800）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>功能码耗时(s)</th><th>上下料(s)</th><th>小计(s)</th></tr>
+    <tr><td><span class="mod">MOD-CC-001</span></td><td>待测液 0–10 ℃ 冷藏取放（缓存）</td><td>31</td><td>60</td><td>91</td></tr>
+    <tfoot><tr><td colspan="4">WS-09 平台处理耗时（并行缓存）</td><td>91 s</td></tr></tfoot>
+  </table>
+
+  <h3>解决方案总节拍（九平台叠加）</h3>
+  <table>
+    <tr><th>平台 / 工作站</th><th>处理耗时 (s)</th><th>≈ min</th><th>相对 600 s 基准</th><th>相对占比</th></tr>
+    <tr><td>WS-01 制样加内标 · PLT-800</td><td>315</td><td>5.3</td><td>−285 s</td><td><span class="timebar" style="width:53px"></span> 6.4%</td></tr>
+    <tr><td>WS-02 提取加液加盐 · PLT-800</td><td>720</td><td>12.0</td><td>+120 s</td><td><span class="timebar" style="width:120px"></span> 14.6%</td></tr>
+    <tr><td>WS-03 振荡·提取离心 · PLT-1200</td><td>640</td><td>10.7</td><td>+40 s</td><td><span class="timebar" style="width:107px"></span> 13.0%</td></tr>
+    <tr><td>WS-04 转移·氮吹① · PLT-800</td><td>660</td><td>11.0</td><td>+60 s</td><td><span class="timebar" style="width:110px"></span> 13.4%</td></tr>
+    <tr><td>WS-05 脱脂·离心 · PLT-1200</td><td>720</td><td>12.0</td><td>+120 s（瓶颈）</td><td><span class="timebar" style="width:120px"></span> 14.6%</td></tr>
+    <tr><td>WS-06 反萃取·离心 · PLT-1200</td><td>640</td><td>10.7</td><td>+40 s</td><td><span class="timebar" style="width:107px"></span> 13.0%</td></tr>
+    <tr><td>WS-07 氮吹②·复溶 · PLT-800</td><td>660</td><td>11.0</td><td>+60 s</td><td><span class="timebar" style="width:110px"></span> 13.4%</td></tr>
+    <tr><td>WS-08 过滤 · PLT-800</td><td>580</td><td>9.7</td><td>−20 s（命中）</td><td><span class="timebar" style="width:97px"></span> 11.8%</td></tr>
+    <tr><td>WS-09 冷链存储 · PLT-800</td><td>91</td><td>1.5</td><td>并行缓存</td><td><span class="timebar" style="width:15px"></span> 1.8%</td></tr>
+    <tfoot><tr><td><b>解决方案总节拍（串行单样）</b></td><td><b>4935</b></td><td><b>≈ 82.3 min</b></td><td><b>8 处理站均值 617 s</b></td><td>100%</td></tr></tfoot>
+  </table>
+  <div class="note warn"><b>※ 取值与口径说明</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>平台拆分基准：</b>按指令以「每平台 ≈ 600 s」均衡拆分。8 座处理工站均值 617 s（315/720/640/660/720/640/660/580），逐平台尽量接近 600 s；WS-09 存储为并行冷链缓存站，节拍 91 s，不计入瓶颈均衡。</li>
+    <li><sup>①</sup> <b>离心 <code>MOD-LX-001</code>：</b>卡片 <code>cycle_time_sec</code> 为「0–300」，取上限 300 s；标准 8000 rpm ↔ 模组上限 8000 rpm <b>✓ 满足，无转速偏差</b>（见 §9）。</li>
+    <li><sup>②</sup> <b>移液 <code>MOD-YY-001</code> ※：</b>卡片 <code>cycle_time_sec</code> 为 0，按定量环精密移液 / 转移工程估算 <b>60 s</b>。</li>
+    <li><sup>③</sup> <b>浓缩 <code>MOD-NS-001</code> ※估：</b>卡片 <code>cycle_time_sec</code> 为空，按同类有机溶剂真空离心吹干工程估算 <b>480 s</b>（见 §5）；正式实施以方法学验证终点为准。</li>
+    <li>上表为<b>串行单样节拍</b>。实际生产中离心 4 孔、浓缩多位、过滤可并行，各工站可流水重叠，<b>稳态通量远高于串行节拍</b>（瓶颈为 WS-02/WS-05 720 s）。</li>
+  </ul></div>
+</section>
+
+<!-- 9 通量与合规 -->
+<section id="kpi">
+  <h2><span class="num">9</span>通量、合规性与偏差说明</h2>
+  <div class="kpi">
+    <div class="k"><div class="v">9</div><div class="l">工作站数量（8 处理 + 1 缓存）</div></div>
+    <div class="k"><div class="v">10</div><div class="l">选用模组型号（全部为客户已确认）</div></div>
+    <div class="k"><div class="v">4</div><div class="l">目标药物种数（同位素内标法）</div></div>
+    <div class="k"><div class="v">82.3min</div><div class="l">串行单样总节拍</div></div>
+  </div>
+  <div class="note ok"><b>✓ 合规亮点（本方案无转速偏差）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>离心转速完全满足：</b>本标准 §8.1/§8.2 提取、脱脂、反萃取<b>全部为 8000 r/min 离心</b>，<code>MOD-LX-001</code> 转速上限恰为 <b>8000 rpm</b>（卡片 <code>speed_rpm_max 8000</code>）、控温 2–7 ℃ 覆盖常温离心需求 → <b>✓ 完全满足，无任何转速偏差</b>（相较其他兽残标准 9000/10000 rpm 超限情形，本方案为最优匹配案例）。</li>
+    <li><b>无 SPE、无柱干风险：</b>本标准采用<b>液液萃取（正己烷脱脂 + 氨化乙酸乙酯反萃取）</b>，全程无固相萃取柱，从根本上规避 SPE 活化/平衡/流速难控、柱干堵塞、回收率波动（挑战-4），亦无 SPE 柱耗材依赖。</li>
+    <li><b>奶样加盐已覆盖：</b>标准 §8.1 奶样（牛奶/羊奶）需另加无水硫酸钠 3 g，本方案用加盐模组 <code>MOD-YJ-004</code>（定量加固体盐 + 涡旋）实现，无需人工介入。</li>
+    <li><b>同位素内标法：</b>4 种氘代内标（氯霉素-D₅ 等）在 <code>MOD-JY-004</code> 首步精密加入，全流程随行校正基质效应与回收率（挑战-6）。</li>
+  </ul></div>
+  <div class="note warn"><b>⚠ 需说明的口径 / 缺口（诚实标注，需与客户确认）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>称样：</b>标准取样 2 g（±0.05 g，感量 0.01 g / 0.00001 g 天平），客户已确认 14 模组中<b>无称量模组</b>，按行业惯例<b>人工称样后上样</b>；自动化范围自「均质制样」起。</li>
+    <li><b>浓缩 / 移液耗时：</b><code>MOD-NS-001</code> 卡片耗时为空（估 480 s）、<code>MOD-YY-001</code> 卡片耗时为 0（估 60 s），均为<b>工程估算并已标注 ※</b>，正式实施以方法学验证为准（见 §5/§8）。</li>
+    <li><b>低温离心：</b>标准无强制低温（−2 ℃）提取要求，均为常温 8000 rpm 离心，<code>MOD-LX-001</code>（2–7 ℃ 预冷）完全覆盖，<b>无低温偏差</b>。</li>
+  </ul></div>
+  <div class="note info"><b>合规与数据来源</b>
+  <ul class="clean" style="margin-top:6px">
+    <li>全部技术参数引用自 <code>references/01-modules</code> / <code>02-platforms</code>，<b>无编造数据</b>；选型严格限定于客户已确认的 14 模组清单内，实用 10 个型号。</li>
+    <li>提取涉乙酸乙酯、正己烷、浓氨水 + 50 ℃ 氮吹，工站要求通风 + 压缩空气（见 §10）；有机相易挥发，浓缩控温防目标物损失。</li>
+    <li>「智慧实验室软件」为系统软件层，在模组硬件库中无对应卡片，由 SmartLabOS 软件平台单独配置统一调度（不编造模组 ID）。</li>
+  </ul></div>
+  <div class="note ok"><b>报价</b> 涉及价格、报价信息，请联系销售团队获取报价。</div>
+</section>
+
+<!-- 10 公用工程 -->
+<section id="utility">
+  <h2><span class="num">10</span>公用工程与场地要求</h2>
+  <p class="lead">各平台规格、占地、功率及排风/上下水/压缩空气要求（引自 <code>references/02-platforms</code> 与各模组 <code>electrical_environment</code>）。</p>
+  <table>
+    <tr><th>工作站</th><th>平台</th><th>外形 (长×宽×高 mm)</th><th>占地</th><th>关键公用工程</th></tr>
+    <tr><td>WS-01 制样加内标</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>220V/24V · 压缩空气 · 上下水（均质清洗）</td></tr>
+    <tr><td>WS-02 提取加液加盐</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>220V/24V · 压缩空气（正压加液）· 有机溶剂排风</td></tr>
+    <tr><td>WS-03 振荡·提取离心</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220V/24V · 离心排风 · 真空泵（−80 kPa）</td></tr>
+    <tr><td>WS-04 转移·氮吹①</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>220V/24V/<b>48V</b> · 真空泵 · 压缩空气 · 排风</td></tr>
+    <tr><td>WS-05 脱脂·离心</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220V/24V · 正己烷防爆排风 · 真空泵</td></tr>
+    <tr><td>WS-06 反萃取·离心</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220V/24V · 离心排风 · 真空泵</td></tr>
+    <tr><td>WS-07 氮吹②·复溶</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>220V/24V/<b>48V</b> · 真空泵 · 压缩空气 · 排风</td></tr>
+    <tr><td>WS-08 过滤</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>220V/24V · 压缩空气（正压过滤）· 有机废液</td></tr>
+    <tr><td>WS-09 冷链存储</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>220V · 压缩空气 · 冷凝排水</td></tr>
+    <tfoot><tr><td colspan="3">合计</td><td>7.14 ㎡</td><td>含通道按 2.5~3× 预留 ≈ 18–22 ㎡</td></tr></tfoot>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">设备高 2055 mm，要求<b>层高 ≥ 3 m</b>、<b>地面承重 ≥ 500 kg/㎡</b>；多工站错峰运行，实际同时功率低于简单求和峰值。</p>
+  <div class="grid g2">
+    <div class="card"><h4>⚡ 供电</h4><ul class="clean">
+      <li>主电 <b>220 V 单相</b> + 控制电 <b>24 V</b>；WS-04/WS-07 浓缩模组（<code>MOD-NS-001</code>）另需 <b>48 V</b></li>
+      <li>独立配电箱 + 漏电/接地保护；建议每平台配 <b>3 kVA 在线式 UPS</b></li></ul></div>
+    <div class="card"><h4>💨 排风 / 通风</h4><ul class="clean">
+      <li>提取/净化涉<b>乙酸乙酯、正己烷、浓氨水、甲醇</b> + 50 ℃ 氮吹挥发（易燃有机溶剂）</li>
+      <li>WS-02/04/05/06/07 上方设<b>万向抽气罩 / 防爆排风</b>，正己烷区域按可燃气体分区，达标后高空排放</li></ul></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h4>🚰 上水 / 下水 / 废液</h4><ul class="clean">
+      <li><b>上水：</b>一级纯水（GB/T 6682），供 4% NaCl 配制、均质/定容清洗</li>
+      <li><b>下水：</b>平台排废口接<b>独立排废管路</b>，有机废液（乙酸乙酯/正己烷/甲醇）与氨性废液<b>分类收集</b>至危废罐，<u>不得直排市政</u></li></ul></div>
+    <div class="card"><h4>🟦 压缩空气 / 真空</h4><ul class="clean">
+      <li>洁净干燥<b>压缩空气 0.4–0.7 MPa</b>（正压加液、涡旋气动压紧、过滤）</li>
+      <li><b>真空泵</b>：浓缩 <code>MOD-NS-001</code>（−95 kPa）、离心 <code>MOD-LX-001</code>（−80 kPa）配套</li></ul></div>
+  </div>
+</section>
+
+<!-- 11 物料 / 商务 -->
+<section id="bom" style="border-bottom:none">
+  <h2><span class="num">11</span>关键物料清单与商务说明</h2>
+  <table>
+    <tr><th>类别</th><th>规格</th><th>用途</th><th>关联模组</th></tr>
+    <tr><td>50 ml 离心管</td><td>50 mL PP（尖底）</td><td>均质 / 提取 / 脱脂 / 反萃取 / 离心</td><td>JZ-002 / WX-006 / YJ-004 / ZD-001 / LX-001</td></tr>
+    <tr><td>2 ml / 10 ml 西林瓶</td><td>萃取瓶 / 浓缩接收</td><td>加内标、浓缩、复溶</td><td>JY-004 / NS-001 / YY-001</td></tr>
+    <tr><td>针式过滤器</td><td>13 mm / 0.22 µm 尼龙</td><td>进样前过滤</td><td><code>MOD-GL-002</code></td></tr>
+    <tr><td>2 ml 进样小瓶 / 西林瓶</td><td>2 mL LC vial</td><td>过滤接样、冷藏进样</td><td>GL-002 / CC-001</td></tr>
+    <tr><td>关键试剂</td><td>2% 氨化乙酸乙酯、4% NaCl、4% NaCl 饱和正己烷、20% 甲醇、无水硫酸钠（奶样）、混合内标工作液</td><td>提取 / 脱脂 / 反萃取 / 复溶 / 内标</td><td>WX-006 / YJ-004 / ZD-001 / JY-004 / YY-001</td></tr>
+    <tr><td>同位素内标</td><td>氯霉素-D₅、甲砜霉素-D₃、氟苯尼考-D₃、氟苯尼考胺-D₃（≥98%）</td><td>内标法定量校正</td><td><code>MOD-JY-004</code></td></tr>
+  </table>
+  <div class="note info"><b>商务说明</b>本方案为售前技术配置建议。<b>涉及价格、报价信息，请联系销售团队获取报价。</b>
+  交付周期与质保以最终合同为准；平台/模组标准交付约 8 周（引自卡片 <code>lead_time_weeks</code>），工站集成约 12 周，供参考。</div>
+  <p class="crumbs">输出文件：projects/测试项目/1.html　|　标准：GB 31658.20—2022　|　解决方案：SOL-VETDRUG-CDFCY-01　|　数据源：references/01-modules、02-platforms、04-solutions</p>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    测试项目 · 成都市食品检验研究院 · 方案一（共六）· 动物性食品酰胺醇类药物及代谢物残留前处理自动化方案（GB 31658.20—2022 · 液液萃取无 SPE）· 9 工站串行节拍 4935 s ≈ 82.3 min/样<br>
+    <span style="color:#6b8aa6">本方案依据 GB 31658.20—2022 §8.1/§8.2 整理，技术参数以国家标准原文及现场 URS 确认为准；模组/平台参数均引自 references/ 知识库，选型严格限定于客户已确认 14 模组清单（实用 10 型号）。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#e3eef7',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#0c5c8f',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

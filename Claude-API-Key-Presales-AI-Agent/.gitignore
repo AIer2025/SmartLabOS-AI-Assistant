@@ -1,0 +1,19 @@
+# 构建产物
+bin/
+obj/
+publish/
+*.user
+
+# IDE
+.vs/
+.idea/
+*.suo
+
+# 机密（绝不入仓）：本地开发用 user-secrets(存于用户配置目录)或环境变量注入
+# env 配置文件含 MySQL 口令 → 只提交 .sample.json 模板，现场按模板另存为正式文件
+env/Presales-AI-Agent-config.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.local.json
+secrets.json
+*.env

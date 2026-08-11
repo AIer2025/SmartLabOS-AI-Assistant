@@ -1,0 +1,801 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案一 · GB 31658.28—2025 乙酰孕激素类药物残留 · SmartLabOS 前处理方案</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#dfe6ef;
+    --bg:#f4f7fb; --card:#ffffff;
+    --brand:#0c5c8f; --brand2:#0a9396; --accent:#ee9b00; --danger:#c1121f; --ok:#1f9d6b;
+    --ext:#1b5fa8; --pur:#1f9d6b; --conc:#c9760f; --filt:#1496a6; --idle:#cfd8e3;
+    --chip:#eef4fa; --radius:14px; --shadow:0 6px 22px rgba(15,27,45,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#06243c 0%,#0c5c8f 55%,#0a9396 130%);
+    color:#fff;padding:46px 0 40px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:340px;height:340px;
+    background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#9fe7e0;
+    border:1px solid rgba(159,231,224,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:27px;font-weight:700;letter-spacing:.5px}
+  header.hero .sub{font-size:16px;color:#d6e6f2;margin-bottom:22px;max-width:820px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:8px;padding:6px 13px;font-size:13px}
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.03)}
+  nav.toc ul{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0 auto;padding:8px 22px;max-width:1180px}
+  nav.toc a{text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 11px;border-radius:8px}
+  nav.toc a:hover{background:var(--chip);color:var(--brand)}
+  section{padding:36px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 22px;font-size:14.5px}
+  h3{font-size:17px;margin:24px 0 12px;color:var(--ink)}
+  h4{font-size:14.5px;margin:14px 0 6px;color:var(--brand2)}
+  p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+  .proc{background:#0b2236;color:#cfe3f2;border-radius:var(--radius);padding:18px 22px;
+    font-size:14px;border-left:5px solid var(--accent);margin:14px 0}
+  .proc b{color:#ffd166}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}
+  @media(max-width:880px){.g2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#eef4fa;color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  tfoot td{background:#f0f6fc;font-weight:700}
+  td code,.mod{font-family:Consolas,monospace;background:#eef4fa;color:var(--brand);
+    padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600}
+  .t-ext{background:#e3eef7;color:#0c5c8f}.t-spe{background:#d8f3f0;color:#0a7a72}
+  .t-conc{background:#fff0e6;color:#c9760f}.t-filt{background:#e9f7f9;color:#0c6470}
+  .t-new{background:#fde8e8;color:#c1121f}
+  .plat{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+  .pcard{flex:1;min-width:220px;border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .pcard.sel{border:2px solid var(--brand);box-shadow:0 6px 18px rgba(12,92,143,.16)}
+  .pcard h4{margin:0 0 6px;font-size:15px;color:var(--ink)}
+  .pcard .big{font-size:13px;color:var(--muted)}
+  .pcard .pick{font-size:12px;color:var(--brand2);font-weight:700;margin-top:8px}
+  .pcard .no{font-size:12px;color:var(--muted);margin-top:8px}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0;font-size:12.5px;align-items:center;
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;box-shadow:var(--shadow)}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .legend i{width:14px;height:14px;border-radius:3px;display:inline-block}
+  .ws{border:1px solid var(--line);border-radius:var(--radius);background:#fff;
+    box-shadow:var(--shadow);overflow:hidden;margin:18px 0}
+  .ws-head{padding:13px 20px;color:#fff;background:linear-gradient(90deg,#06243c,#0c5c8f)}
+  .ws-head h4{margin:0;font-size:16px;color:#fff}
+  .ws-head .sub{font-size:12.5px;opacity:.9}
+  .ws-body{padding:14px 20px 16px}
+  .wsgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:880px){.wsgrid{grid-template-columns:1fr}}
+  .flowline{font-size:12.5px;color:var(--muted);background:#f7fafd;border:1px dashed var(--line);
+    border-radius:8px;padding:9px 12px;margin-top:8px}
+  ul.tight{margin:.3em 0;padding-left:20px}ul.tight li{margin:4px 0;font-size:13px}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}
+  .note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#eaf2fb;border-color:var(--brand)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0}
+  @media(max-width:880px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+  .kpi .k .v{font-size:24px;font-weight:700;color:var(--brand)}
+  .kpi .k .l{font-size:12.5px;color:var(--muted)}
+  .timebar{height:18px;border-radius:5px;background:linear-gradient(90deg,#0c5c8f,#0a9396);display:inline-block;vertical-align:middle}
+  footer{background:#06243c;color:#9db8cf;padding:26px 0;font-size:13px}
+  .crumbs{font-size:12.5px;color:var(--muted);margin:18px 0 0}
+  .crumbs a{color:var(--brand);text-decoration:none}
+  .slotgrid text{font-family:"Microsoft YaHei",sans-serif}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">成都市食品检验研究院 · 兽残专项自动化 · 方案一</span>
+    <h1>动物性食品及尿液中乙酰孕激素类药物残留量测定<br>SmartLabOS 自动化前处理解决方案</h1>
+    <div class="sub">依据 <b>GB 31658.28—2025</b> 第 <b>8.1 酶解与提取</b> &amp; <b>8.2 净化</b>流程，
+    自【客户已确认 16 个模组】选型，选定 <b>PLT-1200 / PLT-800</b> 平台组装工作站并串联为完整样品制备产线，
+    覆盖<b>酶解—乙腈提取—盐析—冷冻—离心—SPE 净化—浓缩—复溶—过滤—低温存储</b>，含<b>逐平台处理耗时测算</b>。</div>
+    <div class="hmeta">
+      <span>📋 标准：GB 31658.28—2025（2025-09-01 实施）</span>
+      <span>🧪 基质：猪/牛/羊/鸡 肌肉·脂肪·肝·肾 + 奶/乳粉/蛋/尿</span>
+      <span>💊 6 种乙酰孕激素类</span>
+      <span>⏱ 双样节拍 ≈ 85.2 min（2 样/循环 · 单样均摊 ≈ 42.6 min）</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><ul>
+  <li><a href="#std">① 项目与标准</a></li>
+  <li><a href="#flow">② 工艺流程</a></li>
+  <li><a href="#platform">③ 平台选型</a></li>
+  <li><a href="#modules">④ 模组选型</a></li>
+  <li><a href="#ws">⑤ 工作站组成</a></li>
+  <li><a href="#solution">⑥ 解决方案串联</a></li>
+  <li><a href="#time">⑦ 处理耗时测算</a></li>
+  <li><a href="#kpi">⑧ 通量与合规</a></li>
+  <li><a href="#utility">⑨ 公用工程</a></li>
+  <li><a href="#bom">⑩ 物料/商务</a></li>
+</ul></nav>
+
+<div class="wrap">
+
+<!-- 1 项目与标准 -->
+<section id="std">
+  <h2><span class="num">1</span>项目概述与标准解读</h2>
+  <p class="lead">GB 31658.28—2025《食品安全国家标准 动物性食品及尿液中乙酰孕激素类药物残留量的测定 液相色谱-串联质谱法》</p>
+  <table>
+    <tr><th>项目</th><th>内容</th></tr>
+    <tr><td>检验标准</td><td>GB 31658.28—2025（发布 2025-06-03，实施 2025-09-01，首次发布）</td></tr>
+    <tr><td>客户单位</td><td>成都市食品检验研究院（市市监局正处级公益二类事业单位，国家食品复检机构，牵头食用农产品抽检监测）</td></tr>
+    <tr><td>适用基质</td><td>猪/牛/羊/鸡的肌肉、脂肪、肝、肾脏；牛奶、羊奶、乳粉（牛/羊）、鸡蛋；猪尿、牛尿</td></tr>
+    <tr><td>目标药物</td><td>醋酸氟孕酮 FGA、醋酸甲地孕酮 MA、醋酸美仑孕酮 MGA、醋酸氯地孕酮 CMA、醋酸羟孕酮 HPA、醋酸甲羟孕酮 MPA，共 <b>6 种</b></td></tr>
+    <tr><td>方法原理</td><td>β-葡萄糖醛苷酶/芳基硫酸酯酶<b>酶解</b> → 乙腈<b>提取</b> + 盐析 → <b>增强型除脂固相萃取柱净化</b> → 40℃氮吹浓缩复溶 → LC-MS/MS，<b>基质匹配外标法</b>定量</td></tr>
+    <tr><td>本方案覆盖</td><td>§8.1 酶解与提取、§8.2 净化（含浓缩复溶、离心、过滤），至 LC 进样小瓶为止</td></tr>
+    <tr><td>关键耗材</td><td>增强型脂肪去除固相萃取柱（或性能相当，本方案按 6 cc 载具适配）；有机系滤膜 <b>0.2 µm</b>；萃取盐包 4 g Na₂SO₄ + 1 g NaCl；β-葡萄糖醛苷酶/芳基硫酸酯酶 10000 U/mL</td></tr>
+    <tr><td>检出/定量限</td><td>组织/奶/蛋/尿 5 种 0.2 µg/kg（LOQ 0.5）、MPA 0.4 µg/kg（LOQ 1.0）；回收率 60%~120%，批内 RSD ≤15%、批间 ≤20%</td></tr>
+  </table>
+  <div class="note info"><b>客户痛点 → 本方案对策（一一对应）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>均质不均、高脂高蛋白基质分层：</b>50ml 离心管内高剪切均质（<code>MOD-JZ-002</code>，1000–30000 r/min）+ 盐析 + −18℃冷冻除脂，从源头稳定痕量取样重复性。</li>
+    <li><b>萃取乳化、目标物损失：</b>拆盖-加乙腈-闭盖-涡旋一体（<code>MOD-WX-006</code>）+ 定量加盐涡旋（<code>MOD-YJ-004</code>）盐析破乳，参数闭环、无个体差异。</li>
+    <li><b>SPE 柱活化/平衡/流速失控：</b>注射泵微升级流速闭环（<code>MOD-SPE-004</code>，±1%），八步流程可编程，规避柱干、堵塞、填料吸附波动。</li>
+    <li><b>氮吹控温控速难、热敏物分解：</b>离心+加热+真空三效浓缩（<code>MOD-NS-005</code>，25–55℃闭环控温）40℃精准蒸干，减少目标物挥发损失。</li>
+    <li><b>基质离子抑制、步骤繁琐：</b>增强除脂 SPE + 冷冻除脂 + 0.2 µm 过滤三级净化，全程自动上下料、无人化，消除人工个体差异。</li>
+  </ul></div>
+  <div class="note ok"><b>数据来源声明</b>本方案全部模组、平台、托盘参数均引用自 SmartLabOS 知识库
+  <code>references/01-modules</code>、<code>02-platforms</code>、<code>06-pallet</code> 与流程标准 <code>potocol/MD/09-GB31658.28-2025.md</code>，
+  并按【客户已确认 16 个模组】范围内选型（未启用 2 个、新建 2 个 URS 补缺），<b>未做杜撰</b>；与标准存在差异处已在第 8 节明确标注。</div>
+</section>
+
+<!-- 2 工艺流程 -->
+<section id="flow">
+  <h2><span class="num">2</span>前处理工艺流程拆解</h2>
+  <p class="lead">将标准 8.1 / 8.2 文字流程拆解为可由模组执行的「单元操作」（蓝=酶解提取 §8.1，绿=净化 §8.2，红=已确认模组缺口·新建 URS 补齐）。以组织/鸡蛋基质（取样 5 g + 0.2 mol/L 乙酸铵缓冲液 pH 5.2 3 mL）为主线，奶/乳粉/尿基质按取样量与缓冲液配方切换（软件配方管理）。</p>
+  <div class="proc"><b>8.1 酶解与提取</b> —— 称取试料 (5±0.05) g → 加 0.2 mol/L 乙酸铵缓冲液(pH5.2) 3 mL → <b>混匀/均质</b> → 加 β-葡萄糖醛苷酶/芳基硫酸酯酶 <b>100 µL</b> → <b>55 ℃避光振荡 2 h</b> 酶解 → 室温 <b>涡旋 1 min</b> → 加乙腈 10 mL <b>涡旋 1 min</b> → 加萃取盐包(4 g Na₂SO₄+1 g NaCl) <b>涡旋 1~2 min</b> → <b>−18 ℃冷冻 30 min</b> → <b>4 ℃ 9000 r/min 离心 5 min</b> → 量取上层 <b>4 mL</b> 于 10 mL 离心管 → 加水 1 mL 涡旋混匀，备用。</div>
+  <div class="proc" style="border-left-color:var(--brand2)"><b>8.2 净化</b> —— 备用液过<b>增强型除脂 SPE 柱</b>，<b>收集全部流出液</b> → <b>40 ℃氮吹至近干</b> → <b>60% 乙腈水 1.0 mL 复溶</b>并充分涡旋 → （浑浊时 <b>10000 r/min 离心 5 min</b>）→ <b>0.2 µm 有机系滤膜过滤</b> → 滤液供 LC-MS/MS 测定。</div>
+  <div class="mermaid">
+flowchart LR
+  A([5g 试料<br/>人工称样]):::s --> B[加缓冲液 3mL]:::ext --> C[均质混匀]:::ext --> E[加酶 100µL]:::new --> F[55℃避光振荡 2h]:::ext --> G[涡旋1min+加乙腈10mL涡旋]:::ext --> H[加盐包 涡旋]:::ext --> I[−18℃冷冻 30min]:::new --> J[4℃离心]:::ext --> K[取上层4mL+加水1mL]:::ext
+  K --> L[增强除脂 SPE 净化<br/>收集全部流出液]:::spe --> M[40℃ 氮吹近干]:::conc --> N[60%乙腈 1mL 复溶]:::conc --> O[浑浊时离心]:::filt --> P[0.2µm 过滤]:::filt --> Q([LC-MS/MS]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  classDef ext fill:#e3eef7,stroke:#0c5c8f,color:#0c5c8f;
+  classDef spe fill:#d8f3f0,stroke:#0a7a72,color:#0a7a72;
+  classDef conc fill:#fff0e6,stroke:#c9760f,color:#9a5a08;
+  classDef filt fill:#e9f7f9,stroke:#1496a6,color:#0c6470;
+  classDef new fill:#fde8e8,stroke:#c1121f,color:#c1121f;
+  </div>
+  <p style="font-size:13px;color:var(--muted)">注：称样（5 g，感量 0.01 g 天平）SmartLabOS 模组库无称量模组，按行业惯例由人工称样后上样；自动化范围自“加缓冲液”起至“过滤进样”止。<b>红色两节点</b>（100 µL 加酶、−18℃冷冻）在客户已确认 16 模组中无对应，本方案新建 2 个模组 URS（见第 4、8 节及独立 URS 文件）。</p>
+</section>
+
+<!-- 3 平台选型 -->
+<section id="platform">
+  <h2><span class="num">3</span>平台选型</h2>
+  <p class="lead">离心管自动化岛平台。约束：单平台最多 <b>6 模组 + 8 托盘</b>。三型平台模组位/托盘位/占地对比择优。</p>
+  <div class="plat">
+    <div class="pcard"><h4>PLT-800</h4><div class="big">800×850×2055 · 3 模组 · 4 托盘（1×4） · 0.68 ㎡ · 175 kg</div><div class="pick">✓ 用于末端进样瓶低温存储工站（<code>MOD-CC-001</code> 仅兼容 PLT-800）</div></div>
+    <div class="pcard sel"><h4>PLT-1200 ★ 主选</h4><div class="big">1200×850×2055 · 6 模组 · 8 托盘（2×4） · 1.02 ㎡ · 210 kg</div><div class="pick">✓ 六座前处理工站统一采用，主力验证机型、占地省、气源/供电成熟</div></div>
+    <div class="pcard"><h4>PLT-1400</h4><div class="big">1400×850×2055 · 6 模组 · 8 托盘（1×8） · 1.19 ㎡ · 210 kg</div><div class="no">○ 模组位同 1200、占地更大；可作浓缩工站升级以扩托盘缓存（注：加热模组上限 3）</div></div>
+  </div>
+  <table>
+    <tr><th>平台</th><th>尺寸(mm)</th><th>模组位</th><th>托盘位</th><th>布局</th><th>占地</th><th>加热模组上限</th><th>本方案采用</th></tr>
+    <tr><td><code>PLT-800</code></td><td>800×850×2055</td><td>3</td><td>4</td><td>1×4</td><td>0.68 ㎡</td><td>3</td><td>✅ 存储工站 WS-07</td></tr>
+    <tr><td><b><code>PLT-1200</code></b></td><td>1200×850×2055</td><td><b>6</b></td><td><b>8</b></td><td>2×4</td><td>1.02 ㎡</td><td>6</td><td><b>✅ WS-01~WS-06 统一采用</b></td></tr>
+    <tr><td><code>PLT-1400</code></td><td>1400×850×2055</td><td>6</td><td>8</td><td>1×8</td><td>1.19 ㎡</td><td>3</td><td>○ 可选（浓缩工站扩缓存）</td></tr>
+  </table>
+  <div class="note info"><b>选型结论</b>本流程各工站模组位需求 3~6 位（浓缩工站因 5 路并行需 5 位），<code>PLT-1200</code>（6 位/8 托盘）全部满足且为主力验证机型，故前处理六座工站统一选用 <b>PLT-1200</b>；末端进样瓶低温存储采用 <b>MOD-CC-001</b>（模组卡标注仅兼容 <code>PLT-800</code>），故存储工站选用 <b>PLT-800</b>。浓缩工站若需更长无人运行时间，可将 <code>PLT-1200</code> 升级为 <code>PLT-1400</code> 增加托盘缓存（注意 PLT-1400 加热模组上限为 3，需核算浓缩模组数量）。</div>
+</section>
+
+<!-- 4 模组选型 -->
+<section id="modules">
+  <h2><span class="num">4</span>模组选型（严格限定于客户已确认 16 模组 · 参数逐一校验）</h2>
+  <p class="lead">全部模组取自 <code>references/01-modules/</code>，参数与 ID 一一对应，绝不编造。“位”=占用标准模组位数（<code>module_slots</code>）。红色两行为已确认清单<b>无法覆盖</b>的缺口，新建 URS 补齐。</p>
+  <table>
+    <tr><th>工艺功能</th><th>模组 ID</th><th>模组名称</th><th>关键参数（单循环耗时 cycle_time_sec）</th><th>对应标准步骤</th><th>位</th></tr>
+    <tr><td><span class="tag t-ext">加液</span></td><td><span class="mod">MOD-JY-010</span></td><td>50ml 离心管拆装盖加液模块</td><td>1–50 mL，±1%，拆盖-加液-装盖，106 s</td><td>加 0.2 mol/L 乙酸铵缓冲液 3 mL</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">均质</span></td><td><span class="mod">MOD-JZ-002</span></td><td>50ml 离心管均质模块</td><td>1–40 mL，1000–30000 r/min，含刀头清洗，60 s</td><td>混匀/均质（破高脂分层）</td><td>1</td></tr>
+    <tr><td><span class="tag t-new">加酶 ⚠</span></td><td><span class="mod">URS-EZ-100</span></td><td>【新建】微量酶试剂加注模块（100 µL）</td><td>10–200 µL，±2%，冷藏酶液，≈90 s（规范值）</td><td>加 β-葡萄糖醛苷酶/芳基硫酸酯酶 100 µL</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">加热振荡</span></td><td><span class="mod">MOD-PY-002</span></td><td>50ml 离心管金属浴模块</td><td>16 工位，25–70 ℃，加热+定时平摇，220 s（孵育 2 h 批式）</td><td>55 ℃避光振荡 2 h 酶解</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">加液涡旋</span></td><td><span class="mod">MOD-WX-006</span></td><td>50ml 离心管正压加液涡旋模块</td><td>1–50 mL，1–3000 rpm，拆盖-加液-装盖-涡旋，300 s</td><td>涡旋 1 min + 加乙腈 10 mL 涡旋 1 min</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">加盐涡旋</span></td><td><span class="mod">MOD-YJ-004</span></td><td>50ml 离心管加盐涡旋模块</td><td>定量加盐（盐管）+ 拆合盖 + 涡旋 1–3000 rpm，300 s</td><td>加萃取盐包 涡旋 1~2 min（盐析）</td><td>1</td></tr>
+    <tr><td><span class="tag t-new">冷冻 ⚠</span></td><td><span class="mod">URS-FRZ-50</span></td><td>【新建】50ml 离心管低温冷冻沉淀模块</td><td>−25~0 ℃，−18 ℃冷冻，多工位批式，≈90 s（规范值+批式 30 min）</td><td>−18 ℃冷冻 30 min（冷冻除脂）</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">冷冻离心</span></td><td><span class="mod">MOD-LX-005</span></td><td>50ml×4 孔位离心机模块（不带 XYZ）</td><td>1–50 mL，500–<b>8000</b> rpm，1–10 ℃，420 s</td><td>4 ℃ 9000 r/min 离心 5 min（见偏差）</td><td><b>3</b></td></tr>
+    <tr><td><span class="tag t-ext">移液取样</span></td><td><span class="mod">MOD-YY-003</span></td><td>10ml 移液模块</td><td>1–10 mL，±1%，275 s</td><td>量取上层 4 mL 至 15 mL 离心管</td><td>1</td></tr>
+    <tr><td><span class="tag t-conc">加水/复溶</span></td><td><span class="mod">MOD-YY-002</span></td><td>1ml 移液模块</td><td>0.5–1 mL，±1%，270 s</td><td>加水 1 mL；60% 乙腈 1.0 mL 复溶</td><td>1</td></tr>
+    <tr><td><span class="tag t-spe">SPE</span></td><td><span class="mod">MOD-SPE-004</span></td><td>6cc 自动上样 SPE 模块</td><td>1–50 mL，0.1–15 mL/min，±1%，可换 3/6/10cc 载具，360 s</td><td>增强除脂 SPE 净化（收集全部流出液）</td><td>1</td></tr>
+    <tr><td><span class="tag t-conc">浓缩</span></td><td><span class="mod">MOD-NS-005</span></td><td>15ml 西林瓶离心浓缩模块</td><td>1–10 mL，25–55 ℃，1000–8000 rpm，真空 −95 kPa，2640 s</td><td>40 ℃氮吹至近干</td><td>1</td></tr>
+    <tr><td><span class="tag t-filt">离心</span></td><td><span class="mod">MOD-LX-004</span></td><td>2ml-6 孔位高速离心模块 V4.0（带 XYZ）</td><td>0.5–2 mL，1000–<b>14000</b> rpm，1–10 ℃，420 s</td><td>浑浊时 10000 r/min 离心 5 min ✓</td><td><b>3</b></td></tr>
+    <tr><td><span class="tag t-filt">过滤</span></td><td><span class="mod">MOD-GL-002</span></td><td>5cc 针式过滤模块</td><td>1–5 mL，13 mm 针式过滤器（适配 0.2 µm 有机系膜），520 s</td><td>0.2 µm 滤膜过滤</td><td>1</td></tr>
+    <tr><td><span class="tag t-ext">多路供液</span></td><td><span class="mod">MOD-JY-012</span></td><td>8 通道正压加液模块</td><td>8 通道，1–4 bar，±1%，10 s，<b>占 0 位（平台外置）</b></td><td>缓冲液/乙腈/淋洗/洗脱溶剂多路供给</td><td>0</td></tr>
+    <tr><td><span class="tag t-conc">低温存储</span></td><td><span class="mod">MOD-CC-001</span></td><td>800 样品存储模块</td><td>90 工位，0–10 ℃，XYZ 自动取放，2 mL 西林瓶，31 s</td><td>进样小瓶/标准中间液低温暂存</td><td>3</td></tr>
+  </table>
+  <div class="note warn"><b>已确认清单中「未启用」的 2 个模组（说明理由）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><code>MOD-PH-001</code>（50ml 离心管 pH 调测模块）——本标准 pH 5.2 系<b>缓冲液/乙酸铵溶液配制</b>时用乙酸调节（试剂制备），<b>样品前处理无 pH 在线调节步骤</b>，故不启用；若客户其余兽残项目（如某些磺胺/沙星需调 pH）纳入同岛，可增配此模组。</li>
+    <li><code>MOD-YY-004</code>（50ml 全量液体转移模块）——本标准提取仅"<b>量取上层 4 mL</b>"（定量移取，由 <code>MOD-YY-003</code> 完成），无"全量倒液/合并"步骤，故不启用；预留作其他标准双次提取合并使用。</li>
+  </ul></div>
+  <div class="note info"><b>配套托盘（引用 references/06-pallet 托盘统计表，均在 130×250 托盘规格内）</b>
+  50ml 离心管托盘（18 个/盘）、8g 盐管托盘（24 个/盘）、15ml 离心管托盘（32 个/盘）、6CC SPE 柱托盘（24 个/盘）、15ml 西林瓶托盘（28 个/盘）、13mm 过滤器托盘（40 个/盘）、2ml 离心管托盘（60 个/盘）、2ml 西林瓶托盘（进样瓶，60 个/盘）、1ml 枪头托盘（128 个/盘）、10ml 枪头/5ml 枪头托盘。</div>
+</section>
+
+<!-- 5 工作站组成 -->
+<section id="ws">
+  <h2><span class="num">5</span>工作站组成（模组搭载 + 平台布局）</h2>
+  <p class="lead">按工艺顺序将模组分组搭载到 6 座 PLT-1200 + 1 座 PLT-800，共 7 座工站。每座给出模组位占用（≤6，PLT-800≤3）、托盘（≤8）与 SVG 平台俯视布局。<code>MOD-LX-005/MOD-LX-004</code> 体积大各占 <b>3 位</b>；<code>MOD-JY-012</code> 占 <b>0 位</b>。</p>
+  <div class="legend">
+    <span><i style="background:#1b5fa8"></i>酶解提取段 §8.1</span>
+    <span><i style="background:#1f9d6b"></i>净化段 §8.2</span>
+    <span><i style="background:#c9760f"></i>浓缩/复溶</span>
+    <span><i style="background:#1496a6"></i>离心/过滤</span>
+    <span><i style="background:#c1121f"></i>新建 URS 模组</span>
+    <span><i style="background:#cfd8e3"></i>空闲位</span>
+  </div>
+
+  <!-- WS1 -->
+  <div class="ws">
+    <div class="ws-head"><h4>WS-VETGEST-Prep-CDFI-01 ｜ 制样·酶解工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖 §8.1（加缓冲液→均质→加酶→55℃避光振荡 2h）· 模块位 4/6</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th></tr>
+          <tr><td><code>MOD-JY-010</code></td><td>拆盖-加乙酸铵缓冲液 3 mL-装盖</td><td>1</td></tr>
+          <tr><td><code>MOD-JZ-002</code></td><td>高剪切均质（破高脂分层）</td><td>1</td></tr>
+          <tr><td><code>URS-EZ-100</code> ⚠</td><td>加酶液 100 µL（冷藏）</td><td>1</td></tr>
+          <tr><td><code>MOD-PY-002</code></td><td>55 ℃避光振荡 2 h 酶解（16 工位批式）</td><td>1</td></tr>
+          <tr><td><code>MOD-JY-012</code></td><td>缓冲液多路供给</td><td>0</td></tr>
+          <tfoot><tr><td colspan="2"><b>合计</b></td><td><b>4 / 6</b></td></tr></tfoot>
+        </table>
+        <h4>托盘（≤8，引自托盘统计表）</h4>
+        <ul class="tight">
+          <li>50 ml 离心管托盘（供试样，18 个/盘）</li>
+          <li>缓冲液溶剂瓶托盘</li>
+          <li>冷藏酶液瓶托盘</li>
+          <li>1 ml 枪头托盘（128 个/盘）</li>
+        </ul>
+      </div>
+      <div>
+        <h4>平台俯视布局（6 模块位）</h4>
+        <svg viewBox="0 0 360 200" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="196" rx="10" fill="#fbfdff" stroke="#1b5fa8"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0d2c54">PLT-1200 · 1200×850</text>
+          <rect x="14" y="32" width="80" height="120" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="54" y="88" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">JY-010</text>
+          <text x="54" y="104" text-anchor="middle" font-size="9" fill="#5d6b7a">加缓冲液</text>
+          <rect x="100" y="32" width="80" height="120" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="140" y="88" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">JZ-002</text>
+          <text x="140" y="104" text-anchor="middle" font-size="9" fill="#5d6b7a">均质</text>
+          <rect x="186" y="32" width="80" height="120" rx="8" fill="#fde8e8" stroke="#c1121f"/>
+          <text x="226" y="88" text-anchor="middle" font-size="10.5" fill="#c1121f" font-weight="700">URS-EZ-100</text>
+          <text x="226" y="104" text-anchor="middle" font-size="9" fill="#a8323b">加酶 100µL</text>
+          <rect x="272" y="32" width="74" height="120" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="309" y="88" text-anchor="middle" font-size="10.5" fill="#0d2c54" font-weight="700">PY-002</text>
+          <text x="309" y="104" text-anchor="middle" font-size="9" fill="#5d6b7a">55℃酶解</text>
+          <text x="180" y="176" text-anchor="middle" font-size="9.5" fill="#5d6b7a">底部走线：MOD-JY-012 八通道正压加液（占 0 位）+ 8 托盘位</text>
+        </svg>
+        <div class="flowline">流程：上样 5 g 试料 → <code>JY-010</code> 加乙酸铵缓冲液 3 mL → <code>JZ-002</code> 均质破分层 → <code>URS-EZ</code> 加酶 100 µL → <code>PY-002</code> 55 ℃避光振荡 2 h 酶解（16 工位批式并行孵育，作产线缓存段）。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS2 -->
+  <div class="ws">
+    <div class="ws-head"><h4>WS-VETGEST-Extract-CDFI-02 ｜ 溶剂提取·盐析·冷冻工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖 §8.1（涡旋→加乙腈涡旋→加盐涡旋→−18℃冷冻）· 模块位 3/6</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th></tr>
+          <tr><td><code>MOD-WX-006</code></td><td>室温涡旋 1 min + 加乙腈 10 mL + 涡旋 1 min</td><td>1</td></tr>
+          <tr><td><code>MOD-YJ-004</code></td><td>定量加萃取盐包 + 涡旋 1~2 min（盐析）</td><td>1</td></tr>
+          <tr><td><code>URS-FRZ-50</code> ⚠</td><td>−18 ℃冷冻 30 min（冷冻除脂）</td><td>1</td></tr>
+          <tr><td><code>MOD-JY-012</code></td><td>乙腈溶剂供给</td><td>0</td></tr>
+          <tfoot><tr><td colspan="2"><b>合计</b></td><td><b>3 / 6</b></td></tr></tfoot>
+        </table>
+        <h4>托盘（≤8）</h4>
+        <ul class="tight">
+          <li>50 ml 离心管托盘（18 个/盘）</li>
+          <li>8g 盐管托盘（萃取盐包，24 个/盘）</li>
+          <li>乙腈溶剂瓶托盘</li>
+        </ul>
+      </div>
+      <div>
+        <h4>平台俯视布局（6 模块位）</h4>
+        <svg viewBox="0 0 360 200" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="196" rx="10" fill="#fbfdff" stroke="#1b5fa8"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0d2c54">PLT-1200 · 提取盐析冷冻</text>
+          <rect x="14" y="32" width="100" height="120" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="64" y="88" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">WX-006</text>
+          <text x="64" y="104" text-anchor="middle" font-size="9" fill="#5d6b7a">加乙腈涡旋</text>
+          <rect x="120" y="32" width="100" height="120" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="170" y="88" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">YJ-004</text>
+          <text x="170" y="104" text-anchor="middle" font-size="9" fill="#5d6b7a">加盐涡旋</text>
+          <rect x="226" y="32" width="120" height="120" rx="8" fill="#fde8e8" stroke="#c1121f"/>
+          <text x="286" y="88" text-anchor="middle" font-size="11" fill="#c1121f" font-weight="700">URS-FRZ-50</text>
+          <text x="286" y="104" text-anchor="middle" font-size="9" fill="#a8323b">−18℃冷冻 30min</text>
+          <text x="180" y="176" text-anchor="middle" font-size="9.5" fill="#5d6b7a">底部走线：MOD-JY-012 供乙腈（占 0 位）</text>
+        </svg>
+        <div class="flowline">流程：<code>WX-006</code> 加乙腈 10 mL 并涡旋破乳 → <code>YJ-004</code> 定量加盐包盐析涡旋 → <code>URS-FRZ</code> −18 ℃冷冻 30 min 使脂类/水相冻析（多工位批式），直击客户"萃取乳化、高脂干扰"痛点。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS3 -->
+  <div class="ws">
+    <div class="ws-head"><h4>WS-VETGEST-Centrifuge-CDFI-03 ｜ 冷冻离心·取样工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖 §8.1（4℃离心→量取上层 4 mL）· 模块位 4/6</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th></tr>
+          <tr><td><code>MOD-LX-005</code></td><td>4 ℃ 离心 5 min（分层）</td><td>3</td></tr>
+          <tr><td><code>MOD-YY-003</code></td><td>量取上层 4 mL → 15 ml 离心管</td><td>1</td></tr>
+          <tr><td><code>MOD-JY-012</code></td><td>供液/吹扫辅助</td><td>0</td></tr>
+          <tfoot><tr><td colspan="2"><b>合计</b></td><td><b>4 / 6</b></td></tr></tfoot>
+        </table>
+        <h4>托盘（≤8）</h4>
+        <ul class="tight">
+          <li>50 ml 离心管托盘（提取液，18 个/盘）</li>
+          <li>15 ml 离心管托盘（备用液接收，32 个/盘）</li>
+          <li>10 ml 枪头托盘</li>
+        </ul>
+      </div>
+      <div>
+        <h4>平台俯视布局（6 模块位）</h4>
+        <svg viewBox="0 0 360 200" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="196" rx="10" fill="#fbfdff" stroke="#1b5fa8"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0d2c54">PLT-1200 · 冷冻离心取样</text>
+          <rect x="14" y="32" width="180" height="120" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="104" y="86" text-anchor="middle" font-size="12" fill="#0d2c54" font-weight="700">MOD-LX-005</text>
+          <text x="104" y="104" text-anchor="middle" font-size="10" fill="#5d6b7a">4℃ 离心 · 3 位</text>
+          <rect x="200" y="32" width="86" height="120" rx="8" fill="#e8f3ff" stroke="#1b5fa8"/>
+          <text x="243" y="86" text-anchor="middle" font-size="11" fill="#0d2c54" font-weight="700">YY-003</text>
+          <text x="243" y="104" text-anchor="middle" font-size="9" fill="#5d6b7a">取上层 4mL</text>
+          <rect x="292" y="32" width="54" height="120" rx="8" fill="#eef1f5" stroke="#516074"/>
+          <text x="319" y="88" text-anchor="middle" font-size="9.5" fill="#516074" transform="rotate(90 319 88)">空闲位 ×2</text>
+          <text x="180" y="176" text-anchor="middle" font-size="9.5" fill="#5d6b7a">底部走线：MOD-JY-012（占 0 位）；2 个空模块位预留扩展</text>
+        </svg>
+        <div class="flowline">流程：<code>LX-005</code> 4 ℃ 离心 5 min 分层 → <code>YY-003</code> 精准量取上层清液 4 mL 转入 15 mL 离心管（作 §8.2 备用液载体）。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS4 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#0b3d27,#1f9d6b)"><h4>WS-VETGEST-SPE-CDFI-04 ｜ 备用液·SPE 净化工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖 §8.1 尾（加水 1 mL）+ §8.2（增强除脂 SPE 净化，收集全部流出液）· 模块位 2/6</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th></tr>
+          <tr><td><code>MOD-YY-002</code></td><td>加水 1.0 mL（备用液，上样前吸吐混匀）</td><td>1</td></tr>
+          <tr><td><code>MOD-SPE-004</code></td><td>增强除脂 SPE 净化（活化-上样-收集全部流出液）</td><td>1</td></tr>
+          <tr><td><code>MOD-JY-012</code></td><td>活化液/溶剂供给</td><td>0</td></tr>
+          <tfoot><tr><td colspan="2"><b>合计</b></td><td><b>2 / 6</b>（可增配第 2、3 柱并行提通量）</td></tr></tfoot>
+        </table>
+        <h4>托盘（≤8）</h4>
+        <ul class="tight">
+          <li>15 ml 离心管托盘（备用液上样，32 个/盘）</li>
+          <li>6CC SPE 柱托盘（24 个/盘）</li>
+          <li>15 ml 西林瓶托盘（接收全部流出液，28 个/盘）</li>
+          <li>1 ml 枪头托盘</li>
+        </ul>
+      </div>
+      <div>
+        <h4>平台俯视布局（6 模块位）</h4>
+        <svg viewBox="0 0 360 200" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="196" rx="10" fill="#fbfdff" stroke="#1f9d6b"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0b3d27">PLT-1200 · SPE 净化（可扩并行）</text>
+          <rect x="14" y="32" width="86" height="120" rx="8" fill="#eef1f5" stroke="#516074"/>
+          <text x="57" y="86" text-anchor="middle" font-size="11" fill="#2b3543" font-weight="700">YY-002</text>
+          <text x="57" y="102" text-anchor="middle" font-size="9" fill="#516074">加水 1mL</text>
+          <rect x="106" y="32" width="86" height="120" rx="8" fill="#eafaf3" stroke="#1f9d6b"/>
+          <text x="149" y="86" text-anchor="middle" font-size="11" fill="#0b3d27" font-weight="700">SPE-004</text>
+          <text x="149" y="102" text-anchor="middle" font-size="9" fill="#0b3d27">增强除脂净化</text>
+          <rect x="198" y="32" width="148" height="120" rx="8" fill="#f4faf7" stroke="#8fc7ae" stroke-dasharray="5 4"/>
+          <text x="272" y="84" text-anchor="middle" font-size="10.5" fill="#4a7c63">扩展位 ×4</text>
+          <text x="272" y="100" text-anchor="middle" font-size="9" fill="#6b9683">可增配 SPE-004 并行</text>
+          <text x="180" y="176" text-anchor="middle" font-size="9.5" fill="#5d6b7a">底部走线：MOD-JY-012 供活化/上样辅助液（占 0 位）</text>
+        </svg>
+        <div class="flowline">流程：<code>YY-002</code> 向备用液加水 1 mL → <code>SPE-004</code> 注射泵微升级流速闭环，将备用液全量过增强除脂 SPE 柱并<b>收集全部流出液</b>入 15 mL 西林瓶（乙酰孕激素在本法为"过柱除脂、流出液即目标液"）。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS5 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#7a4708,#c9760f)"><h4>WS-VETGEST-Concentrate-CDFI-05 ｜ 浓缩工站（5 路并行）</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖 §8.2（40 ℃氮吹至近干）· 模块位 5/6 · 以并行数逼近 600 s 节拍</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th></tr>
+          <tr><td><code>MOD-NS-005</code> ×5</td><td>40 ℃ 离心+加热+真空三效浓缩至近干（并行 5 路）</td><td>5</td></tr>
+          <tr><td><code>MOD-JY-012</code></td><td>破真空/吹扫气源辅助</td><td>0</td></tr>
+          <tfoot><tr><td colspan="2"><b>合计</b></td><td><b>5 / 6</b></td></tr></tfoot>
+        </table>
+        <h4>托盘（≤8）</h4>
+        <ul class="tight">
+          <li>15 ml 西林瓶托盘 ×5（浓缩载体，28 个/盘）</li>
+          <li>（余位作缓存/复溶转运）</li>
+        </ul>
+        <div class="note warn" style="margin-top:10px"><b>为何 5 路并行？</b>单台 <code>MOD-NS-005</code> 浓缩节拍 2700 s（cycle 2640 + 上下料 60），是全线瓶颈。按"平台节拍≈600 s"目标，需 ⌈2700/600⌉=<b>5 路并行</b>，即 2700÷5 ≈ <b>540 s</b>/循环有效节拍。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局（6 模块位）</h4>
+        <svg viewBox="0 0 360 200" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="196" rx="10" fill="#fbfdff" stroke="#c9760f"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#7a4708">PLT-1200 · 5 路并行浓缩</text>
+          <rect x="14" y="32" width="62" height="120" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <rect x="80" y="32" width="62" height="120" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <rect x="146" y="32" width="62" height="120" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <rect x="212" y="32" width="62" height="120" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <rect x="278" y="32" width="62" height="120" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <text x="45" y="92" text-anchor="middle" font-size="10" fill="#7a4708" transform="rotate(90 45 92)">NS-005</text>
+          <text x="111" y="92" text-anchor="middle" font-size="10" fill="#7a4708" transform="rotate(90 111 92)">NS-005</text>
+          <text x="177" y="92" text-anchor="middle" font-size="10" fill="#7a4708" transform="rotate(90 177 92)">NS-005</text>
+          <text x="243" y="92" text-anchor="middle" font-size="10" fill="#7a4708" transform="rotate(90 243 92)">NS-005</text>
+          <text x="309" y="92" text-anchor="middle" font-size="10" fill="#7a4708" transform="rotate(90 309 92)">NS-005</text>
+          <text x="180" y="176" text-anchor="middle" font-size="9.5" fill="#5d6b7a">底部走线：MOD-JY-012 气源辅助（占 0 位）；余 1 模块位预留</text>
+        </svg>
+        <div class="flowline">流程：SPE 流出液（15 mL 西林瓶）在 5 台 <code>MOD-NS-005</code> 上并行 40 ℃三效浓缩至近干，控温 25–55 ℃闭环、真空 −95 kPa，规避人工氮吹控温控速难、热敏物分解与目标物挥发损失。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS6 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#0a5561,#1496a6)"><h4>WS-VETGEST-Filter-CDFI-06 ｜ 复溶·离心·过滤工站</h4>
+      <div class="sub">平台 PLT-1200 · 覆盖 §8.2（60% 乙腈复溶→浑浊时离心→0.2 µm 过滤）· 模块位 5/6</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th></tr>
+          <tr><td><code>MOD-YY-002</code></td><td>60% 乙腈水 1.0 mL 复溶 + 吸吐混匀</td><td>1</td></tr>
+          <tr><td><code>MOD-LX-004</code></td><td>浑浊时 10000 r/min 离心 5 min（条件启用）</td><td>3</td></tr>
+          <tr><td><code>MOD-GL-002</code></td><td>0.2 µm 有机系针式过滤至进样瓶</td><td>1</td></tr>
+          <tr><td><code>MOD-JY-012</code></td><td>洗针/清洗液供给</td><td>0</td></tr>
+          <tfoot><tr><td colspan="2"><b>合计</b></td><td><b>5 / 6</b></td></tr></tfoot>
+        </table>
+        <h4>托盘（≤8）</h4>
+        <ul class="tight">
+          <li>15 ml 西林瓶托盘（浓缩物复溶，28 个/盘）</li>
+          <li>2 ml 离心管托盘（浑浊样品离心，60 个/盘）</li>
+          <li>13mm 过滤器托盘（40 个/盘）</li>
+          <li>2 ml 进样小瓶托盘（60 个/盘）</li>
+        </ul>
+      </div>
+      <div>
+        <h4>平台俯视布局（6 模块位）</h4>
+        <svg viewBox="0 0 360 200" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="356" height="196" rx="10" fill="#fbfdff" stroke="#1496a6"/>
+          <text x="180" y="20" text-anchor="middle" font-size="12" fill="#0a5561">PLT-1200 · 复溶离心过滤</text>
+          <rect x="14" y="32" width="70" height="120" rx="8" fill="#fff0e6" stroke="#c9760f"/>
+          <text x="49" y="88" text-anchor="middle" font-size="11" fill="#7a4708" font-weight="700">YY-002</text>
+          <text x="49" y="104" text-anchor="middle" font-size="9" fill="#7a4708">复溶 1mL</text>
+          <rect x="90" y="32" width="164" height="120" rx="8" fill="#e9f7f9" stroke="#1496a6"/>
+          <text x="172" y="86" text-anchor="middle" font-size="12" fill="#0c6470" font-weight="700">MOD-LX-004</text>
+          <text x="172" y="104" text-anchor="middle" font-size="10" fill="#5d6b7a">14000rpm 离心 · 3 位（浑浊时）</text>
+          <rect x="260" y="32" width="86" height="120" rx="8" fill="#e9f7f9" stroke="#1496a6"/>
+          <text x="303" y="88" text-anchor="middle" font-size="11" fill="#0c6470" font-weight="700">GL-002</text>
+          <text x="303" y="104" text-anchor="middle" font-size="9" fill="#5d6b7a">0.2µm 过滤</text>
+          <text x="180" y="176" text-anchor="middle" font-size="9.5" fill="#5d6b7a">底部走线：MOD-JY-012 洗针供液（占 0 位）</text>
+        </svg>
+        <div class="flowline">流程：<code>YY-002</code> 加 60% 乙腈水 1.0 mL 复溶浓缩物 → （样品浑浊时 <code>LX-004</code> 10000 r/min 离心 5 min）→ <code>GL-002</code> 0.2 µm 有机系针式过滤至 2 mL 进样小瓶。</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- WS7 -->
+  <div class="ws">
+    <div class="ws-head" style="background:linear-gradient(90deg,#334a63,#5b7characteristic)"><h4>WS-VETGEST-Storage-CDFI-07 ｜ 进样瓶低温存储工站</h4>
+      <div class="sub">平台 PLT-800 · 进样小瓶/标准中间液 0–10 ℃ 冷藏暂存 · 模块位 3/3</div></div>
+    <div class="ws-body"><div class="wsgrid">
+      <div>
+        <h4>搭载模组</h4>
+        <table>
+          <tr><th>模组</th><th>功能</th><th>位</th></tr>
+          <tr><td><code>MOD-CC-001</code></td><td>800/90 工位样品冷藏存储（0–10 ℃，XYZ 自动取放，2 mL 西林瓶）</td><td>3</td></tr>
+          <tfoot><tr><td colspan="2"><b>合计</b></td><td><b>3 / 3</b></td></tr></tfoot>
+        </table>
+        <h4>托盘（≤4）</h4>
+        <ul class="tight">
+          <li>2 ml 西林瓶/进样小瓶托盘（60 个/盘）</li>
+          <li>标准中间液瓶托盘</li>
+        </ul>
+        <div class="note info" style="margin-top:10px"><b>存储温区说明</b><code>MOD-CC-001</code> 控温 0–10 ℃，满足标准溶液"4–8 ℃ 1 周"及进样前低温暂存；标准储备液需 <b>−18 ℃ 3 个月</b>，超出本模组温区，由实验室外置 −18 ℃ 冰箱承担（非本岛自动化范围）。</div>
+      </div>
+      <div>
+        <h4>平台俯视布局（PLT-800 · 3 模块位）</h4>
+        <svg viewBox="0 0 300 200" class="slotgrid" width="100%">
+          <rect x="2" y="2" width="296" height="196" rx="10" fill="#fbfdff" stroke="#334a63"/>
+          <text x="150" y="20" text-anchor="middle" font-size="12" fill="#243b52">PLT-800 · 800×850</text>
+          <rect x="14" y="32" width="272" height="120" rx="8" fill="#eef2f7" stroke="#334a63"/>
+          <text x="150" y="84" text-anchor="middle" font-size="13" fill="#243b52" font-weight="700">MOD-CC-001</text>
+          <text x="150" y="104" text-anchor="middle" font-size="10" fill="#5d6b7a">0–10 ℃ 冷藏存储 · 90 工位 · 3 位</text>
+          <text x="150" y="176" text-anchor="middle" font-size="9.5" fill="#5d6b7a">4 托盘位；对接 LC-MS/MS 自动进样器</text>
+        </svg>
+        <div class="flowline">过滤后 2 mL 进样小瓶自动入 <code>MOD-CC-001</code> 0–10 ℃ 暂存，按 FIFO 追溯，机械臂/进样器直取上机，衔接后端 LC-MS/MS 自动进样与基质匹配标曲。</div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- 6 解决方案串联 -->
+<section id="solution">
+  <h2><span class="num">6</span>样品制备解决方案（工作站串联）</h2>
+  <p class="lead">7 座工作站按前处理顺序串联，SmartLabOS 中央调度 + XYZ 机械臂/搬运实现工站间样品自动流转（自动上下料），前接采样-制样-分样、后对接 LC-MS/MS 检测与报告，形成"采样→前处理→检测→报告"闭环。</p>
+  <div class="mermaid">
+flowchart LR
+  IN([5 g 组织/蛋/奶/尿<br/>人工称样·自动上料]):::s --> S1
+  subgraph S1[WS-01 制样酶解 · PLT-1200]
+    direction TB
+    a1[JY-010 加缓冲液]-->a2[JZ-002 均质]-->a3[URS-EZ 加酶100µL]-->a4[PY-002 55℃ 2h]
+  end
+  S1 -->|酶解液 50ml离心管| S2
+  subgraph S2[WS-02 提取盐析冷冻 · PLT-1200]
+    direction TB
+    b1[WX-006 加乙腈涡旋]-->b2[YJ-004 加盐涡旋]-->b3[URS-FRZ −18℃冷冻]
+  end
+  S2 -->|盐析液| S3
+  subgraph S3[WS-03 冷冻离心取样 · PLT-1200]
+    direction TB
+    c1[LX-005 4℃离心]-->c2[YY-003 取上层4mL]
+  end
+  S3 -->|备用液 15ml离心管| S4
+  subgraph S4[WS-04 SPE净化 · PLT-1200]
+    direction TB
+    d1[YY-002 加水1mL]-->d2[SPE-004 除脂净化<br/>收集全部流出液]
+  end
+  S4 -->|流出液 15ml西林瓶| S5
+  subgraph S5[WS-05 浓缩 · PLT-1200]
+    direction TB
+    e1[NS-005 ×5 并行<br/>40℃氮吹近干]
+  end
+  S5 -->|浓缩物| S6
+  subgraph S6[WS-06 复溶离心过滤 · PLT-1200]
+    direction TB
+    f1[YY-002 复溶1mL]-->f2[LX-004 浑浊时离心]-->f3[GL-002 0.2µm过滤]
+  end
+  S6 -->|2ml进样瓶| S7
+  subgraph S7[WS-07 低温存储 · PLT-800]
+    direction TB
+    g1[CC-001 0–10℃暂存]
+  end
+  S7 --> OUT([→ LC-MS/MS<br/>基质匹配外标定量]):::s
+  classDef s fill:#06243c,color:#fff,stroke:none;
+  </div>
+  <table>
+    <tr><th>序</th><th>工作站</th><th>平台</th><th>对应标准条款</th><th>输入 → 输出容器</th></tr>
+    <tr><td>1</td><td>WS-VETGEST-Prep-CDFI-01 制样酶解</td><td>PLT-1200</td><td>§8.1 取样/加缓冲液/均质/加酶/55℃酶解</td><td>5 g 试料 → 酶解液（50 ml 离心管）</td></tr>
+    <tr><td>2</td><td>WS-VETGEST-Extract-CDFI-02 提取盐析冷冻</td><td>PLT-1200</td><td>§8.1 加乙腈/加盐/−18℃冷冻</td><td>酶解液 → 盐析冷冻液（50 ml 离心管）</td></tr>
+    <tr><td>3</td><td>WS-VETGEST-Centrifuge-CDFI-03 冷冻离心取样</td><td>PLT-1200</td><td>§8.1 4℃离心/量取上层 4 mL</td><td>盐析液 → 备用液（15 ml 离心管，4 mL+水1 mL）</td></tr>
+    <tr><td>4</td><td>WS-VETGEST-SPE-CDFI-04 SPE 净化</td><td>PLT-1200</td><td>§8.2 增强除脂 SPE 净化（收集流出液）</td><td>备用液 → 流出液（15 ml 西林瓶）</td></tr>
+    <tr><td>5</td><td>WS-VETGEST-Concentrate-CDFI-05 浓缩</td><td>PLT-1200</td><td>§8.2 40℃氮吹至近干</td><td>流出液 → 浓缩物（15 ml 西林瓶）</td></tr>
+    <tr><td>6</td><td>WS-VETGEST-Filter-CDFI-06 复溶离心过滤</td><td>PLT-1200</td><td>§8.2 复溶/离心/0.2 µm 过滤</td><td>浓缩物 → 进样液（2 mL 进样瓶）</td></tr>
+    <tr><td>7</td><td>WS-VETGEST-Storage-CDFI-07 低温存储</td><td>PLT-800</td><td>进样前暂存 / 上机对接</td><td>进样瓶 → LC-MS/MS 自动进样</td></tr>
+  </table>
+  <div class="note ok"><b>对应解决方案库范式</b>本产线结构对应 <code>references/04-solutions/</code> 中「酶解 → 溶剂提取盐析 → 冷冻离心 → SPE 净化 → 浓缩复溶 → 过滤 → 低温进样」标准范式；工作站命名沿用成都食检院已验证的 WS 系列（Prep / Extract / SPE / Concentrate / Filter / Storage）。</div>
+</section>
+
+<!-- 7 处理耗时测算 -->
+<section id="time">
+  <h2><span class="num">7</span>处理耗时测算（逐平台 → 总节拍）</h2>
+  <p class="lead">测算口径：<b>每平台处理节拍 = Σ 该平台所载模组（功能码单循环 cycle_time_sec + 自动上下料 60 s）</b>；解决方案总节拍 = Σ 各平台节拍。
+  数值取自模组卡 <code>process_capability.cycle_time_sec</code> 与 <code>module_up_unload_time.up_unload_time</code>（自动上下料 60 s/循环）。</p>
+  <div class="note info" style="margin-top:0"><b>⚠ 通道数 = 2：以下均为「2 样品/循环」的处理节拍</b>
+  模组多为"双工位"，按<b>双通道（通量 = 2，一个循环并行处理 2 个样品）</b>标定，上下料 60 s = 15 s × 2 通道 × 2 上下料。因此每行小计、各工作站合计与总计对应<b>一个循环 2 个样品</b>；<b>单样均摊 = 数值 ÷ 2</b>。设计目标：各平台节拍尽量接近 <b>600 s（10 min）</b>，据此对浓缩等长时步骤设并行/批式。</div>
+
+  <h3>WS-01 制样·酶解（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>cycle_time (s·2样)</th><th>上下料 (s)</th><th>小计 (s·2样/循环)</th></tr>
+    <tr><td><span class="mod">MOD-JY-010</span></td><td>加乙酸铵缓冲液 3 mL</td><td>106</td><td>60</td><td>166</td></tr>
+    <tr><td><span class="mod">MOD-JZ-002</span></td><td>均质破分层</td><td>60</td><td>60</td><td>120</td></tr>
+    <tr><td><span class="mod">URS-EZ-100</span></td><td>加酶液 100 µL（规范值）</td><td>90</td><td>60</td><td>150</td></tr>
+    <tr><td><span class="mod">MOD-PY-002</span></td><td>55 ℃避光振荡酶解 ※批式 2 h</td><td>220</td><td>60</td><td>280</td></tr>
+    <tr><td><span class="mod">MOD-JY-012</span></td><td>缓冲液供给</td><td>10</td><td>60</td><td>70</td></tr>
+    <tfoot><tr><td colspan="4">WS-01 合计（2 样/循环）｜ 单样均摊 ≈ 393 s</td><td>786 s ≈ 13.1 min</td></tr></tfoot>
+  </table>
+
+  <h3>WS-02 提取·盐析·冷冻（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>cycle_time (s·2样)</th><th>上下料 (s)</th><th>小计 (s·2样/循环)</th></tr>
+    <tr><td><span class="mod">MOD-WX-006</span></td><td>涡旋 1 min + 加乙腈 10 mL 涡旋 1 min</td><td>300</td><td>60</td><td>360</td></tr>
+    <tr><td><span class="mod">MOD-YJ-004</span></td><td>加萃取盐包 + 涡旋 1~2 min</td><td>300</td><td>60</td><td>360</td></tr>
+    <tr><td><span class="mod">URS-FRZ-50</span></td><td>−18 ℃冷冻 30 min ※批式（规范值）</td><td>90</td><td>60</td><td>150</td></tr>
+    <tr><td><span class="mod">MOD-JY-012</span></td><td>乙腈供给</td><td>10</td><td>60</td><td>70</td></tr>
+    <tfoot><tr><td colspan="4">WS-02 合计（2 样/循环）｜ 单样均摊 ≈ 470 s</td><td>940 s ≈ 15.7 min</td></tr></tfoot>
+  </table>
+
+  <h3>WS-03 冷冻离心·取样（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>cycle_time (s·2样)</th><th>上下料 (s)</th><th>小计 (s·2样/循环)</th></tr>
+    <tr><td><span class="mod">MOD-LX-005</span></td><td>4 ℃离心 5 min（见偏差）</td><td>420</td><td>60</td><td>480</td></tr>
+    <tr><td><span class="mod">MOD-YY-003</span></td><td>量取上层 4 mL</td><td>275</td><td>60</td><td>335</td></tr>
+    <tr><td><span class="mod">MOD-JY-012</span></td><td>供液辅助</td><td>10</td><td>60</td><td>70</td></tr>
+    <tfoot><tr><td colspan="4">WS-03 合计（2 样/循环）｜ 单样均摊 ≈ 443 s</td><td>885 s ≈ 14.8 min</td></tr></tfoot>
+  </table>
+
+  <h3>WS-04 备用液·SPE 净化（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>cycle_time (s·2样)</th><th>上下料 (s)</th><th>小计 (s·2样/循环)</th></tr>
+    <tr><td><span class="mod">MOD-YY-002</span></td><td>加水 1 mL</td><td>270</td><td>60</td><td>330</td></tr>
+    <tr><td><span class="mod">MOD-SPE-004</span></td><td>增强除脂 SPE 净化（收集全部流出液）</td><td>360</td><td>60</td><td>420</td></tr>
+    <tr><td><span class="mod">MOD-JY-012</span></td><td>活化/溶剂供给</td><td>10</td><td>60</td><td>70</td></tr>
+    <tfoot><tr><td colspan="4">WS-04 合计（2 样/循环）｜ 单样均摊 ≈ 410 s ｜ 增配并行柱可再降</td><td>820 s ≈ 13.7 min</td></tr></tfoot>
+  </table>
+
+  <h3>WS-05 浓缩（PLT-1200 · 5 路并行）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>cycle_time (s·2样)</th><th>上下料 (s)</th><th>小计（有效节拍 s·2样/循环）</th></tr>
+    <tr><td><span class="mod">MOD-NS-005</span> ×5</td><td>40 ℃氮吹至近干（单台 2640 s，5 路并行 2700÷5）</td><td>2640</td><td>60</td><td>540</td></tr>
+    <tr><td><span class="mod">MOD-JY-012</span></td><td>破真空/气源辅助</td><td>10</td><td>60</td><td>70</td></tr>
+    <tfoot><tr><td colspan="4">WS-05 有效合计（2 样/循环，5 路并行）｜ 单样均摊 ≈ 305 s</td><td>610 s ≈ 10.2 min</td></tr></tfoot>
+  </table>
+
+  <h3>WS-06 复溶·离心·过滤（PLT-1200）</h3>
+  <table>
+    <tr><th>模组</th><th>功能（标准步骤）</th><th>cycle_time (s·2样)</th><th>上下料 (s)</th><th>小计 (s·2样/循环)</th></tr>
+    <tr><td><span class="mod">MOD-YY-002</span></td><td>60% 乙腈 1.0 mL 复溶</td><td>270</td><td>60</td><td>330</td></tr>
+    <tr><td><span class="mod">MOD-GL-002</span></td><td>0.2 µm 有机系过滤</td><td>520</td><td>60</td><td>580</td></tr>
+    <tr><td><span class="mod">MOD-JY-012</span></td><td>洗针供液</td><td>10</td><td>60</td><td>70</td></tr>
+    <tr><td colspan="5" style="background:#fff6e5;font-size:12.5px">（条件）<span class="mod">MOD-LX-004</span> 浑浊时 10000 r/min 离心：420 + 60 = <b>480 s</b>，仅浑浊样品启用，不计入常规节拍</td></tr>
+    <tfoot><tr><td colspan="4">WS-06 常规合计（2 样/循环）｜ 单样均摊 ≈ 490 s</td><td>980 s ≈ 16.3 min</td></tr></tfoot>
+  </table>
+
+  <h3>WS-07 进样瓶低温存储（PLT-800）</h3>
+  <table>
+    <tr><th>模组</th><th>功能</th><th>cycle_time (s·2样)</th><th>上下料 (s)</th><th>小计 (s·2样/循环)</th></tr>
+    <tr><td><span class="mod">MOD-CC-001</span></td><td>0–10 ℃ 进样瓶入库暂存</td><td>31</td><td>60</td><td>91</td></tr>
+    <tfoot><tr><td colspan="4">WS-07 合计（2 样/循环）｜ 单样均摊 ≈ 46 s</td><td>91 s ≈ 1.5 min</td></tr></tfoot>
+  </table>
+
+  <h3>解决方案总节拍（七平台叠加 · 通道数 = 2）</h3>
+  <table>
+    <tr><th>平台 / 工作站</th><th>2 样/循环节拍 (s)</th><th>≈ min</th><th>单样均摊 (≈ min)</th><th>相对占比</th></tr>
+    <tr><td>WS-01 制样酶解</td><td>786</td><td>13.1</td><td>6.6</td><td><span class="timebar" style="width:92px"></span> 15.4%</td></tr>
+    <tr><td>WS-02 提取盐析冷冻</td><td>940</td><td>15.7</td><td>7.9</td><td><span class="timebar" style="width:110px"></span> 18.4%</td></tr>
+    <tr><td>WS-03 冷冻离心取样</td><td>885</td><td>14.8</td><td>7.4</td><td><span class="timebar" style="width:104px"></span> 17.3%</td></tr>
+    <tr><td>WS-04 SPE 净化</td><td>820</td><td>13.7</td><td>6.8</td><td><span class="timebar" style="width:96px"></span> 16.0%</td></tr>
+    <tr><td>WS-05 浓缩（5 路并行）</td><td>610</td><td>10.2</td><td>5.1</td><td><span class="timebar" style="width:72px"></span> 11.9%</td></tr>
+    <tr><td>WS-06 复溶离心过滤</td><td>980</td><td>16.3</td><td>8.2</td><td><span class="timebar" style="width:115px"></span> 19.2%</td></tr>
+    <tr><td>WS-07 低温存储</td><td>91</td><td>1.5</td><td>0.8</td><td><span class="timebar" style="width:11px"></span> 1.8%</td></tr>
+    <tfoot><tr><td><b>解决方案总节拍</b></td><td><b>5112</b></td><td><b>≈ 85.2 min（2 样/循环）</b></td><td><b>≈ 42.6 min/样</b></td><td>100%</td></tr></tfoot>
+  </table>
+  <div class="note warn"><b>※ 取值与"≈600 s 平台节拍"达成情况说明</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>浓缩（瓶颈）：</b>单台 <code>MOD-NS-005</code> 2700 s，通过 <b>5 路并行</b>压至有效节拍 540 s（+供液 70 = 610 s），已达 ≈600 s 目标。</li>
+    <li><b>酶解（长时）：</b>55 ℃ 2 h 为国标固有时长，采用 <code>MOD-PY-002</code> <b>16 工位批式并行孵育</b>（可增配金属浴模组），作产线缓存段，不按 2 h 计入串行节拍；WS-01 串行节拍仅取上下料/加样 786 s。</li>
+    <li><b>冷冻（长时）：</b>−18 ℃ 30 min 同理由 <code>URS-FRZ-50</code> 多工位批式并行，规范值 30 min 不计入串行节拍，仅取交接 150 s。</li>
+    <li><b>其余工站</b> 610~980 s，均在 600 s 目标 ±60% 内；WS-02/WS-06 略高（含 2 次 5 min 涡旋、过滤 520 s 等国标固有耗时），可通过双工位并行与流水重叠进一步逼近。</li>
+    <li>上表为<b>串行节拍叠加</b>；实际生产各工站流水重叠，<b>稳态通量由最长工站（WS-06 常规 980 s）决定</b>，约 <b>2 样/16.3 min ≈ 7.4 样/h</b>；提升可增配 SPE/过滤/浓缩并行数或双工位。</li>
+  </ul></div>
+</section>
+
+<!-- 8 通量与合规 -->
+<section id="kpi">
+  <h2><span class="num">8</span>通量、合规性与偏差说明</h2>
+  <div class="kpi">
+    <div class="k"><div class="v">7</div><div class="l">工作站数量（6×PLT-1200 + 1×PLT-800）</div></div>
+    <div class="k"><div class="v">14 + 2</div><div class="l">已确认模组启用 + 新建 URS</div></div>
+    <div class="k"><div class="v">6</div><div class="l">目标药物种数</div></div>
+    <div class="k"><div class="v">85.2min</div><div class="l">双样节拍（2 样/循环·单样 ≈ 42.6min）</div></div>
+  </div>
+  <div class="note warn"><b>⚠ 工艺偏差与缺口说明（诚实标注，需与客户确认）</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>【缺口 1】加酶 100 µL：</b>已确认 16 模组最小加液量为 <code>MOD-YY-002</code> 0.5 mL，<u>无法精密加注 100 µL 酶液</u>。→ 新建 <b>URS-EZ-100 微量酶试剂加注模块</b>（10–200 µL，冷藏酶位），详见独立 URS 文件；处理时间按规范 90 s + 上下料 60 s 计入。</li>
+    <li><b>【缺口 2】−18 ℃冷冻 30 min：</b>已确认模组最低温 <code>MOD-LX-005</code> 1 ℃、<code>MOD-CC-001</code> 0 ℃，<u>无 −18 ℃冷冻能力</u>。→ 新建 <b>URS-FRZ-50 低温冷冻沉淀模块</b>（−25~0 ℃，50 ml 离心管，多工位批式），详见独立 URS 文件；处理时间按规范 30 min 批式 + 交接 150 s 计入。</li>
+    <li><b>【偏差 1】提取离心转速：</b>标准要求 <b>9000 r/min</b>，<code>MOD-LX-005</code> 上限 8000 r/min（温区 1–10 ℃满足 4 ℃）。建议：① 选配外置高速冷冻离心集成；② 或经方法学验证后以 8000 r/min·4 ℃ 等效执行（乙酰孕激素为脂溶性小分子，盐析+冷冻后分层充分，8000 r/min 通常可满足分离）。</li>
+    <li><b>【符合】复溶离心：</b>标准（浑浊时）10000 r/min —— <code>MOD-LX-004</code>（1000–14000 rpm）<b>✓ 满足</b>。</li>
+    <li><b>【符合】过滤：</b>标准 0.2 µm 有机系滤膜 —— <code>MOD-GL-002</code> 13 mm 针式过滤器可装 0.2 µm 有机系膜 <b>✓ 满足</b>。</li>
+    <li><b>【确认】SPE 柱：</b>标准为"增强型脂肪去除固相萃取柱（或性能相当）"，<code>MOD-SPE-004</code> 为 6cc 自动上样，可换 3/6/10cc 载具适配对应规格增强除脂柱；<u>请客户确认所用除脂柱规格与载具匹配</u>。</li>
+    <li><b>【确认】储备液温区：</b><code>MOD-CC-001</code> 0–10 ℃，满足工作液/中间液 4–8 ℃ 与进样暂存；标准储备液 −18 ℃ 3 个月由外置冰箱承担。</li>
+  </ul></div>
+  <div class="note info"><b>合规要点</b>
+  <ul class="clean" style="margin-top:6px">
+    <li>全部技术参数引用自 <code>references/</code> 模组/平台/托盘库与 <code>potocol/MD/09-GB31658.28-2025.md</code>，<b>无编造数据</b>；缺口以 URS 补齐并明确标注。</li>
+    <li>酶解 55 ℃避光振荡 2 h：<code>MOD-PY-002</code> 温区 25–70 ℃ 满足 55 ℃，金属浴干式恒温 + 定时平摇，需加装避光罩（标准要求避光）。</li>
+    <li>SPE 活化/平衡/上样/流出液收集由 <code>MOD-SPE-004</code> 注射泵微升级流速闭环（±1%），规避柱干、流速不均，直击客户 SPE 痛点。</li>
+    <li>提取涉乙腈、净化涉甲醇/甲酸/乙酸铵 + 40 ℃浓缩，工站要求通风 + 压缩空气 + 真空；生物酶试剂需冷链。</li>
+    <li>多基质（组织/奶/乳粉/蛋/尿）取样量与缓冲液配方差异由 SmartLabOS 检测标准库/流程库按基质配方自动切换调度。</li>
+  </ul></div>
+  <div class="note ok"><b>报价</b> 涉及价格、报价信息请联系销售团队获取报价。</div>
+</section>
+
+<!-- 9 公用工程 -->
+<section id="utility">
+  <h2><span class="num">9</span>公用工程与场地要求</h2>
+  <p class="lead">各平台规格、占地及排风/上下水/压缩空气/真空要求（引自 <code>references/02-platforms</code> 与各模组 <code>electrical_environment</code>）。</p>
+  <table>
+    <tr><th>工作站</th><th>平台</th><th>外形 (长×宽×高 mm)</th><th>占地</th><th>关键公用工程需求</th></tr>
+    <tr><td>WS-01 制样酶解</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220 V/24 V·压缩空气·上下水（均质刀头清洗）·酶液冷链</td></tr>
+    <tr><td>WS-02 提取盐析冷冻</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220 V/24 V/48 V(加盐)·压缩空气·排风(乙腈)·冷冻制冷</td></tr>
+    <tr><td>WS-03 冷冻离心取样</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220 V/24 V·离心制冷排风·压缩空气</td></tr>
+    <tr><td>WS-04 SPE 净化</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220 V/24 V·压缩空气·上下水·排废</td></tr>
+    <tr><td>WS-05 浓缩（5 路）</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220 V/48 V·真空泵·排风·压缩空气·排废（浓缩加热）</td></tr>
+    <tr><td>WS-06 复溶离心过滤</td><td>PLT-1200</td><td>1200×850×2055</td><td>1.02 ㎡</td><td>220 V/24 V·真空泵(2ml离心)·压缩空气·排废</td></tr>
+    <tr><td>WS-07 低温存储</td><td>PLT-800</td><td>800×850×2055</td><td>0.68 ㎡</td><td>220 V·压缩空气·排水·0–10 ℃制冷</td></tr>
+    <tfoot><tr><td colspan="3">合计（净占地）</td><td>6.80 ㎡</td><td>含通道按净占地 2.5~3 倍预留 ≈ 18~20 ㎡</td></tr></tfoot>
+  </table>
+  <p style="font-size:13px;color:var(--muted)">设备高 2055 mm，要求<b>层高 ≥ 3 m</b>、<b>地面承重 ≥ 500 kg/㎡</b>；多工站错峰运行，实际同时功率低于简单求和峰值。整机重量约 7×210 kg 量级（PLT-800 约 175 kg）。</p>
+  <div class="grid g2">
+    <div class="card"><h4>⚡ 供电</h4><ul class="clean">
+      <li>主电 <b>220 V 单相</b> + 控制电 <b>24 V</b>；加盐模组 <code>MOD-YJ-004</code> 需 <b>48 V</b>；浓缩模组 <code>MOD-NS-005</code> 需 <b>48 V</b></li>
+      <li>独立配电箱 + 漏电/接地保护，设备可靠接地；建议配 <b>3 kVA 在线式 UPS</b>（平台标配 UPS 接口）</li></ul></div>
+    <div class="card"><h4>💨 排风 / 通风</h4><ul class="clean">
+      <li>提取涉<b>乙腈</b>，净化涉<b>甲醇、甲酸、乙酸铵</b> + 40 ℃浓缩挥发</li>
+      <li>WS-02/05/06 上方设<b>万向抽气罩/防爆排风</b>，罩口面风速 ≥ 0.5 m/s，经处理达标后高空排放</li></ul></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h4>🚰 上水 / 下水 / 废液</h4><ul class="clean">
+      <li><b>上水：</b>一级纯水（GB/T 6682），供均质刀头清洗、pH/SPE 用水、洗针</li>
+      <li><b>下水/废液：</b>平台排废口接<b>独立排废管路</b>，有机废液与酶/缓冲废液<b>分类收集</b>至危废中转罐，<u>不得直排市政</u></li></ul></div>
+    <div class="card"><h4>🟦 压缩空气 / 真空 / 冷链</h4><ul class="clean">
+      <li>洁净干燥<b>压缩空气 0.4–0.7 MPa（1–4 bar）</b>：正压加液、拆合盖、SPE、过滤</li>
+      <li><b>真空泵</b>：浓缩 <code>MOD-NS-005</code>（−95 kPa）、2ml 高速离心 <code>MOD-LX-004</code>（−75 kPa）配套</li>
+      <li><b>冷链</b>：酶液冷藏位、WS-07 0–10 ℃、冷冻模组 −18 ℃、离心 1–10 ℃</li></ul></div>
+  </div>
+</section>
+
+<!-- 10 物料 / 商务 -->
+<section id="bom" style="border-bottom:none">
+  <h2><span class="num">10</span>关键物料 / 托盘清单与商务说明</h2>
+  <table>
+    <tr><th>类别</th><th>规格</th><th>用途</th><th>托盘容量（引自托盘统计表）</th></tr>
+    <tr><td>50 ml 离心管</td><td>50 mL PP 尖底</td><td>取样/酶解/提取/盐析/离心</td><td>50ml 离心管托盘 18 个/盘</td></tr>
+    <tr><td>萃取盐包</td><td>4 g Na₂SO₄ + 1 g NaCl（8g 盐管装）</td><td>盐析（MOD-YJ-004）</td><td>8g 盐管托盘 24 个/盘</td></tr>
+    <tr><td>β-葡萄糖醛苷酶/芳基硫酸酯酶</td><td>10000 U/mL（冷藏）</td><td>酶解加酶 100 µL（URS-EZ-100）</td><td>冷藏酶液瓶托盘</td></tr>
+    <tr><td>15 ml 离心管</td><td>15 mL</td><td>备用液载体（4 mL+水 1 mL）/上样</td><td>15ml 离心管托盘 32 个/盘</td></tr>
+    <tr><td>增强除脂 SPE 柱</td><td>6 cc（可换 3/10cc 载具）</td><td>SPE 净化（MOD-SPE-004）</td><td>6CC SPE 柱托盘 24 个/盘</td></tr>
+    <tr><td>15 ml 西林瓶</td><td>15 mL</td><td>流出液接收 / 浓缩</td><td>15ml 西林瓶托盘 28 个/盘</td></tr>
+    <tr><td>针式过滤器</td><td>13 mm / 0.2 µm 有机系</td><td>进样前过滤（MOD-GL-002）</td><td>13mm 过滤器托盘 40 个/盘</td></tr>
+    <tr><td>2 ml 离心管</td><td>2 mL</td><td>浑浊样品高速离心（MOD-LX-004）</td><td>2ml 离心管托盘 60 个/盘</td></tr>
+    <tr><td>2 ml 进样小瓶</td><td>2 mL LC vial（西林瓶）</td><td>过滤接收 / 低温暂存 / LC-MS/MS 进样</td><td>2ml 西林瓶托盘 60 个/盘</td></tr>
+    <tr><td>移液枪头</td><td>1 mL / 10 mL</td><td>加水/复溶/取上层 4 mL</td><td>1ml 枪头 128 个/盘、10ml 枪头</td></tr>
+  </table>
+  <div class="note info"><b>软件（智慧实验室软件 · SmartLabOS）</b>中央控制与调度对全线 7 座工站统一编排；样品全生命周期（采样-制样-分样-前处理-检测-报告）追溯、基质配方库自动切换、设备台账与运维、与 LIMS 双向对接、基质匹配标曲自动进样、报告一键生成与多级审核；配数字孪生大屏实时监控（可选）。</div>
+  <div class="note info"><b>商务说明</b>本方案为售前技术配置建议。<b>涉及价格、报价信息，请联系销售团队获取报价。</b>
+  交付周期与质保以最终合同为准；平台/模组标准交付约 8 周、工站集成约 12 周（引自平台/模组卡，供参考）。新建模组 URS-EZ-100 / URS-FRZ-50 需按 URS 定制开发，周期另议。</div>
+  <p class="crumbs">输出文件：<a href="#">projects/成都食检院项目/1.html</a>　|　标准：GB 31658.28—2025　|　数据源：references/01-modules、02-platforms、06-pallet、potocol/MD/09-GB31658.28-2025.md</p>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    成都市食品检验研究院 · 方案一 · 动物性食品及尿液中乙酰孕激素类药物残留前处理自动化方案 · 处理节拍 ≈ 85.2 min/循环（2 样，单样均摊 ≈ 42.6 min）<br>
+    <span style="color:#6b8aa6">本方案依据 GB 31658.28—2025 §8.1/§8.2 整理，技术参数以国家标准原文及现场 URS 确认为准；模组/平台/托盘参数均引自 references/ 知识库，缺口以 URS-EZ-100 / URS-FRZ-50 补齐。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#e3eef7',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#0c5c8f',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

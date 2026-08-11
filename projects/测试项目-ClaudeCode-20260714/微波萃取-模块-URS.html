@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOD-WB-001 50ml离心管微波辅助萃取模块 · URS 用户需求说明书</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b2d; --ink2:#33455c; --muted:#6b7c93; --line:#dfe6ef;
+    --bg:#f4f7fb; --card:#ffffff; --brand:#c1121f; --brand2:#0c5c8f; --accent:#ee9b00; --ok:#1f9d6b;
+    --chip:#fdeef0; --radius:14px; --shadow:0 6px 22px rgba(15,27,45,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.7;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  header.hero{background:linear-gradient(125deg,#3a0509 0%,#c1121f 60%,#ee6055 130%);
+    color:#fff;padding:42px 0 36px;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;right:-90px;top:-90px;width:320px;height:320px;
+    background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);border-radius:50%}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:2px;color:#ffd9dc;
+    border:1px solid rgba(255,217,220,.45);border-radius:30px;padding:4px 14px;margin-bottom:16px}
+  header.hero h1{margin:0 0 6px;font-size:26px;font-weight:700}
+  header.hero .sub{font-size:15px;color:#ffe3e5;margin-bottom:20px;max-width:760px}
+  .hmeta{display:flex;flex-wrap:wrap;gap:10px}
+  .hmeta span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    border-radius:8px;padding:6px 13px;font-size:13px}
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav.toc ul{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0 auto;padding:8px 22px;max-width:1080px}
+  nav.toc a{text-decoration:none;color:var(--ink2);font-size:13.5px;padding:6px 11px;border-radius:8px}
+  nav.toc a:hover{background:var(--chip);color:var(--brand)}
+  section{padding:34px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:11px}
+  h2 .num{background:var(--brand);color:#fff;width:30px;height:30px;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+  .lead{color:var(--muted);margin:2px 0 20px;font-size:14.5px}
+  h3{font-size:16px;margin:22px 0 10px}
+  h4{font-size:14px;margin:12px 0 6px;color:var(--brand2)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow);margin:14px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#fdeef0;color:var(--ink);font-weight:600;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  td code,.mod{font-family:Consolas,monospace;background:#fdeef0;color:var(--brand);
+    padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .req{font-family:Consolas,monospace;color:var(--brand);font-weight:700}
+  .note{border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;border-left:5px solid}
+  .note.ok{background:#e9f7ef;border-color:#2a9d4a}
+  .note.warn{background:#fff6e5;border-color:var(--accent)}
+  .note.info{background:#eaf2fb;border-color:var(--brand2)}
+  .note.bad{background:#fdecef;border-color:var(--brand)}
+  .note>b:first-child{display:block;margin-bottom:4px}
+  ul.clean{margin:8px 0;padding-left:20px}ul.clean li{margin:5px 0}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}
+  @media(max-width:820px){.g2{grid-template-columns:1fr}}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin:16px 0;text-align:center}
+  .prio{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700}
+  .p-must{background:#fde0e4;color:#c1121f}.p-should{background:#fff0d6;color:#b5730a}.p-nice{background:#e6f0fb;color:#0c5c8f}
+  footer{background:#3a0509;color:#e6b8bc;padding:24px 0;font-size:13px}
+  .svgbox{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:16px 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">新建模块用户需求说明书 · URS · 缺口补充</span>
+    <h1>MOD-WB-001 · 50ml 离心管微波辅助萃取模块</h1>
+    <div class="sub">因 GB/T 21316—2007 §7.1 需「家用微波炉光波模式 700 W 辐照 30 s」进行微波辅助提取，
+    而已确认模块清单（8 个）及 97 模块库均无匹配模块，按售前指令 5.3 出具本 URS，供模块开发立项与评审。</div>
+    <div class="hmeta">
+      <span>📋 依据：GB/T 21316—2007 §7.1</span>
+      <span>🏷 拟定 ID：MOD-WB-001</span>
+      <span>📦 目标容器：50 ml 尖底离心管</span>
+      <span>⏱ 处理时间：30 s ×2 轮 + 上下料 60 s</span>
+      <span>🏢 百泉聚兴（北京）科技有限公司</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><ul>
+  <li><a href="#bg">① 背景与缺口</a></li>
+  <li><a href="#scope">② 范围与目标</a></li>
+  <li><a href="#func">③ 功能需求</a></li>
+  <li><a href="#perf">④ 性能参数</a></li>
+  <li><a href="#flow">⑤ 动作时序</a></li>
+  <li><a href="#layout">⑥ 结构与接口</a></li>
+  <li><a href="#time">⑦ 处理时间</a></li>
+  <li><a href="#safe">⑧ 安全与验收</a></li>
+</ul></nav>
+
+<div class="wrap">
+
+<!-- 1 背景 -->
+<section id="bg">
+  <h2><span class="num">1</span>背景与缺口说明</h2>
+  <p class="lead">本模块用于填补 GB/T 21316—2007 磺胺类残留前处理自动化产线中的<b>唯一在线自动化缺口</b>——微波辅助提取。</p>
+  <table>
+    <tr><th>项目</th><th>内容</th></tr>
+    <tr><td>触发标准条款</td><td>GB/T 21316—2007 §7.1 提取：涡旋 1 min 后「<b>家用微波炉光波模式微波辐照 30 s</b>」，3000 r/min 离心；沉淀物再加乙腈重复微波辅助提取 30 s（<b>共 2 轮</b>）</td></tr>
+    <tr><td>标准 §5 仪器</td><td>明确列示「<b>家用微波炉（带光波模式，功率 700 W）</b>」为必备仪器</td></tr>
+    <tr><td>缺口性质</td><td>已确认清单 8 个模块（均质/加液/涡旋/离心/移液/浓缩/超声/过滤）及 97 模块库中，<b>“微波”相关卡片均为微波消解（35 ml 消解管）语境，无微波萃取模块</b></td></tr>
+    <tr><td>处置原则</td><td>按售前指令「严禁引入清单外模块」，不得以消解模块或其他模块替换；按指令 5.3 <b>新建模块并出具本 URS</b>，处理时间按标准 30 s×2 + 上下料计入平台耗时</td></tr>
+  </table>
+  <div class="note bad"><b>为何不能用现有模块替代</b>
+  <ul class="clean" style="margin-top:6px">
+    <li><b>微波消解模块 ≠ 微波萃取：</b>消解模块面向 35 ml 消解管的强酸高温高压消解（破坏样品基质），而本工序为 50 ml 离心管内乙腈-水体系的<b>低温瞬时微波辅助萃取</b>（30 s、保护痕量磺胺不降解），工艺目标、容器、温压窗口完全不同。</li>
+    <li><b>超声模块 <span class="mod">MOD-CS-005</span> 不等效：</b>标准 §7.1 明确为微波光波辐照，微波介电加热的传质强化机制与超声空化不同，不可互换（超声在本标准仅用于 §7.2 溶解残渣）。</li>
+  </ul></div>
+</section>
+
+<!-- 2 范围 -->
+<section id="scope">
+  <h2><span class="num">2</span>适用范围与设计目标</h2>
+  <div class="grid g2">
+    <div class="card"><h4>适用范围</h4><ul class="clean">
+      <li>50 ml 尖底离心管内乙腈-水（1000+30）体系的微波辅助提取</li>
+      <li>动物源性食品基质（肌肉/肝/肾/水产/牛奶）痕量磺胺提取</li>
+      <li>可扩展至其他需微波辅助萃取的国标前处理（如部分农残/兽残方法）</li>
+    </ul></div>
+    <div class="card"><h4>设计目标</h4><ul class="clean">
+      <li>等效替代「家用微波炉光波模式 700 W · 30 s」的实验室手工操作，实现自动上下料、无人化</li>
+      <li>控温保护痕量目标物，避免局部过热致磺胺降解 / 溶剂暴沸</li>
+      <li>与 SmartLabOS 离心管自动化岛平台（PLT-800/1200/1400）标准模块位 450×180×600 兼容</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 3 功能需求 -->
+<section id="func">
+  <h2><span class="num">3</span>功能需求（FR）</h2>
+  <table>
+    <tr><th>编号</th><th>需求描述</th><th>优先级</th></tr>
+    <tr><td><span class="req">FR-01</span></td><td>接收 50 ml 尖底离心管（<b>带盖</b>，防溶剂挥发），自动上料至微波腔工位并检测到位</td><td><span class="prio p-must">MUST</span></td></tr>
+    <tr><td><span class="req">FR-02</span></td><td>提供<b>光波（微波）辐照</b>功能，额定微波功率 700 W（可 300–800 W 可调），辐照时间可编程（默认 30 s）</td><td><span class="prio p-must">MUST</span></td></tr>
+    <tr><td><span class="req">FR-03</span></td><td>支持<b>2 轮微波辅助提取</b>（第 1 轮后离心取上清、再加乙腈后第 2 轮），轮次由上位软件调度</td><td><span class="prio p-must">MUST</span></td></tr>
+    <tr><td><span class="req">FR-04</span></td><td><b>红外/光纤测温闭环控温</b>，实时监测管内温度，超温（>60 ℃）自动降功率/停机，防磺胺降解与暴沸</td><td><span class="prio p-must">MUST</span></td></tr>
+    <tr><td><span class="req">FR-05</span></td><td>微波腔<b>防泄漏屏蔽</b> + 门/工位联锁，非到位/门未闭禁止辐照</td><td><span class="prio p-must">MUST</span></td></tr>
+    <tr><td><span class="req">FR-06</span></td><td>多工位并行（建议 ≥2 工位）以匹配 ≈600 s 平台节拍与高通量筛查需求</td><td><span class="prio p-should">SHOULD</span></td></tr>
+    <tr><td><span class="req">FR-07</span></td><td>与智慧实验室软件（SmartLabOS）通讯，上报工位状态、温度曲线、辐照时长，接收启停指令</td><td><span class="prio p-must">MUST</span></td></tr>
+    <tr><td><span class="req">FR-08</span></td><td>辐照结束自动下料，管体外壁如有冷凝水珠可吸干（沿用超声模块的擦干设计）</td><td><span class="prio p-nice">NICE</span></td></tr>
+  </table>
+</section>
+
+<!-- 4 性能参数 -->
+<section id="perf">
+  <h2><span class="num">4</span>性能参数需求（对齐模块卡字段）</h2>
+  <table>
+    <tr><th>参数（模块卡字段）</th><th>需求值</th><th>依据</th></tr>
+    <tr><td>拟定 ID / part_no</td><td><code>MOD-WB-001</code> / HHM(待定)-050</td><td>SmartLabOS 命名规范</td></tr>
+    <tr><td>category（类别）</td><td>微波萃取</td><td>新增功能类</td></tr>
+    <tr><td>operation_target</td><td>50 ml 尖底离心管（带盖）</td><td>标准 §7.1 容器</td></tr>
+    <tr><td>volume_ml（处理液量）</td><td>1–50 mL（典型 25 mL 乙腈-水）</td><td>标准 §7.1 加液 25 mL</td></tr>
+    <tr><td>microwave_power_w</td><td>700 W 额定（300–800 W 可调）</td><td>标准 §5 家用微波炉 700 W</td></tr>
+    <tr><td>temperature_c_max</td><td>≤ 60 ℃（超温保护）</td><td>保护痕量磺胺、防暴沸</td></tr>
+    <tr><td>function_code（拟）</td><td>启动微波辅助萃取</td><td>与库内功能码体系一致</td></tr>
+    <tr><td>cycle_time_sec</td><td><b>30 s / 轮（可编程）</b></td><td>标准 §7.1 辐照 30 s</td></tr>
+    <tr><td>module_slots（模块位）</td><td>1（450×180×600 标准模块位）</td><td>平台兼容</td></tr>
+    <tr><td>up_unload_time</td><td>60 s（自动上下料）</td><td>与库内模块一致</td></tr>
+    <tr><td>compatible_platforms</td><td>PLT-800 / PLT-1200 / PLT-1400</td><td>标准离心管自动化岛</td></tr>
+    <tr><td>requires_ventilation</td><td>true（溶剂挥发 + 发热）</td><td>乙腈体系 + 微波发热</td></tr>
+  </table>
+  <div class="note info"><b>与标准的一致性</b>额定功率 700 W、辐照 30 s、2 轮提取均严格对齐 GB/T 21316—2007 §5 与 §7.1；控温上限与工位数为工程化增强，需在方法学验证中与手工微波炉结果比对回收率（目标 70%~110%、RSD ≤15%）。</div>
+</section>
+
+<!-- 5 动作时序 -->
+<section id="flow">
+  <h2><span class="num">5</span>动作时序（operation_workflow）</h2>
+  <div class="mermaid">
+flowchart LR
+  A([载台移至上下料位]):::s --> B[放入 50ml 离心管<br/>带盖]:::a --> C[到位/闭门检测]:::a --> D[载台移至微波位]:::a --> E[控温启动 700W]:::m --> F[微波辐照 30s]:::m --> G[红外测温闭环<br/>超温降功率]:::m --> H[辐照停止]:::a --> I[载台移至上下料位]:::a --> J([取出离心管<br/>→ 离心工位]):::s
+  J -.第2轮:加乙腈后重复.-> D
+  classDef s fill:#3a0509,color:#fff,stroke:none;
+  classDef a fill:#eef4fa,stroke:#0c5c8f,color:#0c5c8f;
+  classDef m fill:#fde8ec,stroke:#c1121f,color:#c1121f;
+  </div>
+  <p style="font-size:13px;color:var(--muted)">时序参照库内模块卡 <code>operation_workflow</code> 书写风格（如均质/超声模块），关键动作：上料→到位/闭门联锁检测→入微波位→控温辐照 30 s→测温闭环→停止→下料；第 2 轮由软件在加乙腈后重复。</p>
+</section>
+
+<!-- 6 结构与接口 -->
+<section id="layout">
+  <h2><span class="num">6</span>结构、布局与接口</h2>
+  <div class="svgbox">
+    <svg viewBox="0 0 640 220" width="100%">
+      <rect x="4" y="4" width="632" height="212" rx="12" fill="#fbfdff" stroke="#c1121f"/>
+      <text x="320" y="26" text-anchor="middle" font-size="13" fill="#3a0509" font-weight="700">MOD-WB-001 微波辅助萃取模块 · 结构示意（450×180×600 标准模块位）</text>
+      <!-- 微波腔 -->
+      <rect x="40" y="52" width="180" height="130" rx="10" fill="#fde8ec" stroke="#c1121f"/>
+      <text x="130" y="80" text-anchor="middle" font-size="12" fill="#c1121f" font-weight="700">微波屏蔽腔</text>
+      <text x="130" y="100" text-anchor="middle" font-size="10" fill="#a8323f">磁控管 700W + 波导</text>
+      <circle cx="130" cy="140" r="26" fill="#fff" stroke="#c1121f"/>
+      <text x="130" y="144" text-anchor="middle" font-size="10" fill="#c1121f">50ml 管</text>
+      <!-- 测温 -->
+      <rect x="245" y="60" width="120" height="52" rx="8" fill="#eef4fa" stroke="#0c5c8f"/>
+      <text x="305" y="82" text-anchor="middle" font-size="11" fill="#0c5c8f" font-weight="700">红外/光纤测温</text>
+      <text x="305" y="98" text-anchor="middle" font-size="9" fill="#5d6b7a">闭环控温 ≤60℃</text>
+      <!-- 联锁 -->
+      <rect x="245" y="122" width="120" height="52" rx="8" fill="#eef4fa" stroke="#0c5c8f"/>
+      <text x="305" y="144" text-anchor="middle" font-size="11" fill="#0c5c8f" font-weight="700">门/工位联锁</text>
+      <text x="305" y="160" text-anchor="middle" font-size="9" fill="#5d6b7a">防泄漏 + 急停</text>
+      <!-- 载台 -->
+      <rect x="390" y="60" width="100" height="114" rx="8" fill="#e9f7ef" stroke="#1f9d6b"/>
+      <text x="440" y="110" text-anchor="middle" font-size="11" fill="#0b6b45" font-weight="700">载台/上下料</text>
+      <text x="440" y="128" text-anchor="middle" font-size="9" fill="#0b6b45">机械臂到位检测</text>
+      <!-- 接口 -->
+      <rect x="512" y="60" width="112" height="114" rx="8" fill="#fff6e5" stroke="#ee9b00"/>
+      <text x="568" y="86" text-anchor="middle" font-size="11" fill="#8a5a00" font-weight="700">接口</text>
+      <text x="568" y="106" text-anchor="middle" font-size="9" fill="#8a5a00">DC24V 控制</text>
+      <text x="568" y="122" text-anchor="middle" font-size="9" fill="#8a5a00">220V 微波电源</text>
+      <text x="568" y="138" text-anchor="middle" font-size="9" fill="#8a5a00">排风 / 压空</text>
+      <text x="568" y="154" text-anchor="middle" font-size="9" fill="#8a5a00">总线通讯</text>
+    </svg>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h4>机械 / 电气接口</h4><ul class="clean">
+      <li>外形 450×180×600 mm 标准模块位；重量目标 ≤ 30 kg</li>
+      <li>控制电 DC 24 V；微波电源 220 V 单相（磁控管）</li>
+      <li>洁净压缩空气 0.4–0.7 MPa（气动到位/夹持）；排风接口</li>
+      <li>与平台机械臂共用 ERG32/EPG40 夹爪抓取 50 ml 离心管（Φ34.6 mm）</li>
+    </ul></div>
+    <div class="card"><h4>软件 / 通讯接口</h4><ul class="clean">
+      <li>接入 SmartLabOS 智慧实验室软件，标准总线通讯</li>
+      <li>上报：工位占用、温度曲线、辐照时长、故障码</li>
+      <li>接收：启停、功率/时长/轮次参数下发</li>
+      <li>PLC 源程序纳入库内 <code>plc_source_url</code> 管理</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 7 处理时间 -->
+<section id="time">
+  <h2><span class="num">7</span>处理时间核算（计入平台耗时）</h2>
+  <table>
+    <tr><th>项</th><th>取值</th><th>说明</th></tr>
+    <tr><td>单轮微波辐照</td><td>30 s</td><td>标准 §7.1 规定辐照 30 s</td></tr>
+    <tr><td>提取轮次</td><td>2 轮</td><td>§7.1：首轮 + 残渣重复 1 次</td></tr>
+    <tr><td>功能码耗时合计</td><td><b>30 s × 2 = 60 s</b></td><td>指令 5.3：新建模块处理时间采用规范 MD 规定时间</td></tr>
+    <tr><td>上下料时间</td><td>60 s</td><td>自动上下料，对齐库内模块 <code>up_unload_time</code></td></tr>
+    <tr><td><b>模块计入平台节拍</b></td><td><b>120 s</b></td><td>已计入本项目 1.html 的 <b>WS2（PLT-1200）节拍 580 s</b></td></tr>
+  </table>
+  <div class="note ok"><b>计入位置</b>本模块处理时间 120 s 已按售前指令 5.3 计入解决方案 <a href="1.html">1.html</a> 的「平台 2 · WS2 微波·离心分离工作站」总耗时（微波 120 + 离心 360 + 移液 100 = 580 s），参与 5 平台节拍均衡（均值 ≈ 596 s，逼近目标 600 s）。</div>
+</section>
+
+<!-- 8 安全与验收 -->
+<section id="safe">
+  <h2><span class="num">8</span>安全、合规与验收准则</h2>
+  <div class="grid g2">
+    <div class="card"><h4>安全要求（MUST）</h4><ul class="clean">
+      <li><b>微波泄漏防护：</b>屏蔽腔泄漏 ≤ 国标限值（≤5 mW/cm² @5 cm），门/工位联锁，未到位/未闭合禁止辐照</li>
+      <li><b>超温/暴沸保护：</b>红外测温 >60 ℃ 自动降功率/停机；必须带盖辐照防溶剂挥发与飞溅</li>
+      <li><b>有机溶剂环境：</b>乙腈体系需防爆排风；急停按钮 + 可靠接地</li>
+      <li><b>空载保护：</b>无管/无液禁止辐照，防磁控管损伤</li>
+    </ul></div>
+    <div class="card"><h4>验收准则（AC）</h4><ul class="clean">
+      <li><b>AC-01 功能：</b>自动上下料到位率 100%，辐照时长误差 ≤ ±1 s</li>
+      <li><b>AC-02 控温：</b>管内峰值温度 ≤ 60 ℃，测温闭环响应正常</li>
+      <li><b>AC-03 方法学：</b>与手工微波炉法比对，磺胺回收率 70%~110%、RSD ≤15%（对齐标准 §11）</li>
+      <li><b>AC-04 泄漏：</b>微波泄漏检测合格；连续运行 8 h 无故障</li>
+      <li><b>AC-05 通讯：</b>与 SmartLabOS 软件启停/上报/参数下发全链路验证</li>
+    </ul></div>
+  </div>
+  <div class="note warn"><b>立项建议</b>本 URS 为售前缺口补充文档，用于向研发/客户确认微波萃取模块的必要性与需求边界。落地前，产线可暂以「人工微波炉工位」衔接 WS1 与 WS2；模块开发排期、URD 细化与样机验证另行评审。<b>涉及价格、报价信息，请联系销售团队获取报价。</b></div>
+  <p style="font-size:12.5px;color:var(--muted)">依据：GB/T 21316—2007 §5 / §7.1 / §11；SmartLabOS 模块卡字段规范（references/01-modules）；售前方案指令 5.3。数据来源：C:\TestClaude\SmartLabOS-AI-Assistant\potocol\MD\05-GB21316-2007.md。</p>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <b style="color:#fff">百泉聚兴（北京）科技有限公司 · SmartLabOS 智能方案助手</b><br>
+    MOD-WB-001 · 50ml 离心管微波辅助萃取模块 URS · 缺口补充（GB/T 21316—2007 §7.1）· 配套解决方案 <a href="1.html" style="color:#ffc9cd">1.html</a><br>
+    <span style="color:#c78b8f">本 URS 依据 GB/T 21316—2007 与 SmartLabOS 模块卡规范整理；技术参数以国家标准原文及研发 URD 确认为准。</span>
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{
+    fontFamily:'Segoe UI, Microsoft YaHei',primaryColor:'#fde8ec',primaryTextColor:'#0f1b2d',
+    primaryBorderColor:'#c1121f',lineColor:'#6b7c93',fontSize:'13px'}});
+</script>
+</body>
+</html>

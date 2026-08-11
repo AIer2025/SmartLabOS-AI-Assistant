@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartLabOS Presales AI Assistant</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">⚗️</span>
+      <div>
+        <h1>SmartLabOS Presales AI Assistant</h1>
+        <p class="sub">百泉聚兴 · 主数据维护 + 售前方案自动生成</p>
+      </div>
+    </div>
+    <nav class="mode-tabs" id="modeTabs">
+      <button class="mode-tab active" data-view="data">主数据维护</button>
+      <button class="mode-tab" data-view="presales">售前方案自动生成</button>
+    </nav>
+    <div class="health" id="health">数据库：检测中…</div>
+  </header>
+
+  <!-- ============ 视图一：主数据维护（原有功能） ============ -->
+  <div id="viewData">
+  <div class="layout">
+    <nav class="sidebar" id="entityNav"><!-- 实体导航由 JS 生成 --></nav>
+
+    <main class="content">
+      <div class="toolbar">
+        <h2 id="entityTitle">—</h2>
+        <div class="toolbar-actions">
+          <input type="search" id="searchBox" placeholder="搜索 ID / 名称 / 状态…" />
+          <button id="searchBtn" class="btn">搜索</button>
+          <div class="col-chooser">
+            <button id="colBtn" class="btn" type="button">列 ▾</button>
+            <div id="colMenu" class="col-menu" hidden><!-- 列勾选项由 JS 生成 --></div>
+          </div>
+          <button id="exportBtn" class="btn">导出 YAML-MD</button>
+          <button id="importBtn" class="btn">导入 Excel</button>
+          <button id="newBtn" class="btn btn-primary">+ 新增</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="dataTable">
+          <thead><tr id="tableHead"></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div id="emptyHint" class="empty" hidden>暂无数据</div>
+      </div>
+
+      <div class="pager">
+        <button id="prevPage" class="btn">‹ 上一页</button>
+        <span id="pageInfo">—</span>
+        <button id="nextPage" class="btn">下一页 ›</button>
+      </div>
+    </main>
+  </div>
+  </div><!-- /viewData -->
+
+  <!-- ============ 视图二：售前方案自动生成 ============ -->
+  <div id="viewPresales" hidden>
+    <div class="layout">
+      <nav class="sidebar ps-sidebar">
+        <div class="ps-side-head">
+          <span>客户项目</span>
+          <button id="psNewBtn" class="btn btn-primary" type="button">+ 新建项目</button>
+        </div>
+        <div id="psProjectList" class="ps-project-list"><!-- 项目列表由 JS 生成 --></div>
+      </nav>
+
+      <main class="content">
+        <div id="psEmpty" class="ps-empty">
+          <p>请选择左侧项目，或点击「+ 新建项目」开始。</p>
+          <p class="hint">流程：新建项目 → 填写需求信息 → 保存 → 模块选定（自动推理，可增删）→ 模块确认 → 方案生成（调用 Claude Code 生成 *.html 提案与 WORD 文档）。</p>
+        </div>
+
+        <div id="psForm" hidden>
+          <div class="toolbar">
+            <h2 id="psTitle">—</h2>
+            <div class="toolbar-actions">
+              <span id="psStatusBadge" class="ps-badge">—</span>
+              <button id="psSaveBtn" class="btn" type="button">保存需求</button>
+              <button id="psPreviewBtn" class="btn" type="button">预览指令</button>
+              <button id="psSelectModBtn" class="btn" type="button">模块选定 ⚙</button>
+              <button id="psGenerateBtn" class="btn btn-primary" type="button">方案生成 ▶</button>
+              <button id="psDeleteBtn" class="btn btn-danger" type="button">删除项目</button>
+            </div>
+          </div>
+          <p class="path-line" id="psDirLine"></p>
+
+          <div class="ps-fields">
+            <!-- 6.2.1 客户项目现状 -->
+            <section class="ps-card">
+              <label class="ps-label">客户项目现状
+                <span class="ps-counter"><span id="psStatusCount">0</span> / 1500</span>
+              </label>
+              <textarea id="psCurrentStatus" class="ps-textarea" rows="6" maxlength="1500"
+                placeholder="请描述客户当前项目现状（最多 1500 字）…"></textarea>
+            </section>
+
+            <!-- 6.2.2 客户流程标准（多选） -->
+            <section class="ps-card">
+              <label class="ps-label">客户流程标准（potocol/MD，可多选）
+                <span class="ps-counter">已选 <span id="psProtoCount">0</span></span>
+              </label>
+              <div id="psProtocols" class="ps-check-grid"><!-- 由 JS 生成 --></div>
+            </section>
+
+            <!-- 6.2.3 客户挑战 -->
+            <section class="ps-card">
+              <label class="ps-label">客户挑战（最多 20 条，每条 ≤200 字）
+                <button id="psAddChallenge" class="btn btn-sm" type="button">+ 添加挑战</button>
+              </label>
+              <div id="psChallenges" class="ps-item-list"></div>
+            </section>
+
+            <!-- 6.2.4 客户期望 -->
+            <section class="ps-card">
+              <label class="ps-label">客户期望（最多 20 条，每条 ≤200 字）
+                <button id="psAddExpectation" class="btn btn-sm" type="button">+ 添加期望</button>
+              </label>
+              <div id="psExpectations" class="ps-item-list"></div>
+            </section>
+
+            <div class="ps-row">
+              <!-- 6.2.5 流程范围（多选） -->
+              <section class="ps-card ps-col">
+                <label class="ps-label">流程范围（可多选）</label>
+                <div id="psProcessScope" class="ps-check-inline"></div>
+              </section>
+
+              <!-- 上下料方式（单选） -->
+              <section class="ps-card ps-col">
+                <label class="ps-label">上下料方式</label>
+                <div id="psLoading" class="ps-radio-inline"></div>
+              </section>
+
+              <!-- 6.2.6 软件功能（单选） -->
+              <section class="ps-card ps-col">
+                <label class="ps-label">软件功能</label>
+                <div id="psSoftware" class="ps-radio-inline"></div>
+              </section>
+            </div>
+          </div>
+
+          <!-- 模块选定 / 模块确认 -->
+          <section class="ps-card ps-mod" id="psModulePanel" hidden>
+            <div class="ps-gen-head">
+              <span class="ps-label">模块选定</span>
+              <span id="psModStatus" class="ps-badge">—</span>
+              <span class="ps-mod-count">已选 <span id="psModCount">0</span></span>
+              <div class="ps-mod-actions">
+                <button id="psModInferBtn" class="btn btn-sm" type="button">自动推理选定</button>
+                <button id="psModAddBtn" class="btn btn-sm" type="button">+ 添加模块</button>
+                <button id="psModConfirmBtn" class="btn btn-sm btn-primary" type="button">模块确认 ✓</button>
+              </div>
+            </div>
+            <p class="hint" id="psModHint">点击「模块选定 ⚙」或「自动推理选定」，系统将依据国标与需求自动推荐模块；可删除/添加后点击「模块确认」。也可直接「添加模块」手工选定。</p>
+            <div id="psModProgress" class="ps-progress" hidden>
+              <div class="ps-pbar"><div id="psModBar" class="ps-pbar-fill"></div></div>
+              <div class="ps-progress-meta">
+                <span id="psModPhase" class="ps-progress-phase">准备中…</span>
+                <span id="psModElapsed" class="ps-progress-elapsed">用时 00:00</span>
+              </div>
+              <div id="psModActivity" class="ps-progress-activity"></div>
+            </div>
+            <div id="psModChips" class="ps-mod-chips"></div>
+            <details id="psModLogWrap" class="ps-log-wrap" hidden>
+              <summary>推理日志</summary>
+              <pre id="psModLog" class="ps-log"></pre>
+            </details>
+          </section>
+
+          <!-- 生成状态 / 日志 / 产物 -->
+          <section class="ps-card ps-gen" id="psGenPanel" hidden>
+            <div class="ps-gen-head">
+              <span class="ps-label">方案生成</span>
+              <span id="psGenStatus" class="ps-badge">—</span>
+            </div>
+            <div id="psGenProgress" class="ps-progress" hidden>
+              <div class="ps-pbar"><div id="psGenBar" class="ps-pbar-fill"></div></div>
+              <div class="ps-progress-meta">
+                <span id="psGenPhase" class="ps-progress-phase">准备中…</span>
+                <span id="psGenElapsed" class="ps-progress-elapsed">用时 00:00</span>
+              </div>
+              <div id="psGenActivity" class="ps-progress-activity"></div>
+            </div>
+            <div id="psFiles" class="ps-files"></div>
+            <details id="psLogWrap" class="ps-log-wrap">
+              <summary>运行日志</summary>
+              <pre id="psLog" class="ps-log"></pre>
+            </details>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div><!-- /viewPresales -->
+
+  <!-- 新建项目对话框 -->
+  <div class="modal-mask" id="psNewMask" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3>新建客户项目</h3>
+        <button class="icon-btn" id="psNewClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>项目名称 <span class="req">*</span></label>
+          <input id="psNewName" placeholder="如 上海海关项目-2026" />
+          <p class="hint">将在 projects/ 下创建同名目录用于存放生成的提案文件；名称不能含 \ / : * ? " &lt; &gt; | 等字符。</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <span class="form-error" id="psNewError"></span>
+        <button class="btn" id="psNewCancel">取消</button>
+        <button class="btn btn-primary" id="psNewCreate">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 指令预览对话框 -->
+  <div class="modal-mask" id="psPreviewMask" hidden>
+    <div class="modal modal-wide">
+      <div class="modal-head">
+        <h3>将传递给 Claude Code 的指令文档（预览）</h3>
+        <button class="icon-btn" id="psPreviewClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <pre id="psPreviewText" class="ps-log"></pre>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="psPreviewCancel">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加模块对话框 -->
+  <div class="modal-mask" id="psModPickMask" hidden>
+    <div class="modal modal-wide">
+      <div class="modal-head">
+        <h3>添加模块（references/01-modules，共 <span id="psModTotal">0</span> 个）</h3>
+        <button class="icon-btn" id="psModPickClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="ps-mod-pick-bar">
+          <input id="psModSearch" class="ps-mod-search" placeholder="按编号/名称/分类搜索…" />
+          <span class="hint">已勾选 <span id="psModPickCount">0</span> 个</span>
+        </div>
+        <div id="psModPickList" class="ps-mod-pick-list"><!-- 由 JS 生成 --></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="psModPickCancel">取消</button>
+        <button class="btn btn-primary" id="psModPickAdd">添加所选</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑/新增对话框 -->
+  <div class="modal-mask" id="modalMask" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">编辑</h3>
+        <button class="icon-btn" id="modalClose">✕</button>
+      </div>
+      <form id="recordForm" class="modal-body"><!-- 字段由 JS 生成 --></form>
+      <div class="modal-foot">
+        <span class="form-error" id="formError"></span>
+        <button class="btn" id="cancelBtn">取消</button>
+        <button class="btn btn-primary" id="saveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出 YAML-MD 对话框 -->
+  <div class="modal-mask" id="exportMask" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="exportTitle">导出 YAML-MD</h3>
+        <button class="icon-btn" id="exportClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>导出目录（服务器端路径）<span class="req">*</span></label>
+          <div class="inline-row">
+            <input id="exportDir" placeholder="如 D:\SmartLabOS\export\modules" />
+            <button class="btn" id="exportBrowse" type="button">浏览…</button>
+          </div>
+          <p class="hint">导出到运行后端的服务器磁盘目录；目录不存在会自动创建。「浏览…」在本机弹出目录选择对话框。</p>
+        </div>
+        <div class="field">
+          <label>导出范围</label>
+          <label class="radio"><input type="radio" name="exportScope" value="all" checked /> 全部记录</label>
+          <label class="radio"><input type="radio" name="exportScope" value="selected" /> 仅选中记录（<span id="exportSelCount">0</span> 条）</label>
+        </div>
+        <label class="checkline"><input type="checkbox" id="exportOverwrite" checked /> 覆盖同名文件</label>
+        <div id="exportResult" class="transfer-result"></div>
+      </div>
+      <div class="modal-foot">
+        <span class="form-error" id="exportError"></span>
+        <button class="btn" id="exportCancel">取消</button>
+        <button class="btn btn-primary" id="exportRun">开始导出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导入 Excel 对话框 -->
+  <div class="modal-mask" id="importMask" hidden>
+    <div class="modal modal-wide">
+      <div class="modal-head">
+        <h3 id="importTitle">导入 Excel</h3>
+        <button class="icon-btn" id="importClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Excel 文件（服务器端路径，.xlsx / .xlsm）<span class="req">*</span></label>
+          <div class="inline-row">
+            <input id="importPath" placeholder="如 D:\SmartLabOS\import\modules.xlsx" />
+            <button class="btn" id="importBrowse" type="button">浏览…</button>
+            <button class="btn btn-primary" id="importPreviewBtn" type="button">预览</button>
+          </div>
+          <p class="hint">卡片录入模板：每张数据工作表 = 一条记录，由隐藏列 group_key / field_key / 类型 还原卡片（模板页自动跳过）。主键(id)重复的记录可勾选「覆盖」。</p>
+        </div>
+        <div id="importSummary" class="transfer-result"></div>
+        <div class="table-wrap" id="importPreviewWrap" hidden>
+          <table id="importTable">
+            <thead><tr><th>工作表</th><th>主键 ID</th><th>状态</th><th>覆盖</th><th>说明</th></tr></thead>
+            <tbody id="importPreviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <span class="form-error" id="importError"></span>
+        <label class="checkline" id="importOverwriteAllWrap" hidden>
+          <input type="checkbox" id="importOverwriteAll" /> 全选/取消全选「覆盖」
+        </label>
+        <button class="btn" id="importCancel">取消</button>
+        <button class="btn btn-primary" id="importCommitBtn" disabled>确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="js/app.js"></script>
+  <script src="js/presales.js"></script>
+</body>
+</html>

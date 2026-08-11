@@ -1,0 +1,49 @@
+======================================================================================
+1. 生成HTML解决方案时参照的模版文档
+原来是："C:\TestClaude\SmartLabOS-AI-Assistant\projects\上海海关项目\SmartLabOS-技术提案输出模版.html"
+现在是："C:\TestClaude\SmartLabOS-AI-Assistant\references\_templates\99-SmartLabOS-技术提案输出模版.html "
+内容是一样的但是模版的路径与文件名需要改成这个新的
+
+2. 在生成解决方案的HTML文档与 "xxxx_URS.html" 文档之后，根据如下MD文档中的内容提纲要求
+"C:\TestClaude\SmartLabOS-AI-Assistant\references\_templates\02-SmartLabOS提案标准-详细设计方案版.md"
+生成WORD文档的提案内容，后台调用Claude Code生成WORD文档
+
+3. WORD提案文档的保存目录为："C:\TestClaude\SmartLabOS-AI-Assistant\projects\$ProjectName" ，
+文件名定为："($ProjectName)_SmartLabOS_Presales_提案_YYYYMMDDHHMMSS.docx" ,
+($ProjectName) : 项目名称，"YYYYMMDDHHMMSS": 年月日时分秒
+
+4. 修改添加 "C:\TestClaude\SmartLabOS-AI-Assistant\DataMaintenance\SmartLabOS.DataMaintenance.sln"
+这个解决方案的所有源程序完成上述要求
+
+======================================================================================
+将生成WORD版本 (*.docx) 的提案文档过程拆解成两步来完成:
+1. "模块选定"
+用户点击"模块选定"按钮之后，系统经过自动计算推理后，显示系统自动选择的模块一览，让用户可以删除/添加模块。
+模块信息保存目录："C:\TestClaude\SmartLabOS-AI-Assistant\references\01-modules"
+1.1  删除模块：用户删除系统自动选定的模块
+1.2  添加模块：显示"C:\TestClaude\SmartLabOS-AI-Assistant\references\01-modules"这个目录下的所有模块，
+让用户可以选择一个或者多个模块进行添加
+2. "模块确认"
+用户点击"模块确认"按钮，确认选择的模块，将模块选择信息存入到项目提案相关信息之中。
+也可以不进行模块的删除/添加操作，直接点击"模块确认"
+3. "模块确认"之后，用户可以继续完成后续的"方案生成"操作
+4. 打开某个项目之后，如果之前的处理已经选定了模块，则显示选定模块供用户确认，删除/添加模块处理都可以进行。
+修改"C:\TestClaude\SmartLabOS-AI-Assistant\DataMaintenance\SmartLabOS.DataMaintenance.sln"相关程序，
+完成最新的功能修改需求。
+
+======================================================================================
+
+
+请给出如下项目的发布方法：
+"C:\TestClaude\SmartLabOS-AI-Assistant\DataMaintenance\SmartLabOS.DataMaintenance.sln" 
+需要在本机上发布，使用Windows的IIS服务进行发布，请给出项目编译,  链接，发布的方法，请用
+PowerShell 的Script 给出整个发布过程的自动化脚本，将这个脚本保存为：
+"C:\TestClaude\SmartLabOS-AI-Assistant\Publish-Presales-AI-Agent-20260701.ps1"
+
+"C:\TestClaude\SmartLabOS-AI-Assistant\Powershell-Explanation-20260701.md"
+======================================================================================
+在"C:\TestClaude\SmartLabOS-AI-Assistant\Powershell-Explanation-20260701.md"中追加如下内容：
+1. 项目主要的编译，链接，发布的命令是如何执行的
+2. 项目发布给IIS之后，可执行文件在系统的什么位置（执行文件的位置）
+3. 以后我修改了项目之后，应该如何发布系统
+
