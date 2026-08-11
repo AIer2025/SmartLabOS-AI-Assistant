@@ -1,8 +1,0 @@
-{
-  "_comment": "独立于程序之外的 MySQL 连接配置。Python 导入器读取本文件；后端 API 默认从 appsettings.json 读取，二者可分别维护。修改本文件无需改动任何代码。",
-  "host": "localhost",
-  "port": 3306,
-  "user": "root",
-  "password": "#Bqjx@2026#",
-  "database": "SmartLabOS-Presales-AI"
-}

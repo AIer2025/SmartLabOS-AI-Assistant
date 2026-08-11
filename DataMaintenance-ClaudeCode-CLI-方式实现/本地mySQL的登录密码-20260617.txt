@@ -1,3 +1,0 @@
-自己的笔记本上的mySQL的登录方式：
-UserName:  root  /  Password :  #Bqjx@2026#
-（Port: 3306）
